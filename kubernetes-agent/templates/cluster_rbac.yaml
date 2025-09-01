@@ -1,0 +1,70 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "kubernetes-agent.fullname" . }}
+rules:
+  # Core ("" group)
+  - apiGroups: [""]
+    resources:
+      - pods
+      - endpoints
+      - services
+      - namespaces
+      - nodes
+      - serviceaccounts
+      - configmaps
+      - secrets
+      - persistentvolumes
+      - persistentvolumeclaims
+    verbs: ["get","list","watch"]
+  # apps
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - daemonsets
+      - statefulsets
+      - replicasets
+    verbs: ["get","list","watch"]
+  # rbac.authorization.k8s.io
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - roles
+      - rolebindings
+      - clusterroles
+      - clusterrolebindings
+    verbs: ["get","list","watch"]
+  # networking.k8s.io
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - networkpolicies
+      - ingresses
+    verbs: ["get","list","watch"]
+  # batch
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: ["get","list","watch"]
+  # storage.k8s.io
+  - apiGroups: ["storage.k8s.io"]
+    resources:
+      - storageclasses
+    verbs: ["get","list","watch"]
+  # discovery.k8s.io
+  - apiGroups: [ "discovery.k8s.io" ]
+    resources:
+      - endpointslices
+    verbs: [ "get","list","watch" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "kubernetes-agent.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ default (include "kubernetes-agent.fullname" .) .Values.serviceAccount.name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "kubernetes-agent.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
