@@ -7,9 +7,13 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["update","patch"]
+    resourceNames:
+      - {{ include "kubernetes-agent.fullname" . }}
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["update","patch"]
+    resourceNames:
+      - {{ include "kubernetes-agent.fullname" . }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
