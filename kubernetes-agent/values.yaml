@@ -1,5 +1,5 @@
 image:
-  repository: 'aikidosecurity/kubernetes-agent'
+  repository: 'public.ecr.aws/w1u2u3w3/kubernetes-agent'
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ''
