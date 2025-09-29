@@ -1,5 +1,5 @@
 image:
-  repository: 'public.ecr.aws/w1u2u3w3/kubernetes-agent'
+  repository: 'public.ecr.aws/f2p6e0z8/kubernetes-agent'
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ''
