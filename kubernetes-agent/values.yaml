@@ -6,7 +6,7 @@ image:
 
 config:
   apiToken: ''
-  apiEndpoint: ''
+  apiEndpoint: 'https://k8s.aikido-security.com'
 
 imagePullSecrets: []
 nameOverride: ''
