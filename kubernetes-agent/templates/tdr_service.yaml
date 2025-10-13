@@ -1,0 +1,22 @@
+{{- if .Values.threatdetection.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: aikido-tdr-gateway
+  labels:
+    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+  {{- with .Values.threatdetection.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.threatdetection.gateway.port }}
+      targetPort: tdr-gateway
+      protocol: TCP
+      name: tdr-gateway
+  selector:
+    {{- include "kubernetes-agent.selectorLabels" . | nindent 4 }}
+{{- end }}

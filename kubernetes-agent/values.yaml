@@ -8,6 +8,33 @@ config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
 
+threatdetection:
+  enabled: false
+  gateway:
+    port: 8241
+    annotations: {}
+  #image:
+  #  repository: 'public.ecr.aws/f2p6e0z8/ebpf-agent'
+  #  pullPolicy: IfNotPresent
+  #  tag: ''
+  falco:
+    json_output: true
+    json_include_output_property: true
+    http_output:
+      enabled: true
+      url: http://aikido-tdr-gateway:8241/tdr
+    append_output:
+      - suggested_output: true
+      #- match:
+      #    source: syscall
+      #  extra_output: "pod_uid=%k8smeta.pod.uid, pod_name=%k8smeta.pod.name, namespace_name=%k8smeta.ns.name"
+
+  collectors:
+    Kubernetes:
+      enabled: true
+  tty: true
+
+
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''

@@ -49,6 +49,11 @@ spec:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
               protocol: TCP
+            {{- if .Values.threatdetection.enabled }}
+            - name: tdr-gateway
+              containerPort: {{ .Values.threatdetection.gateway.port }}
+              protocol: TCP
+            {{- end}}
           livenessProbe:
             httpGet:
               path: /healthz

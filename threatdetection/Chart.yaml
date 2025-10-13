@@ -1,0 +1,5 @@
+apiVersion: v2
+name: threatdetection
+version: 0.1.0
+appVersion: "0.41.3"
+description: Aikido Threat Detection Daemonset

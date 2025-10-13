@@ -1,6 +1,11 @@
 apiVersion: v2
 name: kubernetes-agent
 description: A Helm chart used to deploy the Aikido Kubernetes agent.
-version: 1.0.5
+version: 1.0.6
 appVersion: v1.3.0
 type: application
+dependencies:
+  - name: threatdetection
+    version: "0.1.*"
+    condition: threatdetection.enabled
+    repository: file://../threatdetection
