@@ -13,7 +13,6 @@ rules:
       - nodes
       - serviceaccounts
       - configmaps
-      - secrets
       - persistentvolumes
       - persistentvolumeclaims
     verbs: ["get","list","watch"]
