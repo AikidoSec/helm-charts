@@ -7,6 +7,7 @@ image:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
+  controllerCacheSyncTimeout: "5m"
 
 imagePullSecrets: []
 nameOverride: ''
