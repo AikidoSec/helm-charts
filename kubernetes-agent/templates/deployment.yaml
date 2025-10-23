@@ -17,6 +17,7 @@ spec:
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
       labels:
+        aikido-security: kubernetes-agent
         {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
@@ -62,6 +63,9 @@ spec:
           ports:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
+              protocol: TCP
+            - containerPort: 81
+              name: api-port
               protocol: TCP
           livenessProbe:
             httpGet:

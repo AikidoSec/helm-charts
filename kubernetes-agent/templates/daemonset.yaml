@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: aikido-kubernetes-sbom-collector
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.sbomCollectorName | quote }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      nodeSelector:
+        {{- if eq .Values.config.isSBOMCollectionEnabled false }}
+        aikidoDSDisabled: true
+        {{- end }}
+      tolerations:
+      # these tolerations are to have the daemonset runnable on control plane nodes
+      # remove them if your control plane nodes should not run pods
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.sbomCollector.repository }}:{{ .Values.sbomCollector.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args: [ "-health-probe-bind-address=:{{ .Values.healthCheck.port }}" ]
+        env:
+          - name: AGENT_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        ports:
+          - name: health
+            containerPort: {{ .Values.healthCheck.port }}
+            protocol: TCP
+        livenessProbe:
+          initialDelaySeconds: 60
+          httpGet:
+            path: /healthz
+            port: health
+        readinessProbe:
+          initialDelaySeconds: 60
+          httpGet:
+            path: /readyz
+            port: health
+        resources:
+          {{- toYaml .Values.sbomCollectorResources | nindent 12 }}
+        volumeMounts:
+          - mountPath: /tmp
+            name: tmp
+          - mountPath: /.ecr
+            name: ecr-cache-config
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: tmp
+          emptyDir: { }
+        - name: ecr-cache-config
+          emptyDir: { }

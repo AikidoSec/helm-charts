@@ -1,13 +1,19 @@
 image:
-  repository: 'public.ecr.aws/f2p6e0z8/kubernetes-agent'
+  repository: 'kubernetes-agent'
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ''
+  tag: 'collector'
+
+sbomCollector:
+  repository: 'kubernetes-sbom-collector'
+  pullPolicy: IfNotPresent
+  tag: 'collector'
 
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   controllerCacheSyncTimeout: '5m'
+  isSBOMCollectionEnabled: false
   # HTTP proxy configuration
   proxy:
     # HTTP proxy URL (e.g., http://proxy.company.com:8080)
@@ -60,3 +66,15 @@ nodeSelector: {}
 affinity: {}
 
 tolerations: []
+
+sbomCollectorName: 'aikido-kubernetes-sbom-collector'
+
+sbomCollectorResources:
+  requests:
+    cpu: 100m
+    memory: 100Mi
+    ephemeral-storage: 500Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+    ephemeral-storage: 1Gi
