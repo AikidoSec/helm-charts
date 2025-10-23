@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.sbomCollectorName | quote }}
+rules:
+  # Core ("" group)
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs: ["get","list","watch"]
+  - apiGroups: [ "" ]
+    resources:
+      - serviceaccounts
+    verbs: [ "get" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.sbomCollectorName | quote }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.sbomCollectorName | quote }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Values.sbomCollectorName | quote }}
+  apiGroup: rbac.authorization.k8s.io
