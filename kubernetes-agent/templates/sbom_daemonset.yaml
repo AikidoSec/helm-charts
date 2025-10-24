@@ -1,4 +1,4 @@
-{{- if eq .Values.config.isSBOMCollectorRunningAsDaemonSet true }}
+{{- if eq .Values.config.runSBOMCollectorAsDaemonSet true }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
