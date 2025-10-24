@@ -8,6 +8,16 @@ sbomCollector:
   repository: 'kubernetes-sbom-collector'
   pullPolicy: IfNotPresent
   tag: 'collector'
+  name: 'aikido-kubernetes-sbom-collector'
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+      ephemeral-storage: 500Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+      ephemeral-storage: 1Gi
 
 config:
   apiToken: ''
@@ -66,15 +76,3 @@ nodeSelector: {}
 affinity: {}
 
 tolerations: []
-
-sbomCollectorName: 'aikido-kubernetes-sbom-collector'
-
-sbomCollectorResources:
-  requests:
-    cpu: 100m
-    memory: 100Mi
-    ephemeral-storage: 500Mi
-  limits:
-    cpu: 500m
-    memory: 1Gi
-    ephemeral-storage: 1Gi

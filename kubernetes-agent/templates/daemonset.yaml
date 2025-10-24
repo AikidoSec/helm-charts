@@ -22,7 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ .Values.sbomCollectorName | quote }}
+      serviceAccountName: {{ .Values.sbomCollector.name | quote }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
@@ -73,7 +73,7 @@ spec:
             path: /readyz
             port: health
         resources:
-          {{- toYaml .Values.sbomCollectorResources | nindent 12 }}
+          {{- toYaml .Values.sbomCollector.resources | nindent 12 }}
         volumeMounts:
           - mountPath: /tmp
             name: tmp
