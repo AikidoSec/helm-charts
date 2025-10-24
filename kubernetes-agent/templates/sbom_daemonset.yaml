@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: aikido-kubernetes-sbom-collector
+  name: 'aikido-kubernetes-sbom-collector'
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
