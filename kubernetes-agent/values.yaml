@@ -9,6 +9,7 @@ sbomCollector:
   pullPolicy: IfNotPresent
   tag: 'collector'
   name: 'aikido-kubernetes-sbom-collector'
+  enabled: false
   resources:
     requests:
       cpu: 100m
@@ -23,11 +24,14 @@ config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   controllerCacheSyncTimeout: "5m"
-  isSBOMCollectionEnabled: false
+  isSBOMCollectorRunningAsDaemonSet: true
 
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''
+
+networkPolicy:
+  enabled: true
 
 serviceAccount:
   # Specifies whether a service account should be created
