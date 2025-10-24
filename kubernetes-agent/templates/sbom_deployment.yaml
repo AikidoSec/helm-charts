@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "kubernetes-sbom-collector"
+  name: 'aikido-kubernetes-sbom-collector'
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
 spec:
