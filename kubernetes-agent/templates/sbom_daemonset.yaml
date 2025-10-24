@@ -5,7 +5,7 @@ metadata:
   name: 'aikido-kubernetes-sbom-collector'
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/version: {{ .Values.sbomCollector.tag | default .Chart.SbomAppVersion }}
 spec:
   selector:
     matchLabels:
@@ -56,12 +56,12 @@ spec:
             containerPort: {{ .Values.healthCheck.port }}
             protocol: TCP
         livenessProbe:
-          initialDelaySeconds: 60
+          initialDelaySeconds: 90
           httpGet:
             path: /healthz
             port: health
         readinessProbe:
-          initialDelaySeconds: 60
+          initialDelaySeconds: 90
           httpGet:
             path: /readyz
             port: health

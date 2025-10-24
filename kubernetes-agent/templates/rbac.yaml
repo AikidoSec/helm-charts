@@ -10,10 +10,11 @@ rules:
     resourceNames:
       - {{ include "kubernetes-agent.fullname" . }}
   - apiGroups: ["apps"]
-    resources: ["deployments"]
+    resources: ["deployments", "daemonsets"]
     verbs: ["update","patch"]
     resourceNames:
       - {{ include "kubernetes-agent.fullname" . }}
+      - 'aikido-kubernetes-sbom-collector'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

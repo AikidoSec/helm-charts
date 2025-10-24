@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{- if eq .Values.sbomCollector.enabled true }} 1 {{- else }} 0 {{- end }}
   selector:
     matchLabels:
       {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
