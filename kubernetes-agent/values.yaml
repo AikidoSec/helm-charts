@@ -24,6 +24,15 @@ config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   controllerCacheSyncTimeout: '5m'
+  
+  # Alternative: Reference an existing secret containing the API token
+  # If specified, this takes precedence over config.apiToken
+  # Note: The agent's ServiceAccount will be granted read access to this secret
+  existingSecret:
+    # Name of the existing secret
+    name: ''
+    # Key within the secret that contains the API token
+    key: 'apiToken'
 
   # If set to true, the agent will run the SBOM collector as a daemonset.
   # Otherwise, it will run it as a deployment.

@@ -67,6 +67,11 @@ spec:
             - name: config
               mountPath: "/etc/kubernetes-agent"
               readOnly: true
+            {{- if .Values.config.existingSecret.name }}
+            - name: api-token
+              mountPath: "/etc/kubernetes-agent/token"
+              readOnly: true
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -82,4 +87,16 @@ spec:
       volumes:
         - name: config
           secret:
+            {{- if .Values.config.existingSecret.name }}
+            secretName: {{ include "kubernetes-agent.fullname" . }}-config
+            {{- else }}
             secretName: {{ include "kubernetes-agent.fullname" . }}
+            {{- end }}
+        {{- if .Values.config.existingSecret.name }}
+        - name: api-token
+          secret:
+            secretName: {{ .Values.config.existingSecret.name }}
+            items:
+            - key: {{ .Values.config.existingSecret.key }}
+              path: apiToken
+        {{- end }}
