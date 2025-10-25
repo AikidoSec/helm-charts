@@ -1,14 +1,15 @@
+{{- if eq .Values.config.runSBOMCollectorAsDaemonSet false }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubernetes-agent.fullname" . }}
+  name: 'aikido-kubernetes-sbom-collector'
   labels:
-    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/version: {{ .Values.sbomCollector.tag }}
 spec:
-  replicas: {{- if eq .Values.sbomCollector.enabled true }} 1 {{- else }} 0 {{- end }}
+  replicas: 1
   selector:
     matchLabels:
-      {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
+      aikido-security: kubernetes-sbom-collector
   template:
     metadata:
       annotations:
@@ -17,7 +18,8 @@ spec:
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
       labels:
-        aikido-security: kubernetes-agent
+        aikido-security: kubernetes-sbom-collector
+        app.kubernetes.io/version: {{ .Values.sbomCollector.tag }}
         {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
@@ -34,7 +36,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.sbomCollector.repository }}:{{ .Values.sbomCollector.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["-health-probe-bind-address=:{{ .Values.healthCheck.port }}"]
           env:
@@ -47,32 +49,32 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: GOMEMLIMIT
-              {{- /* Set Go memory limit to 90% of container memory limit (min 100 MiB) */}}
+              {{- /* Set Go memory limit to 90% of SBOM collector memory limit (min 100 MiB) */}}
               {{- /* 1. Convert memory limit to MiB (Gi -> MiB * 1024, Mi -> MiB * 1) */}}
               {{- /* 2. Calculate 90% with 100 MiB minimum */}}
               {{- /* 3. Use GiB if result >= 1024 MiB, otherwise use MiB */}}
-              value: "{{ $memMiB := 0 }}{{ if contains "Gi" .Values.resources.limits.memory }}{{ $memMiB = mul (.Values.resources.limits.memory | replace "Gi" "" | int) 1024 }}{{ else }}{{ $memMiB = (.Values.resources.limits.memory | replace "Mi" "" | int) }}{{ end }}{{ $goMemLimit := max 100 (mul (div $memMiB 10) 9) }}{{ if ge $goMemLimit 1024 }}{{ div $goMemLimit 1024 }}GiB{{ else }}{{ $goMemLimit }}MiB{{ end }}"
+              value: "{{ $memMiB := 0 }}{{ if contains "Gi" .Values.sbomCollector.resources.limits.memory }}{{ $memMiB = mul (.Values.sbomCollector.resources.limits.memory | replace "Gi" "" | int) 1024 }}{{ else }}{{ $memMiB = (.Values.sbomCollector.resources.limits.memory | replace "Mi" "" | int) }}{{ end }}{{ $goMemLimit := max 100 (mul (div $memMiB 10) 9) }}{{ if ge $goMemLimit 1024 }}{{ div $goMemLimit 1024 }}GiB{{ else }}{{ $goMemLimit }}MiB{{ end }}"
           ports:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
               protocol: TCP
-            - containerPort: 81
-              name: api-port
-              protocol: TCP
           livenessProbe:
+            initialDelaySeconds: 90
             httpGet:
               path: /healthz
               port: health
           readinessProbe:
+            initialDelaySeconds: 90
             httpGet:
               path: /readyz
               port: health
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.sbomCollector.resources | nindent 12 }}
           volumeMounts:
-            - name: config
-              mountPath: "/etc/kubernetes-agent"
-              readOnly: true
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /.ecr
+              name: ecr-cache-config
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -86,6 +88,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: config
-          secret:
-            secretName: {{ include "kubernetes-agent.fullname" . }}
+        - name: tmp
+          emptyDir: { }
+        - name: ecr-cache-config
+          emptyDir: { }
+{{- end }}
