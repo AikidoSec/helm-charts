@@ -5,7 +5,7 @@ metadata:
   name: 'aikido-kubernetes-sbom-collector'
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/version: {{ .Values.sbomCollector.tag }}
+    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
 spec:
   selector:
     matchLabels:
@@ -24,6 +24,8 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      tolerations:
+      {{- toYaml .Values.sbomCollector.daemonSetTolerations | nindent 8 }}
       serviceAccountName: {{ .Values.sbomCollector.name | quote }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -33,14 +35,14 @@ spec:
       {{- end }}
       nodeSelector:
         {{- if eq .Values.sbomCollector.enabled false }}
-        aikidoSec:com/disable-sbom-collector: true
+          aikidoSecurity.disable-sbom-collector: "true"
         {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
-        image: "{{ .Values.sbomCollector.repository }}:{{ .Values.sbomCollector.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
+        imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
         args: [ "-health-probe-bind-address=:{{ .Values.healthCheck.port }}" ]
         env:
           - name: AGENT_NAMESPACE

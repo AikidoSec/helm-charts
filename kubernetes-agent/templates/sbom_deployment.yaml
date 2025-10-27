@@ -4,9 +4,9 @@ kind: Deployment
 metadata:
   name: 'aikido-kubernetes-sbom-collector'
   labels:
-    app.kubernetes.io/version: {{ .Values.sbomCollector.tag }}
+    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
 spec:
-  replicas: 1
+  replicas: {{- if eq .Values.sbomCollector.enabled true }} 1 {{- else }} 0 {{- end }}
   selector:
     matchLabels:
       aikido-security: kubernetes-sbom-collector
@@ -19,7 +19,7 @@ spec:
         {{- end }}
       labels:
         aikido-security: kubernetes-sbom-collector
-        app.kubernetes.io/version: {{ .Values.sbomCollector.tag }}
+        app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
         {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
@@ -33,11 +33,11 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.sbomCollector.name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.sbomCollector.repository }}:{{ .Values.sbomCollector.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
+          imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
           args: ["-health-probe-bind-address=:{{ .Values.healthCheck.port }}"]
           env:
             - name: AGENT_NAMESPACE

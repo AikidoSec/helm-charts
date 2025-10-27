@@ -1,13 +1,22 @@
-image:
-  repository: 'public.ecr.aws/f2p6e0z8/kubernetes-agent'
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ''
+agent:
+  image:
+    repository: 'kubernetes-agent'
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: 'collector'
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi # Only Mi and Gi are supported
 
 sbomCollector:
-  repository: 'public.ecr.aws/f2p6e0z8/kubernetes-sbom-collector'
-  pullPolicy: IfNotPresent
-  tag: 'collector'
+  image:
+    repository: 'kubernetes-sbom-collector'
+    pullPolicy: IfNotPresent
+    tag: 'collector'
   name: 'aikido-kubernetes-sbom-collector'
   enabled: false
   resources:
@@ -17,8 +26,17 @@ sbomCollector:
       ephemeral-storage: 500Mi
     limits:
       cpu: 500m
-      memory: 1Gi
+      memory: 1Gi # Only Mi and Gi are supported
       ephemeral-storage: 1Gi
+  daemonSetTolerations:
+    # these tolerations are to have the daemonset runnable on control plane nodes
+    # remove them if your control plane nodes should not run pods
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
 
 config:
   apiToken: ''
@@ -72,14 +90,6 @@ securityContext:
 
 healthCheck:
   port: 8081
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 100Mi
-  limits:
-    cpu: 500m
-    memory: 500Mi # Only Mi and Gi are supported
 
 nodeSelector: {}
 

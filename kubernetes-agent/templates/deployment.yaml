@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
 spec:
-  replicas: {{- if eq .Values.sbomCollector.enabled true }} 1 {{- else }} 0 {{- end }}
+  replicas: 1
   selector:
     matchLabels:
       {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
@@ -34,8 +34,8 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag }}"
+          imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
           args: ["-health-probe-bind-address=:{{ .Values.healthCheck.port }}"]
           env:
             - name: AGENT_NAMESPACE
@@ -76,7 +76,7 @@ spec:
               path: /readyz
               port: health
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.agent.resources | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: "/etc/kubernetes-agent"
