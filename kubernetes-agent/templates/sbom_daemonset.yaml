@@ -54,11 +54,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: GOMEMLIMIT
-            {{- /* Set Go memory limit to 90% of SBOM collector memory limit (min 100 MiB) */}}
-            {{- /* 1. Convert memory limit to MiB (Gi -> MiB * 1024, Mi -> MiB * 1) */}}
-            {{- /* 2. Calculate 90% with 100 MiB minimum */}}
-            {{- /* 3. Use GiB if result >= 1024 MiB, otherwise use MiB */}}
-            value: "{{ $memMiB := 0 }}{{ if contains "Gi" .Values.sbomCollector.resources.limits.memory }}{{ $memMiB = mul (.Values.sbomCollector.resources.limits.memory | replace "Gi" "" | int) 1024 }}{{ else }}{{ $memMiB = (.Values.sbomCollector.resources.limits.memory | replace "Mi" "" | int) }}{{ end }}{{ $goMemLimit := max 100 (mul (div $memMiB 10) 9) }}{{ if ge $goMemLimit 1024 }}{{ div $goMemLimit 1024 }}GiB{{ else }}{{ $goMemLimit }}MiB{{ end }}"
+            value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
         ports:
           - name: health
             containerPort: {{ .Values.healthCheck.port }}

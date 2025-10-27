@@ -70,10 +70,25 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
 */}}
 {{- define "kubernetes-agent.goMemLimit" -}}
 {{- $memMiB := 0 -}}
-{{- if contains "Gi" .Values.resources.limits.memory -}}
-  {{- $memMiB = mul (.Values.resources.limits.memory | replace "Gi" "" | int) 1024 -}}
+{{- if contains "Gi" .Values.agent.resources.limits.memory -}}
+  {{- $memMiB = mul (.Values.agent.resources.limits.memory | replace "Gi" "" | int) 1024 -}}
 {{- else -}}
-  {{- $memMiB = (.Values.resources.limits.memory | replace "Mi" "" | int) -}}
+  {{- $memMiB = (.Values.agent.resources.limits.memory | replace "Mi" "" | int) -}}
+{{- end -}}
+{{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
+{{- if ge $goMemLimit 1024 -}}
+  {{- div $goMemLimit 1024 }}GiB
+{{- else -}}
+  {{- $goMemLimit }}MiB
+{{- end -}}
+{{- end -}}
+
+{{- define "kubernetes-sbom-collector.goMemLimit" -}}
+{{- $memMiB := 0 -}}
+{{- if contains "Gi" .Values.sbomCollector.resources.limits.memory -}}
+  {{- $memMiB = mul (.Values.sbomCollector.resources.limits.memory | replace "Gi" "" | int) 1024 -}}
+{{- else -}}
+  {{- $memMiB = (.Values.sbomCollector.resources.limits.memory | replace "Mi" "" | int) -}}
 {{- end -}}
 {{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
 {{- if ge $goMemLimit 1024 -}}
