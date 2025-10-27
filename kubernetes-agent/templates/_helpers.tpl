@@ -60,3 +60,25 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Calculate GOMEMLIMIT value based on memory limit
+Set Go memory limit to 90% of container memory limit (min 100 MiB)
+1. Convert memory limit to MiB (Gi -> MiB * 1024, Mi -> MiB * 1)
+2. Calculate 90% with 100 MiB minimum
+3. Use GiB if result >= 1024 MiB, otherwise use MiB
+*/}}
+{{- define "kubernetes-agent.goMemLimit" -}}
+{{- $memMiB := 0 -}}
+{{- if contains "Gi" .Values.resources.limits.memory -}}
+  {{- $memMiB = mul (.Values.resources.limits.memory | replace "Gi" "" | int) 1024 -}}
+{{- else -}}
+  {{- $memMiB = (.Values.resources.limits.memory | replace "Mi" "" | int) -}}
+{{- end -}}
+{{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
+{{- if ge $goMemLimit 1024 -}}
+  {{- div $goMemLimit 1024 }}GiB
+{{- else -}}
+  {{- $goMemLimit }}MiB
+{{- end -}}
+{{- end -}}

@@ -7,7 +7,15 @@ image:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
-  controllerCacheSyncTimeout: "5m"
+  controllerCacheSyncTimeout: '5m'
+  # HTTP proxy configuration
+  proxy:
+    # HTTP proxy URL (e.g., http://proxy.company.com:8080)
+    httpProxy: ''
+    # HTTPS proxy URL (e.g., http://proxy.company.com:8080)
+    httpsProxy: ''
+    # Comma-separated list of hosts to bypass proxy (e.g., localhost,127.0.0.1,.local)
+    noProxy: ''
 
 imagePullSecrets: []
 nameOverride: ''
@@ -45,4 +53,10 @@ resources:
     memory: 100Mi
   limits:
     cpu: 500m
-    memory: 500Mi
+    memory: 500Mi # Only Mi and Gi are supported
+
+nodeSelector: {}
+
+affinity: {}
+
+tolerations: []
