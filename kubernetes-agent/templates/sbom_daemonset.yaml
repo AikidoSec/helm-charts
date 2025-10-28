@@ -40,7 +40,7 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- toYaml .Values.sbomCollector.securityContext | nindent 12 }}
         image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
         imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
         args: [ "-health-probe-bind-address=:{{ .Values.healthCheck.port }}" ]
@@ -76,10 +76,22 @@ spec:
             name: tmp
           - mountPath: /.ecr
             name: ecr-cache-config
+          - name: docker-sock
+            mountPath: /var/run/docker.sock
+            readOnly: true
+          - name: containerd-sock
+            mountPath: /run/containerd/containerd.sock
+            readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
         - name: tmp
           emptyDir: { }
         - name: ecr-cache-config
           emptyDir: { }
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: containerd-sock
+          hostPath:
+            path: /run/containerd/containerd.sock
 {{- end }}

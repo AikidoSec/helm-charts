@@ -37,6 +37,11 @@ sbomCollector:
     - key: node-role.kubernetes.io/master
       operator: Exists
       effect: NoSchedule
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
 
 config:
   apiToken: ''
