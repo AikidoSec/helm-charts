@@ -60,6 +60,9 @@ spec:
             - name: NO_PROXY
               value: {{ .Values.config.proxy.noProxy | quote }}
             {{- end }}
+            {{- if .Values.additionalEnvVars }}
+            {{- toYaml .Values.additionalEnvVars | nindent 12 }}
+            {{- end }}
           ports:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}

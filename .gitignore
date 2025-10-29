@@ -2,3 +2,4 @@
 .idea
 .vscode/
 __debug*
+values.local.yaml

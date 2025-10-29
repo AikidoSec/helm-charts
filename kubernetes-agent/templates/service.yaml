@@ -8,7 +8,7 @@ spec:
   selector:
     aikido-security: kubernetes-agent
   ports:
-  - name: api-agent-port
-    protocol: TCP
-    port: 81
-    targetPort: api-port
+    - name: api-agent-port
+      protocol: TCP
+      port: {{ .Values.agent.service.port }}
+      targetPort: api-port

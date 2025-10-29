@@ -2,8 +2,9 @@ agent:
   image:
     repository: 'kubernetes-agent'
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: 'collector'
+    tag: 'v1.4.0'
+  service:
+    port: 81
   resources:
     requests:
       cpu: 100m
@@ -16,7 +17,7 @@ sbomCollector:
   image:
     repository: 'kubernetes-sbom-collector'
     pullPolicy: IfNotPresent
-    tag: 'collector'
+    tag: 'v1.0.0'
   name: 'aikido-kubernetes-sbom-collector'
   enabled: false
   resources:
@@ -25,9 +26,9 @@ sbomCollector:
       memory: 100Mi
       ephemeral-storage: 500Mi
     limits:
-      cpu: 500m
+      cpu: 750m
       memory: 1Gi # Only Mi and Gi are supported
-      ephemeral-storage: 1Gi
+      ephemeral-storage: 2Gi
   daemonSetTolerations:
     # these tolerations are to have the daemonset runnable on control plane nodes
     # remove them if your control plane nodes should not run pods
@@ -47,7 +48,6 @@ config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   controllerCacheSyncTimeout: '5m'
-  isSBOMCollectionEnabled: false
 
   # If set to true, the agent will run the SBOM collector as a daemonset.
   # Otherwise, it will run it as a deployment.
@@ -101,3 +101,5 @@ nodeSelector: {}
 affinity: {}
 
 tolerations: []
+
+additionalEnvVars: []
