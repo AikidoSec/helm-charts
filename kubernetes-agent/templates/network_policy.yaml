@@ -17,5 +17,5 @@ spec:
               aikido-security: kubernetes-sbom-collector
       ports:
         - protocol: TCP
-          port: 81
+          port: {{ .Values.agent.service.port }}
 {{- end }}
