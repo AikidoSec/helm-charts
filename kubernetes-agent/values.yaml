@@ -1,6 +1,6 @@
 agent:
   image:
-    repository: 'kubernetes-agent'
+    repository: 'public.ecr.aws/f2p6e0z8/kubernetes-agent'
     pullPolicy: IfNotPresent
     tag: 'v1.4.0'
   service:
@@ -15,7 +15,7 @@ agent:
 
 sbomCollector:
   image:
-    repository: 'kubernetes-sbom-collector'
+    repository: 'public.ecr.aws/f2p6e0z8/kubernetes-sbom-collector'
     pullPolicy: IfNotPresent
     tag: 'v1.0.0'
   name: 'aikido-kubernetes-sbom-collector'
