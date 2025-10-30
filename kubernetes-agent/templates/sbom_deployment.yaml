@@ -1,14 +1,15 @@
+{{- if eq .Values.config.runSBOMCollectorAsDaemonSet false }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubernetes-agent.fullname" . }}
+  name: 'aikido-kubernetes-sbom-collector'
   labels:
-    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
 spec:
-  replicas: 1
+  replicas: {{- if eq .Values.sbomCollector.enabled true }} 1 {{- else }} 0 {{- end }}
   selector:
     matchLabels:
-      {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
+      aikido-security: kubernetes-sbom-collector
   template:
     metadata:
       annotations:
@@ -17,7 +18,8 @@ spec:
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
       labels:
-        aikido-security: kubernetes-agent
+        aikido-security: kubernetes-sbom-collector
+        app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
         {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
@@ -29,13 +31,13 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "kubernetes-agent.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.sbomCollector.name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag }}"
-          imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
+          image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
+          imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
           args: ["-health-probe-bind-address=:{{ .Values.healthCheck.port }}"]
           env:
             - name: AGENT_NAMESPACE
@@ -46,46 +48,35 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: API_PORT
-              value: "{{ .Values.agent.service.port }}"
+            - name: AGENT_URL
+              value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
             - name: GOMEMLIMIT
-              value: "{{ include "kubernetes-agent.goMemLimit" . }}"
-            {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
-            - name: HTTP_PROXY
-              value: {{ .Values.config.proxy.httpProxy | quote }}
-            {{- end }}
-            {{- if and .Values.config.proxy .Values.config.proxy.httpsProxy }}
-            - name: HTTPS_PROXY
-              value: {{ .Values.config.proxy.httpsProxy | quote }}
-            {{- end }}
-            {{- if and .Values.config.proxy .Values.config.proxy.noProxy }}
-            - name: NO_PROXY
-              value: {{ .Values.config.proxy.noProxy | quote }}
-            {{- end }}
-            {{- if .Values.additionalEnvVars }}
-            {{- toYaml .Values.additionalEnvVars | nindent 12 }}
-            {{- end }}
+              value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
           ports:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
               protocol: TCP
-            - containerPort: {{ .Values.agent.service.port }}
-              name: api-port
-              protocol: TCP
           livenessProbe:
+            initialDelaySeconds: 90
             httpGet:
               path: /healthz
               port: health
           readinessProbe:
+            initialDelaySeconds: 90
             httpGet:
               path: /readyz
               port: health
           resources:
-            {{- toYaml .Values.agent.resources | nindent 12 }}
+            {{- toYaml .Values.sbomCollector.resources | nindent 12 }}
           volumeMounts:
-            - name: config
-              mountPath: "/etc/kubernetes-agent"
-              readOnly: true
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /.ecr
+              name: ecr-cache-config
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+            - name: containerd-sock
+              mountPath: /run/containerd/containerd.sock
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -99,6 +90,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: config
-          secret:
-            secretName: {{ include "kubernetes-agent.fullname" . }}
+        - name: tmp
+          emptyDir: { }
+        - name: ecr-cache-config
+          emptyDir: { }
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: containerd-sock
+          hostPath:
+            path: /run/containerd/containerd.sock
+{{- end }}

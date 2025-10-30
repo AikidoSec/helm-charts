@@ -1,0 +1,99 @@
+{{- if eq .Values.config.runSBOMCollectorAsDaemonSet true }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: 'aikido-kubernetes-sbom-collector'
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
+      labels:
+        aikido-security: kubernetes-sbom-collector
+        {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      tolerations:
+      {{- toYaml .Values.sbomCollector.daemonSetTolerations | nindent 8 }}
+      serviceAccountName: {{ .Values.sbomCollector.name | quote }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      nodeSelector:
+        {{- if eq .Values.sbomCollector.enabled false }}
+          aikidoSecurity.disable-sbom-collector: "true"
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.sbomCollector.securityContext | nindent 12 }}
+          image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
+          imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
+          args: [ "-health-probe-bind-address=:{{ .Values.healthCheck.port }}" ]
+          env:
+            - name: AGENT_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_URL
+              value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
+            - name: GOMEMLIMIT
+              value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
+          ports:
+            - name: health
+              containerPort: {{ .Values.healthCheck.port }}
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 90
+            httpGet:
+              path: /healthz
+              port: health
+          readinessProbe:
+            initialDelaySeconds: 90
+            httpGet:
+              path: /readyz
+              port: health
+          resources:
+            {{- toYaml .Values.sbomCollector.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /.ecr
+              name: ecr-cache-config
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+              readOnly: true
+            - name: containerd-sock
+              mountPath: /run/containerd/containerd.sock
+              readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: tmp
+          emptyDir: { }
+        - name: ecr-cache-config
+          emptyDir: { }
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: containerd-sock
+          hostPath:
+            path: /run/containerd/containerd.sock
+{{- end }}
