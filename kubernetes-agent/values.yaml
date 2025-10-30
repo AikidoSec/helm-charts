@@ -2,7 +2,7 @@ agent:
   image:
     repository: 'public.ecr.aws/f2p6e0z8/kubernetes-agent'
     pullPolicy: IfNotPresent
-    tag: 'v1.3.1'
+    tag: 'v1.4.0'
   service:
     port: 8091
   resources:
