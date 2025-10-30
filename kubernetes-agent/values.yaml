@@ -11,7 +11,7 @@ agent:
       memory: 100Mi
     limits:
       cpu: 500m
-      memory: 500Mi # Only Mi and Gi are supported
+      memory: 2Gi # Only Mi and Gi are supported
 
 sbomCollector:
   image:
@@ -27,8 +27,8 @@ sbomCollector:
       ephemeral-storage: 500Mi
     limits:
       cpu: 750m
-      memory: 1Gi # Only Mi and Gi are supported
-      ephemeral-storage: 2Gi
+      memory: 5Gi # Only Mi and Gi are supported
+      ephemeral-storage: 5Gi
   daemonSetTolerations:
     # these tolerations are to have the daemonset runnable on control plane nodes
     # remove them if your control plane nodes should not run pods
