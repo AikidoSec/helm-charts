@@ -109,3 +109,24 @@ Uses externalSecret if provided, otherwise uses the chart name.
 {{- include "kubernetes-agent.fullname" . -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Calculate startup probe failure threshold based on controllerCacheSyncTimeout
+Parse timeout value (e.g., "30m", "1h", "300s") and convert to failure threshold
+with 10-second period checks.
+*/}}
+{{- define "kubernetes-agent.startupProbeFailureThreshold" -}}
+{{- $timeout := .Values.config.controllerCacheSyncTimeout -}}
+{{- $seconds := 0 -}}
+{{- if hasSuffix "s" $timeout -}}
+  {{- $seconds = ($timeout | replace "s" "" | int) -}}
+{{- else if hasSuffix "m" $timeout -}}
+  {{- $seconds = mul ($timeout | replace "m" "" | int) 60 -}}
+{{- else if hasSuffix "h" $timeout -}}
+  {{- $seconds = mul ($timeout | replace "h" "" | int) 3600 -}}
+{{- else -}}
+  {{- $seconds = 300 -}}
+{{- end -}}
+{{- $failureThreshold := div $seconds 10 -}}
+{{- max 30 $failureThreshold -}}
+{{- end -}}
