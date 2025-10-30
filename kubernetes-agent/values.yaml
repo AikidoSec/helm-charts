@@ -48,7 +48,7 @@ sbomCollector:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
-  controllerCacheSyncTimeout: '5m'
+  controllerCacheSyncTimeout: '30m'
 
   # If set to true, the agent will run the SBOM collector as a daemonset.
   # Otherwise, it will run it as a deployment.
