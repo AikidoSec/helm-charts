@@ -46,6 +46,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: API_PORT
+              value: "{{ .Values.agent.service.port }}"
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
@@ -67,7 +69,7 @@ spec:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
               protocol: TCP
-            - containerPort: 81
+            - containerPort: {{ .Values.agent.service.port }}
               name: api-port
               protocol: TCP
           livenessProbe:
