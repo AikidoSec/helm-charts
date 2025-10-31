@@ -53,8 +53,6 @@ sbomCollector:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
-
-
   # HTTP proxy configuration
   proxy:
     # HTTP proxy URL (e.g., http://proxy.company.com:8080)
