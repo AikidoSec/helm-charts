@@ -48,6 +48,12 @@ spec:
                   fieldPath: metadata.name
             - name: API_PORT
               value: "{{ .Values.agent.service.port }}"
+            - name: CONTROLLER_CACHE_SYNC_TIMEOUT
+              value: "{{ .Values.agent.controllerCacheSyncTimeout }}"
+            - name: RUN_COLLECTOR_AS_DAEMONSET
+              value: "{{ .Values.sbomCollector.runAsDaemonSet }}"
+            - name: CONFIG_SECRET_NAME
+              value: "{{ include "kubernetes-agent.secretName" . }}"
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}

@@ -69,6 +69,4 @@ stringData:
   config.yaml: |
     apiEndpoint: "https://k8s.aikido-security.com"
     apiToken: "your-api-token-here"
-    controllerCacheSyncTimeout: "30m"
-    runSBOMCollectorAsDaemonSet: true
 ```

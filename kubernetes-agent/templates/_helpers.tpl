@@ -116,7 +116,7 @@ Parse timeout value (e.g., "30m", "1h", "300s") and convert to failure threshold
 with 10-second period checks.
 */}}
 {{- define "kubernetes-agent.startupProbeFailureThreshold" -}}
-{{- $timeout := .Values.config.controllerCacheSyncTimeout -}}
+{{- $timeout := .Values.agent.controllerCacheSyncTimeout -}}
 {{- $seconds := 0 -}}
 {{- if hasSuffix "s" $timeout -}}
   {{- $seconds = ($timeout | replace "s" "" | int) -}}
