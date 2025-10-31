@@ -76,11 +76,7 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
   {{- $memMiB = (.Values.agent.resources.limits.memory | replace "Mi" "" | int) -}}
 {{- end -}}
 {{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
-{{- if ge $goMemLimit 1024 -}}
-  {{- div $goMemLimit 1024 }}GiB
-{{- else -}}
-  {{- $goMemLimit }}MiB
-{{- end -}}
+{{- $goMemLimit }}MiB
 {{- end -}}
 
 {{- define "kubernetes-sbom-collector.goMemLimit" -}}
@@ -91,11 +87,7 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
   {{- $memMiB = (.Values.sbomCollector.resources.limits.memory | replace "Mi" "" | int) -}}
 {{- end -}}
 {{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
-{{- if ge $goMemLimit 1024 -}}
-  {{- div $goMemLimit 1024 }}GiB
-{{- else -}}
-  {{- $goMemLimit }}MiB
-{{- end -}}
+{{- $goMemLimit }}MiB
 {{- end -}}
 
 {{/*
