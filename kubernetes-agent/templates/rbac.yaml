@@ -8,7 +8,7 @@ rules:
     resources: ["secrets"]
     verbs: ["update","patch","get"]
     resourceNames:
-      - {{ include "kubernetes-agent.fullname" . }}
+      - {{ include "kubernetes-agent.secretName" . }}
   - apiGroups: ["apps"]
     resources: ["deployments", "daemonsets"]
     verbs: ["update","patch"]
