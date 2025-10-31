@@ -64,6 +64,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: my-custom-secret-name
+  namespace: aikido
 type: Opaque
 stringData:
   config.yaml: |
