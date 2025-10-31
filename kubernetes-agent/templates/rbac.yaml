@@ -15,6 +15,12 @@ rules:
     resourceNames:
       - {{ include "kubernetes-agent.fullname" . }}
       - 'aikido-kubernetes-sbom-collector'
+  - apiGroups: [ "metrics.k8s.io" ]
+    resources: [ "pods" ]
+    verbs: [ "get", "list" ]
+  - apiGroups: [ "" ]
+    resources: [ "events" ]
+    verbs: [ "get", "list" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
