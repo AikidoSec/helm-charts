@@ -57,7 +57,7 @@ When externalSecret is set:
 
 Your external secret must:
 1. Be created in the same namespace as the Helm release
-2. Contain a config.yaml key with the following structure (same as the [secret.yaml](./kubernetes-agent/templates/secret.yaml) template):
+2. Contain a config.yaml key with the following structure, as shown below (this must match what the agent expects):
 
 ```yaml
 apiVersion: v1
