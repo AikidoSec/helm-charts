@@ -97,3 +97,15 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
   {{- $goMemLimit }}MiB
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the secret name to use for the agent configuration.
+Uses externalSecret if provided, otherwise uses the chart name.
+*/}}
+{{- define "kubernetes-agent.secretName" -}}
+{{- if .Values.agent.externalSecret -}}
+{{- .Values.agent.externalSecret -}}
+{{- else -}}
+{{- include "kubernetes-agent.fullname" . -}}
+{{- end -}}
+{{- end -}}

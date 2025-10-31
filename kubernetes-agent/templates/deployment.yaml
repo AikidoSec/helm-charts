@@ -101,4 +101,4 @@ spec:
       volumes:
         - name: config
           secret:
-            secretName: {{ include "kubernetes-agent.fullname" . }}
+            secretName: {{ include "kubernetes-agent.secretName" . }}
