@@ -5,6 +5,7 @@ agent:
     tag: 'v1.4.0'
   service:
     port: 8091
+    metricsPort: 8080
   resources:
     requests:
       cpu: 100m
