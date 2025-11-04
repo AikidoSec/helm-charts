@@ -2,7 +2,7 @@ agent:
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-agent'
     pullPolicy: IfNotPresent
-    tag: 'v1.4.0'
+    tag: 'v1.5.0'
   service:
     port: 8091
     metricsPort: 8080
@@ -18,7 +18,7 @@ sbomCollector:
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-sbom-collector'
     pullPolicy: IfNotPresent
-    tag: 'v1.0.0'
+    tag: 'v1.0.1'
   name: 'aikido-kubernetes-sbom-collector'
   resources:
     requests:
