@@ -28,7 +28,7 @@ config:
     noProxy: 'localhost,127.0.0.1,.local,.cluster.local'
 ```
 
-#### Installation
+### Installation
 
 ```bash
 # Basic installation
@@ -36,4 +36,38 @@ helm install aikido-agent ./kubernetes-agent --set config.apiToken=your-token
 
 # Installation with proxy support
 helm install aikido-agent ./kubernetes-agent -f values-proxy-example.yaml
+```
+
+### Using an External Secret
+
+By default, the Helm chart creates a Kubernetes Secret containing the agent configuration. However, you can also use your own externally managed secret.
+
+To use an external secret, set the following value:
+```yaml
+agent:
+  externalSecret: "my-custom-secret-name"
+```
+
+When externalSecret is set:
+- The chart will not create a Secret resource
+- The specified secret name will be used for the agent configuration
+- RBAC permissions will be granted to access the external secret
+
+#### External Secret Requirements
+
+Your external secret must:
+1. Be created in the same namespace as the Helm release
+2. Contain a config.yaml key with the following structure, as shown below (this must match what the agent expects):
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-custom-secret-name
+  namespace: aikido
+type: Opaque
+stringData:
+  config.yaml: |
+    apiEndpoint: "https://k8s.aikido-security.com"
+    apiToken: "your-api-token-here"
 ```

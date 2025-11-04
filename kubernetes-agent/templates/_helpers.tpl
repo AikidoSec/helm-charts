@@ -76,11 +76,7 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
   {{- $memMiB = (.Values.agent.resources.limits.memory | replace "Mi" "" | int) -}}
 {{- end -}}
 {{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
-{{- if ge $goMemLimit 1024 -}}
-  {{- div $goMemLimit 1024 }}GiB
-{{- else -}}
-  {{- $goMemLimit }}MiB
-{{- end -}}
+{{- $goMemLimit }}MiB
 {{- end -}}
 
 {{- define "kubernetes-sbom-collector.goMemLimit" -}}
@@ -91,9 +87,38 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
   {{- $memMiB = (.Values.sbomCollector.resources.limits.memory | replace "Mi" "" | int) -}}
 {{- end -}}
 {{- $goMemLimit := max 100 (mul (div $memMiB 10) 9) -}}
-{{- if ge $goMemLimit 1024 -}}
-  {{- div $goMemLimit 1024 }}GiB
-{{- else -}}
-  {{- $goMemLimit }}MiB
+{{- $goMemLimit }}MiB
 {{- end -}}
+
+{{/*
+Get the secret name to use for the agent configuration.
+Uses externalSecret if provided, otherwise uses the chart name.
+*/}}
+{{- define "kubernetes-agent.secretName" -}}
+{{- if .Values.agent.externalSecret -}}
+{{- .Values.agent.externalSecret -}}
+{{- else -}}
+{{- include "kubernetes-agent.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Calculate startup probe failure threshold based on controllerCacheSyncTimeout
+Parse timeout value (e.g., "30m", "1h", "300s") and convert to failure threshold
+with 10-second period checks.
+*/}}
+{{- define "kubernetes-agent.startupProbeFailureThreshold" -}}
+{{- $timeout := .Values.agent.controllerCacheSyncTimeout -}}
+{{- $seconds := 0 -}}
+{{- if hasSuffix "s" $timeout -}}
+  {{- $seconds = ($timeout | replace "s" "" | int) -}}
+{{- else if hasSuffix "m" $timeout -}}
+  {{- $seconds = mul ($timeout | replace "m" "" | int) 60 -}}
+{{- else if hasSuffix "h" $timeout -}}
+  {{- $seconds = mul ($timeout | replace "h" "" | int) 3600 -}}
+{{- else -}}
+  {{- $seconds = 300 -}}
+{{- end -}}
+{{- $failureThreshold := div $seconds 10 -}}
+{{- max 30 $failureThreshold -}}
 {{- end -}}

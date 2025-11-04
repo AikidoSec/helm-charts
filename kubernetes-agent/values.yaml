@@ -5,6 +5,8 @@ agent:
     tag: 'v1.4.0'
   service:
     port: 8091
+  controllerCacheSyncTimeout: '30m'
+  externalSecret: ''
   resources:
     requests:
       cpu: 100m
@@ -20,6 +22,12 @@ sbomCollector:
     tag: 'v1.0.0'
   name: 'aikido-kubernetes-sbom-collector'
   enabled: false
+  # If set to true, the agent will run the SBOM collector as a daemonSet.
+  # Otherwise, it will run it as a deployment.
+  # If sbomCollector.enabled is set to false, no replicas will be created.
+  # The DaemonSet/Deployment is always created to support enabling image scanning
+  # without requiring helm upgrade.
+  runAsDaemonSet: true
   resources:
     requests:
       cpu: 100m
@@ -47,13 +55,6 @@ sbomCollector:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
-  controllerCacheSyncTimeout: '5m'
-
-  # If set to true, the agent will run the SBOM collector as a daemonset.
-  # Otherwise, it will run it as a deployment.
-  # If sbomCollector.enabled is set to false, no replicas will be created.
-  runSBOMCollectorAsDaemonSet: true
-
   # HTTP proxy configuration
   proxy:
     # HTTP proxy URL (e.g., http://proxy.company.com:8080)

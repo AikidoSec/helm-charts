@@ -48,6 +48,12 @@ spec:
                   fieldPath: metadata.name
             - name: API_PORT
               value: "{{ .Values.agent.service.port }}"
+            - name: CONTROLLER_CACHE_SYNC_TIMEOUT
+              value: "{{ .Values.agent.controllerCacheSyncTimeout }}"
+            - name: RUN_COLLECTOR_AS_DAEMONSET
+              value: "{{ .Values.sbomCollector.runAsDaemonSet }}"
+            - name: CONFIG_SECRET_NAME
+              value: "{{ include "kubernetes-agent.secretName" . }}"
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
@@ -72,6 +78,12 @@ spec:
             - containerPort: {{ .Values.agent.service.port }}
               name: api-port
               protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            failureThreshold: {{ include "kubernetes-agent.startupProbeFailureThreshold" . }}
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /healthz
@@ -101,4 +113,4 @@ spec:
       volumes:
         - name: config
           secret:
-            secretName: {{ include "kubernetes-agent.fullname" . }}
+            secretName: {{ include "kubernetes-agent.secretName" . }}
