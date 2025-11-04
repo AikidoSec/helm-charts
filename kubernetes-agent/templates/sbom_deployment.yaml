@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
 spec:
-  replicas: {{- if eq .Values.sbomCollector.enabled true }} 1 {{- else }} 0 {{- end }}
+  replicas: 0
   selector:
     matchLabels:
       aikido-security: kubernetes-sbom-collector

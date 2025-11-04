@@ -20,7 +20,6 @@ sbomCollector:
     pullPolicy: IfNotPresent
     tag: 'v1.0.0'
   name: 'aikido-kubernetes-sbom-collector'
-  enabled: false
   resources:
     requests:
       cpu: 100m

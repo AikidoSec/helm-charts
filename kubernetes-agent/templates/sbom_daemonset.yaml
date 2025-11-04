@@ -34,9 +34,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       nodeSelector:
-        {{- if eq .Values.sbomCollector.enabled false }}
-          aikidoSecurity.disable-sbom-collector: "true"
-        {{- end }}
+        aikidoSecurity.disable-sbom-collector: "true"
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

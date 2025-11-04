@@ -50,8 +50,6 @@ spec:
               value: "{{ .Values.agent.service.port }}"
             - name: METRICS_PORT
               value: "{{ .Values.agent.service.metricsPort }}"
-            - name: SBOM_COLLECTOR_ENABLED
-              value: "{{ .Values.sbomCollector.enabled }}"
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
