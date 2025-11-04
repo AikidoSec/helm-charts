@@ -48,6 +48,8 @@ spec:
                   fieldPath: metadata.name
             - name: API_PORT
               value: "{{ .Values.agent.service.port }}"
+            - name: METRICS_PORT
+              value: "{{ .Values.agent.service.metricsPort }}"
             - name: CONTROLLER_CACHE_SYNC_TIMEOUT
               value: "{{ .Values.agent.controllerCacheSyncTimeout }}"
             - name: RUN_COLLECTOR_AS_DAEMONSET
@@ -77,6 +79,9 @@ spec:
               protocol: TCP
             - containerPort: {{ .Values.agent.service.port }}
               name: api-port
+              protocol: TCP
+            - containerPort: {{ .Values.agent.service.metricsPort }}
+              name: metrics-port
               protocol: TCP
           startupProbe:
             httpGet:

@@ -12,3 +12,7 @@ spec:
       protocol: TCP
       port: {{ .Values.agent.service.port }}
       targetPort: api-port
+    - name: metrics-agent-port
+      protocol: TCP
+      port: {{ .Values.agent.service.metricsPort }}
+      targetPort: metrics-port

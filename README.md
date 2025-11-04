@@ -71,3 +71,9 @@ stringData:
     apiEndpoint: "https://k8s.aikido-security.com"
     apiToken: "your-api-token-here"
 ```
+
+### In-cluster image scanning
+
+Aikido scans container images directly within your Kubernetes cluster and generates Software Bills of Materials (SBOMs) that are analyzed by the platform for potential issues.
+
+The chart always deploys the SBOM collector components (DaemonSet or Deployment) by default. These components remain dormant until activated through the Aikido platform. This allows the scanning feature to be enabled without requiring a Helm chart upgrade.
