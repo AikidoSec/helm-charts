@@ -12,7 +12,7 @@ rules:
     resources:
       - serviceaccounts
     verbs: [ "get" ]
-  {{- if eq .Values.sbomCollector.secretsAccess.enabled true }}
+  {{- if .Values.sbomCollector.secretsAccess.enabled }}
   - apiGroups: [ "" ]
     resources: [ "secrets" ]
     verbs: [ "get", "list" ]
