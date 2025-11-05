@@ -124,5 +124,5 @@ with 10-second period checks.
 {{- end -}}
 
 {{- define "sbom-collector.name" -}}
-{{- printf "aikido-%s-sbom-collector" (default .Chart.Name .Values.nameOverride) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-sbom-collector" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
