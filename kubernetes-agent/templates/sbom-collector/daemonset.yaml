@@ -55,6 +55,8 @@ spec:
               value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
+            - name: SECRETS_ACCESS_ENABLED
+              value: "{{ .Values.sbomCollector.secretsAccess.enabled }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
             - name: HTTP_PROXY
               value: {{ .Values.config.proxy.httpProxy | quote }}
