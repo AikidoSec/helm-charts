@@ -12,6 +12,15 @@ rules:
     resources:
       - serviceaccounts
     verbs: [ "get" ]
+  {{- if eq .Values.sbomCollector.secretsAccess.enabled true }}
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get", "list" ]
+    {{- with .Values.sbomCollector.secretsAccess.imagePullSecretNames }}
+    resourceNames:
+            {{- toYaml . | nindent 8 }}
+    {{- end }}
+  {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
