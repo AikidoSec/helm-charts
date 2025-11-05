@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Values.sbomCollector.name | quote }}
+  name: {{ include "sbom-collector.name" . }}
 rules:
   # Core ("" group)
   - apiGroups: [""]
@@ -16,12 +16,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.sbomCollector.name | quote }}
+  name: {{ include "sbom-collector.name" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.sbomCollector.name | quote }}
+    name: {{ include "sbom-collector.name" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Values.sbomCollector.name | quote }}
+  name: {{ include "sbom-collector.name" . }}
   apiGroup: rbac.authorization.k8s.io

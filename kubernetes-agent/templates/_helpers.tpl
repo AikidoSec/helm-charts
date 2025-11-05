@@ -122,3 +122,7 @@ with 10-second period checks.
 {{- $failureThreshold := div $seconds 10 -}}
 {{- max 30 $failureThreshold -}}
 {{- end -}}
+
+{{- define "sbom-collector.name" -}}
+{{- printf "aikido-%s-sbom-collector" (default .Chart.Name .Values.nameOverride) | trunc 63 | trimSuffix "-" }}
+{{- end }}

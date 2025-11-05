@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 'aikido-kubernetes-sbom-collector'
+  name: {{ include "sbom-collector.name" . }}
   labels:
     app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
 spec:
@@ -33,7 +33,7 @@ spec:
       securityContext:
         {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Values.sbomCollector.name }}
+        - name: {{ include "sbom-collector.name" . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"

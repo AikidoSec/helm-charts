@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: 'aikido-kubernetes-sbom-collector'
+  name: {{ include "sbom-collector.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
@@ -26,7 +26,7 @@ spec:
     spec:
       tolerations:
       {{- toYaml .Values.sbomCollector.daemonSetTolerations | nindent 8 }}
-      serviceAccountName: {{ .Values.sbomCollector.name | quote }}
+      serviceAccountName: {{ include "sbom-collector.name" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
