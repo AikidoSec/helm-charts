@@ -52,6 +52,18 @@ spec:
               value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
+            {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
+            - name: HTTP_PROXY
+              value: {{ .Values.config.proxy.httpProxy | quote }}
+            {{- end }}
+            {{- if and .Values.config.proxy .Values.config.proxy.httpsProxy }}
+            - name: HTTPS_PROXY
+              value: {{ .Values.config.proxy.httpsProxy | quote }}
+            {{- end }}
+            {{- if and .Values.config.proxy .Values.config.proxy.noProxy }}
+            - name: NO_PROXY
+              value: {{ .Values.config.proxy.noProxy | quote }}
+            {{- end }}
           ports:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
