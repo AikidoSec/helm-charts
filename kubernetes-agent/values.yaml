@@ -2,7 +2,7 @@ agent:
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-agent'
     pullPolicy: IfNotPresent
-    tag: 'v1.6.2'
+    tag: 'v1.6.3'
   service:
     port: 8091
     metricsPort: 8080
