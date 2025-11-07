@@ -46,10 +46,15 @@ sbomCollector:
       operator: Exists
       effect: NoSchedule
   securityContext:
+    # The collector needs to run as root to be able to mount the containerd/docker sockets
     runAsUser: 0
     runAsGroup: 0
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
   # Access to image pull secrets for SBOM generation
   # The SBOM collector needs to read container images to generate SBOMs.
   # When images are pulled from private registries, the collector requires
