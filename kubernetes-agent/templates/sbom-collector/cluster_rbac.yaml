@@ -32,7 +32,7 @@ metadata:
     {{- include "sbom-collector.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "sbom-collector.name" . }}
+    name: {{ include "sbom-collector.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole

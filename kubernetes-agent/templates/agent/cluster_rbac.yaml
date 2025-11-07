@@ -61,7 +61,7 @@ metadata:
   name: {{ include "kubernetes-agent.fullname" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ default (include "kubernetes-agent.fullname" .) .Values.serviceAccount.name }}
+    name: {{ include "kubernetes-agent.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole

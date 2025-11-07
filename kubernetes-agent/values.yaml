@@ -67,6 +67,25 @@ sbomCollector:
     # Recommended: specify only the secrets actually used by pods' imagePullSecrets
     # to follow the principle of least privilege.
     imagePullSecretNames: []
+  
+  # Pod annotations for the SBOM collector
+  # Useful for scenarios like Azure Workload Identity where specific annotations
+  # are required to access container registries (e.g., ACR)
+  podAnnotations: {}
+  
+  # Pod labels for the SBOM collector
+  podLabels: {}
+  
+  # Service account configuration for the SBOM collector
+  # If not specified, will use the root serviceAccount configuration
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ''
 
 config:
   apiToken: ''
