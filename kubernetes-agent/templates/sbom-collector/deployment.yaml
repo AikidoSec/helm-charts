@@ -19,7 +19,6 @@ spec:
         {{- end }}
       labels:
         aikido-security: kubernetes-sbom-collector
-        app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
         {{- include "sbom-collector.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
