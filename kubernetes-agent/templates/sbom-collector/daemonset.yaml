@@ -5,11 +5,11 @@ metadata:
   name: {{ include "sbom-collector.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
+    {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
+      {{- include "sbom-collector.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -19,7 +19,7 @@ spec:
         {{- end }}
       labels:
         aikido-security: kubernetes-sbom-collector
-        {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
+        {{- include "sbom-collector.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
