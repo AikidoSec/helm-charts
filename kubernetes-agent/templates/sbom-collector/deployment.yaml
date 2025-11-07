@@ -4,12 +4,12 @@ kind: Deployment
 metadata:
   name: {{ include "sbom-collector.name" . }}
   labels:
-    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
+    {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
   replicas: 0
   selector:
     matchLabels:
-      aikido-security: kubernetes-sbom-collector
+      {{- include "sbom-collector.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -20,7 +20,7 @@ spec:
       labels:
         aikido-security: kubernetes-sbom-collector
         app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
-        {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
+        {{- include "sbom-collector.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
