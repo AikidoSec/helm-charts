@@ -142,7 +142,7 @@ SBOM Collector labels
 {{- define "sbom-collector.labels" -}}
 helm.sh/chart: {{ include "kubernetes-agent.chart" . }}
 {{ include "sbom-collector.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
+{{- if .Values.sbomCollector.image.tag }}
 app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
