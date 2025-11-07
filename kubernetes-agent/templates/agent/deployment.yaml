@@ -96,7 +96,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 30
-            timeoutSeconds: 15
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /readyz
@@ -104,7 +104,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
-            timeoutSeconds: 15
+            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.agent.resources | nindent 12 }}
           volumeMounts:
