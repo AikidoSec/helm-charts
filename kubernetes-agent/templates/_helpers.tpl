@@ -51,13 +51,24 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the service account to use
+Create the name of the service account to use for the agent
 */}}
 {{- define "kubernetes-agent.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "kubernetes-agent.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use for the sbom collector
+*/}}
+{{- define "sbom-collector.serviceAccountName" -}}
+{{- if .Values.sbomCollector.serviceAccount.create }}
+{{- default (include "sbom-collector.name" .) .Values.sbomCollector.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.sbomCollector.serviceAccount.name }}
 {{- end }}
 {{- end }}
 

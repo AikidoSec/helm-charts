@@ -14,13 +14,13 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/agent/secret.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- with .Values.sbomCollector.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
         aikido-security: kubernetes-sbom-collector
         {{- include "sbom-collector.selectorLabels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
+        {{- with .Values.sbomCollector.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -28,7 +28,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "kubernetes-agent.serviceAccountName" . }}
+      serviceAccountName: {{ include "sbom-collector.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:

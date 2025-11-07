@@ -14,19 +14,19 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/agent/secret.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- with .Values.sbomCollector.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
         aikido-security: kubernetes-sbom-collector
         {{- include "sbom-collector.selectorLabels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
+        {{- with .Values.sbomCollector.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       tolerations:
       {{- toYaml .Values.sbomCollector.daemonSetTolerations | nindent 8 }}
-      serviceAccountName: {{ include "sbom-collector.name" . }}
+      serviceAccountName: {{ include "sbom-collector.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
