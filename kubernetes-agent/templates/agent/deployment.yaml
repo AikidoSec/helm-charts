@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/agent/secret.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
@@ -85,7 +85,7 @@ spec:
               protocol: TCP
           startupProbe:
             httpGet:
-              path: /readyz
+              path: /healthz
               port: health
             failureThreshold: {{ include "kubernetes-agent.startupProbeFailureThreshold" . }}
             periodSeconds: 10
@@ -93,10 +93,18 @@ spec:
             httpGet:
               path: /healthz
               port: health
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 30
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /readyz
               port: health
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.agent.resources | nindent 12 }}
           volumeMounts:

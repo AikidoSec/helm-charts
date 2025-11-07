@@ -14,7 +14,7 @@ rules:
     verbs: ["update","patch"]
     resourceNames:
       - {{ include "kubernetes-agent.fullname" . }}
-      - 'aikido-kubernetes-sbom-collector'
+      - {{ include "sbom-collector.name" . }}
   - apiGroups: [ "metrics.k8s.io" ]
     resources: [ "pods" ]
     verbs: [ "get", "list" ]

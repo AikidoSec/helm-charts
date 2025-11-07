@@ -2,7 +2,7 @@ agent:
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-agent'
     pullPolicy: IfNotPresent
-    tag: 'v1.5.1'
+    tag: 'v1.6.4'
   service:
     port: 8091
     metricsPort: 8080
@@ -13,15 +13,14 @@ agent:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
-      memory: 2Gi # Only Mi and Gi are supported
+      cpu: 1500m
+      memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-sbom-collector'
     pullPolicy: IfNotPresent
-    tag: 'v1.0.1'
-  name: 'aikido-kubernetes-sbom-collector'
+    tag: 'v1.2.0'
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   # If sbomCollector.enabled is set to false, no replicas will be created.
@@ -34,9 +33,9 @@ sbomCollector:
       memory: 100Mi
       ephemeral-storage: 500Mi
     limits:
-      cpu: 750m
+      cpu: 1500m
       memory: 5Gi # Only Mi and Gi are supported
-      ephemeral-storage: 5Gi
+      ephemeral-storage: 10Gi
   daemonSetTolerations:
     # these tolerations are to have the daemonset runnable on control plane nodes
     # remove them if your control plane nodes should not run pods
@@ -47,10 +46,27 @@ sbomCollector:
       operator: Exists
       effect: NoSchedule
   securityContext:
+    # The collector needs to run as root to be able to mount the containerd/docker sockets
     runAsUser: 0
     runAsGroup: 0
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+  # Access to image pull secrets for SBOM generation
+  # The SBOM collector needs to read container images to generate SBOMs.
+  # When images are pulled from private registries, the collector requires
+  # access to the same image pull secrets that pods use.
+  secretsAccess:
+    # Enable access to image pull secrets
+    enabled: true
+    # List of specific image pull secret names to grant access to.
+    # If empty, the collector will have access to all secrets in the cluster.
+    # Recommended: specify only the secrets actually used by pods' imagePullSecrets
+    # to follow the principle of least privilege.
+    imagePullSecretNames: []
 
 config:
   apiToken: ''

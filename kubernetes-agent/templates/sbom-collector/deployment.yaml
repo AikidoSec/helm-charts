@@ -1,47 +1,43 @@
-{{- if eq .Values.sbomCollector.runAsDaemonSet true }}
+{{- if eq .Values.sbomCollector.runAsDaemonSet false }}
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
-  name: 'aikido-kubernetes-sbom-collector'
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "sbom-collector.name" . }}
   labels:
-    app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag }}
+    {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
+  replicas: 0
   selector:
     matchLabels:
-      {{- include "kubernetes-agent.selectorLabels" . | nindent 6 }}
+      {{- include "sbom-collector.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/agent/secret.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
       labels:
         aikido-security: kubernetes-sbom-collector
-        {{- include "kubernetes-agent.selectorLabels" . | nindent 8 }}
+        {{- include "sbom-collector.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      tolerations:
-      {{- toYaml .Values.sbomCollector.daemonSetTolerations | nindent 8 }}
-      serviceAccountName: {{ .Values.sbomCollector.name | quote }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      nodeSelector:
-        aikidoSecurity.disable-sbom-collector: "true"
+      serviceAccountName: {{ include "kubernetes-agent.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "sbom-collector.name" . }}
           securityContext:
-            {{- toYaml .Values.sbomCollector.securityContext | nindent 12 }}
+            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
           imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
-          args: [ "-health-probe-bind-address=:{{ .Values.healthCheck.port }}" ]
+          args: ["-health-probe-bind-address=:{{ .Values.healthCheck.port }}"]
           env:
             - name: AGENT_NAMESPACE
               valueFrom:
@@ -55,6 +51,18 @@ spec:
               value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
+            {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
+            - name: HTTP_PROXY
+              value: {{ .Values.config.proxy.httpProxy | quote }}
+            {{- end }}
+            {{- if and .Values.config.proxy .Values.config.proxy.httpsProxy }}
+            - name: HTTPS_PROXY
+              value: {{ .Values.config.proxy.httpsProxy | quote }}
+            {{- end }}
+            {{- if and .Values.config.proxy .Values.config.proxy.noProxy }}
+            - name: NO_PROXY
+              value: {{ .Values.config.proxy.noProxy | quote }}
+            {{- end }}
           ports:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
@@ -78,11 +86,20 @@ spec:
               name: ecr-cache-config
             - name: docker-sock
               mountPath: /var/run/docker.sock
-              readOnly: true
             - name: containerd-sock
               mountPath: /run/containerd/containerd.sock
-              readOnly: true
-      terminationGracePeriodSeconds: 30
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - name: tmp
           emptyDir: { }

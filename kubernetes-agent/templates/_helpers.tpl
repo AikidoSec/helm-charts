@@ -122,3 +122,28 @@ with 10-second period checks.
 {{- $failureThreshold := div $seconds 10 -}}
 {{- max 30 $failureThreshold -}}
 {{- end -}}
+
+{{- define "sbom-collector.name" -}}
+{{- printf "%s-sbom-collector" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+SBOM Collector selector labels
+*/}}
+{{- define "sbom-collector.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "sbom-collector.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: sbom-collector
+{{- end }}
+
+{{/*
+SBOM Collector labels
+*/}}
+{{- define "sbom-collector.labels" -}}
+helm.sh/chart: {{ include "kubernetes-agent.chart" . }}
+{{ include "sbom-collector.selectorLabels" . }}
+{{- if .Values.sbomCollector.image.tag }}
+app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
