@@ -70,7 +70,7 @@ stringData:
 
 ## In-cluster image scanning
 
-Aikido can generate SBOMs (Software Bill of Materials) for container images deployed in your Kubernetes cluster. The chart always deploys the SBOM collector components (DaemonSet or Deployment). These components remain dormant (0 replicas) until activated through the Aikido platform.
+Aikido can generate SBOMs (Software Bill of Materials) for container images deployed in your Kubernetes cluster. This is done by a separate component, the SBOM collector, which can run as a DaemonSet, leveraging the image cache from each node, or a Deployment.
 
 For pulling, the collector attempts first to pull the images from the nodes' cache, through the containerd/docker sockets. If the image is not found in the cache, it will attempt to pull it from the registry. For private registries, the collector requires access to the same image pull secrets that pods use.
 
