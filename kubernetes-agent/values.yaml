@@ -6,7 +6,7 @@ agent:
   service:
     port: 8091
     metricsPort: 8080
-  controllerCacheSyncTimeout: '30m'
+  controllerCacheSyncTimeout: '60m'
   externalSecret: ''
   resources:
     requests:
