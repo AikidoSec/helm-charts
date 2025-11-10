@@ -17,6 +17,8 @@ agent:
       memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
+  # Enable or disable the SBOM collector
+  enabled: false
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-sbom-collector'
     pullPolicy: IfNotPresent

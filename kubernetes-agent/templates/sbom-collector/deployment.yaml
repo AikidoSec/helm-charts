@@ -1,4 +1,4 @@
-{{- if eq .Values.sbomCollector.runAsDaemonSet false }}
+{{- if and .Values.sbomCollector.enabled (eq .Values.sbomCollector.runAsDaemonSet false) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
