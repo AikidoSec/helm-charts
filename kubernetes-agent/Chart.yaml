@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubernetes-agent
 description: A Helm chart used to deploy the Aikido Kubernetes agents.
-version: 2.1.1
+version: 2.1.2
 appVersion: v1.4.0
 type: application
