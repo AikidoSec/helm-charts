@@ -1,4 +1,4 @@
-{{- if eq .Values.sbomCollector.runAsDaemonSet false }}
+{{- if and .Values.sbomCollector.enabled (eq .Values.sbomCollector.runAsDaemonSet false) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +32,7 @@ spec:
       securityContext:
         {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ include "sbom-collector.name" . }}
+        - name: sbom-collector
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"

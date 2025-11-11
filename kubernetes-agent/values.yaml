@@ -2,11 +2,11 @@ agent:
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-agent'
     pullPolicy: IfNotPresent
-    tag: 'v1.6.4'
+    tag: 'v1.6.5'
   service:
     port: 8091
     metricsPort: 8080
-  controllerCacheSyncTimeout: '30m'
+  controllerCacheSyncTimeout: '60m'
   externalSecret: ''
   resources:
     requests:
@@ -17,15 +17,14 @@ agent:
       memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
+  # Enable or disable the SBOM collector, and all its components
+  enabled: false
   image:
     repository: 'public.ecr.aws/aikido-cloud/kubernetes-sbom-collector'
     pullPolicy: IfNotPresent
     tag: 'v1.2.0'
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
-  # If sbomCollector.enabled is set to false, no replicas will be created.
-  # The DaemonSet/Deployment is always created to support enabling image scanning
-  # without requiring helm upgrade.
   runAsDaemonSet: true
   resources:
     requests:
@@ -67,15 +66,15 @@ sbomCollector:
     # Recommended: specify only the secrets actually used by pods' imagePullSecrets
     # to follow the principle of least privilege.
     imagePullSecretNames: []
-  
+
   # Pod annotations for the SBOM collector
   # Useful for scenarios like Azure Workload Identity where specific annotations
   # are required to access container registries (e.g., ACR)
   podAnnotations: {}
-  
+
   # Pod labels for the SBOM collector
   podLabels: {}
-  
+
   # Service account configuration for the SBOM collector
   # If not specified, will use the root serviceAccount configuration
   serviceAccount:
