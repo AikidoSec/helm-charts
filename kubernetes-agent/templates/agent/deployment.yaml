@@ -57,7 +57,9 @@ spec:
             - name: CONFIG_SECRET_NAME
               value: "{{ include "kubernetes-agent.secretName" . }}"
             - name: SBOM_COLLECTOR_ENABLED
-              value: "{{ .Values.sbomCollector.enabled }}"
+              value: {{ .Values.sbomCollector.enabled | quote }}
+            - name: AUTO_UPDATE_ENABLED
+              value: {{ .Values.agent.autoUpdate.enabled | quote }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
