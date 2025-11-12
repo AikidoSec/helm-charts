@@ -1,8 +1,8 @@
 agent:
   image:
-    repository: 'public.ecr.aws/aikido-cloud/kubernetes-agent'
+    repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: 'v1.6.6'
+    tag: v1.7.0
   service:
     port: 8091
     metricsPort: 8080
@@ -25,9 +25,9 @@ sbomCollector:
   # Enable or disable the SBOM collector, and all its components
   enabled: false
   image:
-    repository: 'public.ecr.aws/aikido-cloud/kubernetes-sbom-collector'
+    repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: 'v1.2.0'
+    tag: v1.2.0
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
