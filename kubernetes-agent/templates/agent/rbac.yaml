@@ -9,12 +9,14 @@ rules:
     verbs: ["update","patch","get"]
     resourceNames:
       - {{ include "kubernetes-agent.secretName" . }}
+  {{- if .Values.agent.autoUpdate.enabled }}
   - apiGroups: ["apps"]
     resources: ["deployments", "daemonsets"]
     verbs: ["update","patch"]
     resourceNames:
       - {{ include "kubernetes-agent.fullname" . }}
       - {{ include "sbom-collector.name" . }}
+  {{- end }}
   - apiGroups: [ "metrics.k8s.io" ]
     resources: [ "pods" ]
     verbs: [ "get", "list" ]

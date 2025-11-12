@@ -8,6 +8,11 @@ agent:
     metricsPort: 8080
   controllerCacheSyncTimeout: '60m'
   externalSecret: ''
+  # Enable auto-updates of the agent and SBOM collector
+  # When enabled, the agent can update itself and the SBOM collector by patching deployments/daemonsets
+  # When disabled, RBAC permissions for updating deployments/daemonsets will not be granted
+  autoUpdate:
+    enabled: true
   resources:
     requests:
       cpu: 100m
