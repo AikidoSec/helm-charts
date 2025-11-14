@@ -6,6 +6,7 @@ agent:
   service:
     port: 8091
     metricsPort: 8080
+  priorityClassName: ''
   controllerCacheSyncTimeout: '60m'
   externalSecret: ''
   # Enable auto-updates of the agent and SBOM collector
@@ -27,10 +28,11 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.2.0
+    tag: v1.2.1
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
+  priorityClassName: ''
   resources:
     requests:
       cpu: 100m
