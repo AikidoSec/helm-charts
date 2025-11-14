@@ -29,6 +29,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "sbom-collector.serviceAccountName" . }}
+      {{- with .Values.sbomCollector.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:

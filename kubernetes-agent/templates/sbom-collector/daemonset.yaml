@@ -27,6 +27,9 @@ spec:
       tolerations:
       {{- toYaml .Values.sbomCollector.daemonSetTolerations | nindent 8 }}
       serviceAccountName: {{ include "sbom-collector.serviceAccountName" . }}
+      {{- with .Values.sbomCollector.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
