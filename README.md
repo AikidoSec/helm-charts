@@ -98,3 +98,37 @@ sbomCollector:
 ### GKE Workload Identity
 
 For GKE Workload Identity, you can add a policy binding directly for the SBOM collector service account. The default values use the `aikido-kubernetes-agent-sbom-collector` service account and namespace `aikido`. Read more in the [GCP docs](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/workload-identity).
+
+## Using ExternalSecrets with the Chart
+
+If you use a secret management solution like HashiCorp Vault or AWS Secrets Manager with the [ExternalSecrets Operator](https://external-secrets.io/), you can use the `extraObjects` field to deploy an ExternalSecret resource alongside the chart. This eliminates the need for a separate Helm release or manifest application.
+
+### Example Configuration
+
+```yaml
+agent:
+  externalSecret: 'aikido-credentials'
+
+extraObjects:
+  - |
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: {{ .Values.agent.externalSecret }}
+      namespace: {{ .Release.Namespace }}
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: vault
+      target:
+        name: {{ .Values.agent.externalSecret }}
+        creationPolicy: Owner
+      data:
+        - secretKey: config.yaml
+          remoteRef:
+            key: secrets/aikido/config
+            property: config.yaml
+```
+
+**Note:** The ExternalSecret should create a secret with a `config.yaml` key containing the agent configuration in YAML format with `apiEndpoint` and `apiToken` fields, as shown in the [External Secret Requirements](#external-secret-requirements) section above.

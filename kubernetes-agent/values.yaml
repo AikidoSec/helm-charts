@@ -145,3 +145,27 @@ affinity: {}
 tolerations: []
 
 additionalEnvVars: []
+
+# Extra Kubernetes objects to deploy alongside the chart
+# Useful for deploying ExternalSecret resources when using secret managers
+# like HashiCorp Vault, AWS Secrets Manager, etc. with the ExternalSecrets Operator.
+#
+# Example - ExternalSecret that creates the agent's config secret:
+# extraObjects:
+#   - |
+#     apiVersion: external-secrets.io/v1beta1
+#     kind: ExternalSecret
+#     metadata:
+#       name: aikido-credentials
+#       namespace: {{ .Release.Namespace }}
+#     spec:
+#       secretStoreRef:
+#         kind: ClusterSecretStore
+#         name: vault
+#       target:
+#         name: aikido-credentials
+#       data:
+#         - secretKey: config.yaml
+#           remoteRef:
+#             key: secrets/aikido/config
+extraObjects: []
