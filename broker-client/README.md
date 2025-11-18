@@ -16,7 +16,7 @@ Deploy the Aikido Broker Client in your Kubernetes cluster to securely forward r
 
 ```bash
 helm repo add aikido https://aikidosec.github.io/helm-charts
-help repo update
+helm repo update
 ```
 
 ```bash
