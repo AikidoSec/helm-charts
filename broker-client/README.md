@@ -20,7 +20,10 @@ help repo update
 ```
 
 ```bash
-helm install broker-client aikido/broker-client --set config.clientSecret="AIK_BROKER_XXX_YYY_ZZZZ"
+helm install broker-client aikido/broker-client \
+  --set config.clientSecret="AIK_BROKER_XXX_YYY_ZZZZ" \
+  --namespace aikido \
+  --create-namespace
 ```
 
 ### Using a values file
@@ -48,7 +51,7 @@ persistence:
 Install:
 
 ```bash
-helm install broker-client aikido/broker-client -f my-values.yaml
+helm install broker-client aikido/broker-client -f my-values.yaml --namespace aikido --create-namespace
 ```
 
 ## Configuration
