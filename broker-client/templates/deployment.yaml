@@ -30,7 +30,6 @@ spec:
       serviceAccountName: {{ include "broker-client.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      restartPolicy: {{ .Values.restartPolicy }}
       containers:
       - name: broker-client
         securityContext:
