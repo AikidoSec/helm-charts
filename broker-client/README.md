@@ -12,11 +12,15 @@ Deploy the Aikido Broker Client in your Kubernetes cluster to securely forward r
 
 ### Quick Start
 
+#### Add the Aikido Helm repository
+
 ```bash
-# Add values
-helm install broker-client ./helm/broker-client \
-  --set config.clientSecret="AIK_BROKER_XXX_YYY_ZZZZ" \
-  --set config.allowedInternalSubnets="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+helm repo add aikido https://aikidosec.github.io/helm-charts
+help repo update
+```
+
+```bash
+helm install broker-client aikido/broker-client --set config.clientSecret="AIK_BROKER_XXX_YYY_ZZZZ"
 ```
 
 ### Using a values file
@@ -44,7 +48,7 @@ persistence:
 Install:
 
 ```bash
-helm install broker-client ./helm/broker-client -f my-values.yaml
+helm install broker-client aikido/broker-client -f my-values.yaml
 ```
 
 ## Configuration
