@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "broker-client.fullname" . }}
+  labels:
+    {{- include "broker-client.labels" . | nindent 4 }}
+spec:
+  replicas: 1  # Broker client should only run one instance per client_id
+  strategy:
+    type: Recreate  # Ensure only one pod runs at a time
+  selector:
+    matchLabels:
+      {{- include "broker-client.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "broker-client.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "broker-client.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      restartPolicy: {{ .Values.restartPolicy }}
+      containers:
+      - name: broker-client
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ include "broker-client.imageTag" . }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        - secretRef:
+            name: {{ include "broker-client.fullname" . }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        {{- if .Values.config.customCaBundleContent }}
+        - name: custom-ca
+          mountPath: /certs/custom-ca.crt
+          subPath: custom-ca.crt
+          readOnly: true
+        {{- end }}
+      volumes:
+      - name: config
+        {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "broker-client.fullname" . }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      {{- if .Values.config.customCaBundleContent }}
+      - name: custom-ca
+        secret:
+          secretName: {{ include "broker-client.fullname" . }}-ca-bundle
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
