@@ -6,6 +6,10 @@ metadata:
   labels:
     {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
+  {{- /*
+    When autoUpdate is enabled, the agent will manage the replicas count of the collector.
+    Otherwise, the agent might not have permissions to update the collector, so we will default it to 1.
+  */}}
   {{- if .Values.agent.autoUpdate.enabled }}
   replicas: 0
   {{- else }}
