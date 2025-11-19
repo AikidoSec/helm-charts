@@ -6,7 +6,11 @@ metadata:
   labels:
     {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.agent.autoUpdate.enabled }}
   replicas: 0
+  {{- else }}
+  replicas: 1
+  {{- end }}
   selector:
     matchLabels:
       {{- include "sbom-collector.selectorLabels" . | nindent 6 }}
