@@ -1,0 +1,17 @@
+{{- if and .Values.threatdetection.rbac.create (eq .Values.threatdetection.driver.kind "auto")}}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "threat-detection.name" . }}
+  labels:
+    {{- include "threat-detection.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - update
+{{- end }}

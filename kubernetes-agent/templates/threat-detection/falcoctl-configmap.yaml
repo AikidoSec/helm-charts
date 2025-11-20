@@ -1,0 +1,13 @@
+{{- if or .Values.threatdetection.falcoctl.artifact.install.enabled .Values.threatdetection.falcoctl.artifact.follow.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "threat-detection.name" . }}-falcoctl
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "threat-detection.labels" . | nindent 4 }}
+data:
+  falcoctl.yaml: |-
+    {{- include "threat-detection.containerPlugin" . -}}
+    {{- toYaml .Values.threatdetection.falcoctl.config | nindent 4 }}
+{{- end }}

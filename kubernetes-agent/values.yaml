@@ -6,6 +6,7 @@ agent:
   service:
     port: 8091
     metricsPort: 8080
+    threatDetectionPort: 8241
   controllerCacheSyncTimeout: '60m'
   externalSecret: ''
   resources:
@@ -138,3 +139,291 @@ affinity: {}
 tolerations: []
 
 additionalEnvVars: []
+
+threatdetection:
+  enabled: true
+  image:
+    pullPolicy: IfNotPresent
+    registry: docker.io
+    repository: falcosecurity/falco
+    tag: "0.41.3"
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+  namespaceOverride: ""
+  podAnnotations: { }
+
+  serviceAccount:
+    imagePullSecrets: [ ]
+    create: true
+    annotations: { }
+    name: ""
+
+  rbac:
+    create: true
+
+  podLabels: { }
+  podPriorityClassName:
+  podSecurityContext: { }
+  containerSecurityContext: { }
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+
+  nodeSelector: { }
+  affinity: { }
+
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+
+  healthChecks:
+    livenessProbe:
+      initialDelaySeconds: 60
+      timeoutSeconds: 5
+      periodSeconds: 15
+    readinessProbe:
+      initialDelaySeconds: 30
+      timeoutSeconds: 5
+      periodSeconds: 15
+
+  tty: false
+
+  controller:
+    annotations: {}
+    labels: {}
+    daemonset:
+      updateStrategy:
+        type: RollingUpdate
+
+  driver:
+    enabled: true
+    kind: auto
+    kmod:
+      bufSizePreset: 4
+      dropFailedExit: false
+    ebpf:
+      path: "${HOME}/.falco/falco-bpf.o"
+      hostNetwork: false
+      leastPrivileged: false
+      bufSizePreset: 4
+      dropFailedExit: false
+    modernEbpf:
+      leastPrivileged: false
+      bufSizePreset: 4
+      dropFailedExit: false
+      cpusForEachBuffer: 2
+
+    loader:
+      enabled: true
+      initContainer:
+        image:
+          pullPolicy: IfNotPresent
+          registry: docker.io
+          repository: falcosecurity/falco-driver-loader
+          tag: "0.41.3"
+
+  collectors:
+    enabled: true
+    docker:
+      enabled: false
+    containerd:
+      enabled: false
+    crio:
+      enabled: false
+
+    containerEngine:
+      enabled: true
+      pluginRef: "ghcr.io/falcosecurity/plugins/plugin/container:0.3.6"
+      labelMaxLen: 100
+      withSize: false
+      hooks: [ "create" ]
+      engines:
+        docker:
+          enabled: true
+          sockets: [ "/var/run/docker.sock" ]
+        podman:
+          enabled: true
+          sockets: [ "/run/podman/podman.sock" ]
+        containerd:
+          enabled: true
+          sockets: [ "/run/host-containerd/containerd.sock" ]
+        cri:
+          enabled: true
+          sockets:
+            [
+              "/run/containerd/containerd.sock",
+              "/run/crio/crio.sock",
+              "/run/k3s/containerd/containerd.sock",
+              "/run/host-containerd/containerd.sock",
+            ]
+        lxc:
+          enabled: true
+        libvirt_lxc:
+          enabled: true
+        bpm:
+          enabled: true
+  extra:
+    env: [ ]
+    args: [ ]
+    initContainers: [ ]
+
+  podHostname:
+
+  falcoctl:
+    image:
+      pullPolicy: IfNotPresent
+      registry: docker.io
+      repository: falcosecurity/falcoctl
+      tag: "0.11.2"
+    artifact:
+      install:
+        enabled: true
+        env: [ ]
+        envFrom: [ ]
+        args: [ "--log-format=json" ]
+        resources: { }
+        securityContext: { }
+        mounts:
+          volumeMounts: [ ]
+      follow:
+        enabled: false
+        env: [ ]
+        envFrom: [ ]
+        args: [ "--log-format=json" ]
+        resources: { }
+        securityContext: { }
+        mounts:
+          volumeMounts: [ ]
+    config:
+      indexes:
+        - name: falcosecurity
+          url: https://falcosecurity.github.io/falcoctl/index.yaml
+      artifact:
+        allowedTypes:
+          - plugin
+        install:
+          resolveDeps: true
+          refs: [ ]
+          rulesfilesDir: /rulesfiles
+          pluginsDir: /plugins
+        follow:
+          refs: [ ]
+          every: 6h
+          falcoversions: http://localhost:8765/versions
+          rulesfilesDir: /rulesfiles
+          pluginsDir: /plugins
+
+  falco:
+    rules_files:
+      - /etc/falco/falco_rules.yaml
+      - /etc/falco/falco_rules.local.yaml
+      - /etc/falco/rules.d
+      - /etc/falco/aikido-rules.d
+    rule_matching: first
+
+    outputs_queue:
+      capacity: 0
+
+    load_plugins: [ ]
+    plugins: []
+
+    podHostname:
+
+    config_files:
+      - /etc/falco/config.d
+    watch_config_files: true
+
+    time_format_iso_8601: false
+
+    priority: debug
+
+    json_output: true
+    json_include_output_property: true
+    json_include_tags_property: true
+    json_include_message_property: false
+    json_include_output_fields_property: true
+
+    buffered_outputs: false
+    append_output:
+      - suggested_output: true
+    stdout_output:
+      enabled: true
+    syslog_output:
+      enabled: true
+    file_output:
+      enabled: false
+      keep_alive: false
+      filename: ./events.txt
+    http_output:
+      enabled: true
+      url: http://aikido-kubernetes-agent:8241/tdr
+
+    program_output:
+      enabled: false
+      keep_alive: false
+      program: "jq '{text: .output}' | curl -d @- -X POST https://hooks.slack.com/services/XXX"
+
+    webserver:
+      enabled: true
+      threadiness: 0
+      listen_port: 8765
+      k8s_healthz_endpoint: /healthz
+      prometheus_metrics_enabled: false
+      ssl_enabled: false
+      ssl_certificate: /etc/falco/falco.pem
+
+    log_stderr: true
+    log_syslog: true
+    log_level: info
+    libs_logger:
+      enabled: true
+      severity: info
+    output_timeout: 2000
+    syscall_event_timeouts:
+      max_consecutives: 1000
+
+    syscall_event_drops:
+      threshold: .1
+      actions:
+        - log
+        - alert
+      rate: .03333
+      max_burst: 1
+      simulate_drops: false
+
+    base_syscalls:
+      custom_set: [ ]
+      repair: false
+
+    falco_libs:
+      thread_table_size: 262144
+
+    container_engines:
+      docker:
+        enabled: false
+      cri:
+        enabled: false
+        sockets:
+          [
+            "/run/containerd/containerd.sock",
+            "/run/crio/crio.sock",
+            "/run/k3s/containerd/containerd.sock",
+          ]
+        disable_async: false
+      podman:
+        enabled: false
+      lxc:
+        enabled: false
+      libvirt_lxc:
+        enabled: false
+      bpm:
+        enabled: false

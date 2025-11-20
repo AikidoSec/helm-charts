@@ -1,0 +1,16 @@
+{{- if and .Values.threatdetection.rbac.create (eq .Values.threatdetection.driver.kind "auto")}}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "threat-detection.name" . }}
+  labels:
+    {{- include "threat-detection.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "threat-detection.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "threat-detection.name" . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

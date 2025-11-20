@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "threat-detection.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "threat-detection.labels" . | nindent 4 }}
+    {{- if .Values.threatdetection.controller.labels }}
+      {{- toYaml .Values.threatdetection.controller.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.threatdetection.controller.annotations }}
+  annotations:
+  {{ toYaml .Values.threatdetection.controller.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "threat-detection.selectorLabels" . | nindent 6 }}
+  template:
+    {{- include "threat-detection.podTemplate" . | nindent 4 }}
+  {{- with .Values.threatdetection.controller.daemonset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}  

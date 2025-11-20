@@ -58,6 +58,10 @@ spec:
               value: "{{ include "kubernetes-agent.secretName" . }}"
             - name: SBOM_COLLECTOR_ENABLED
               value: "{{ .Values.sbomCollector.enabled }}"
+            - name: TDR_ENABLED
+              value: "{{ .Values.threatdetection.enabled }}"
+            - name: TDR_PORT
+              value: "{{ .Values.agent.service.threatDetectionPort }}"
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
@@ -85,6 +89,11 @@ spec:
             - containerPort: {{ .Values.agent.service.metricsPort }}
               name: metrics-port
               protocol: TCP
+            {{- if .Values.threatdetection.enabled }}
+            - containerPort: {{ .Values.agent.service.threatDetectionPort }}
+              name: tdr-gateway
+              protocol: TCP
+            {{- end }}
           startupProbe:
             httpGet:
               path: /healthz
