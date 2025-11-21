@@ -43,6 +43,16 @@ entries:
     version: 1.0.0
   kubernetes-agent:
   - apiVersion: v2
+    appVersion: v1.7.1
+    created: "2025-11-21T17:27:32.527021949Z"
+    description: A Helm chart used to deploy the Aikido Kubernetes agents.
+    digest: b6073a262dddca90c19623499ed128a2f593ac581edac8a186e0b9e4ef4603ab
+    name: kubernetes-agent
+    type: application
+    urls:
+    - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-2.4.3/kubernetes-agent-2.4.3.tgz
+    version: 2.4.3
+  - apiVersion: v2
     appVersion: v1.7.0
     created: "2025-11-19T15:05:35.564503786Z"
     description: A Helm chart used to deploy the Aikido Kubernetes agents.
@@ -262,4 +272,4 @@ entries:
     urls:
     - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-1.0.0/kubernetes-agent-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-19T15:18:57.101670544Z"
+generated: "2025-11-21T17:27:32.527224065Z"
