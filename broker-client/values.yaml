@@ -35,7 +35,7 @@ config:
 image:
   repository: aikidosecurity/broker-client
   pullPolicy: IfNotPresent
-  tag: '1.0.3' # Overrides the image tag (default is the appVersion from Chart.yaml)
+  tag: '1.0.4' # Overrides the image tag (default is the appVersion from Chart.yaml)
 
 imagePullSecrets: []
 nameOverride: ''
