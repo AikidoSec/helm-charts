@@ -3,6 +3,26 @@ entries:
   broker-client:
   - apiVersion: v2
     appVersion: 1.0.5
+    created: "2025-12-05T16:32:12.315066225Z"
+    description: Aikido Broker Client - Securely forward requests to internal resources
+    digest: 213ee62adefb669575ad4670118e548135273f90a9100d033ed0a9d15ce10b8d
+    home: https://github.com/AikidoSec/broker
+    keywords:
+    - security
+    - broker
+    - proxy
+    maintainers:
+    - name: Aikido Security
+      url: https://aikido.dev
+    name: broker-client
+    sources:
+    - https://github.com/AikidoSec/broker
+    type: application
+    urls:
+    - https://github.com/AikidoSec/helm-charts/releases/download/broker-client-1.0.4/broker-client-1.0.4.tgz
+    version: 1.0.4
+  - apiVersion: v2
+    appVersion: 1.0.5
     created: "2025-11-28T17:07:54.722323452Z"
     description: Aikido Broker Client - Securely forward requests to internal resources
     digest: ac3bbc157c12d9f741e7b8f8fce97206b4aaf15e8edbdd301b6e8888e4172860
@@ -82,6 +102,17 @@ entries:
     - https://github.com/AikidoSec/helm-charts/releases/download/broker-client-1.0.0/broker-client-1.0.0.tgz
     version: 1.0.0
   kubernetes-agent:
+  - apiVersion: v2
+    appVersion: v1.7.2
+    created: "2025-12-05T16:32:12.589080351Z"
+    description: Install the Aikido Kubernetes Agent to secure and integrate your
+      Kubernetes clusters with Aikido.
+    digest: ace5d4ac0eb544b89ed0e9ea43f6e25bcd2d3fc74cbfbff7c18450af80a2afe2
+    name: kubernetes-agent
+    type: application
+    urls:
+    - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-2.4.5/kubernetes-agent-2.4.5.tgz
+    version: 2.4.5
   - apiVersion: v2
     appVersion: v1.7.2
     created: "2025-11-24T17:09:15.86519418Z"
@@ -323,4 +354,4 @@ entries:
     urls:
     - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-1.0.0/kubernetes-agent-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-28T17:07:54.722413871Z"
+generated: "2025-12-05T16:32:12.589304049Z"
