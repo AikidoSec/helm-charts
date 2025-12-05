@@ -19,7 +19,7 @@ agent:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 1500m
+      # cpu: 1500m # No CPU limit by default
       memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
@@ -39,7 +39,7 @@ sbomCollector:
       memory: 100Mi
       ephemeral-storage: 500Mi
     limits:
-      cpu: 1500m
+      # cpu: 1500m # No CPU limit by default
       memory: 5Gi # Only Mi and Gi are supported
       ephemeral-storage: 10Gi
   daemonSetTolerations:
