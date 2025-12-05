@@ -73,7 +73,7 @@ securityContext:
 # Resource limits and requests
 resources:
   limits:
-    cpu: 2000m
+    # cpu: 2000m # No CPU limit by default
     memory: 1Gi
   requests:
     cpu: 100m
