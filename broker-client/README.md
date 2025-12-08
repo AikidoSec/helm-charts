@@ -65,21 +65,22 @@ helm install broker-client aikido/broker-client -f my-values.yaml --namespace ai
 
 ### Optional Parameters
 
-| Parameter                      | Description                                | Default                        |
-| ------------------------------ | ------------------------------------------ | ------------------------------ |
-| `config.dnsServers`            | Custom DNS servers (comma-separated)       | `""`                           |
-| `config.httpProxy`             | HTTP proxy for HTTP requests               | `""`                           |
-| `config.httpsProxy`            | HTTPS proxy for HTTPS requests             | `""`                           |
-| `config.allProxy`              | Universal proxy fallback for all protocols | `""`                           |
-| `config.customCaBundleContent` | Custom CA certificate content (PEM format) | `""`                           |
-| `image.repository`             | Docker image repository                    | `aikidosecurity/broker-client` |
-| `image.tag`                    | Docker image tag                           | Chart appVersion               |
-| `persistence.enabled`          | Enable persistent storage for client_id    | `true`                         |
-| `persistence.size`             | PVC size                                   | `100Mi`                        |
-| `resources.requests.cpu`       | CPU request                                | `100m`                         |
-| `resources.requests.memory`    | Memory request                             | `256Mi`                        |
-| `resources.limits.cpu`         | CPU limit                                  | `2000m` (2 vCPU)               |
-| `resources.limits.memory`      | Memory limit                               | `1Gi`                          |
+| Parameter                      | Description                                | Default                            |
+| ------------------------------ | ------------------------------------------ | ---------------------------------- |
+| `config.dnsServers`            | Custom DNS servers (comma-separated)       | `""`                               |
+| `config.httpProxy`             | HTTP proxy for HTTP requests               | `""`                               |
+| `config.httpsProxy`            | HTTPS proxy for HTTPS requests             | `""`                               |
+| `config.allProxy`              | Universal proxy fallback for all protocols | `""`                               |
+| `config.brokerTargetUrl`       | Custom broker target URL                   | `"https://broker.aikidobroker.com"`|
+| `config.customCaBundleContent` | Custom CA certificate content (PEM format) | `""`                               |
+| `image.repository`             | Docker image repository                    | `aikidosecurity/broker-client`     |
+| `image.tag`                    | Docker image tag                           | Chart appVersion                   |
+| `persistence.enabled`          | Enable persistent storage for client_id    | `true`                             |
+| `persistence.size`             | PVC size                                   | `100Mi`                            |
+| `resources.requests.cpu`       | CPU request                                | `100m`                             |
+| `resources.requests.memory`    | Memory request                             | `256Mi`                            |
+| `resources.limits.cpu`         | CPU limit                                  | `2000m` (2 vCPU)                   |
+| `resources.limits.memory`      | Memory limit                               | `1Gi`                              |
 
 ### Example with Proxy and Custom CA
 
