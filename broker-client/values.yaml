@@ -33,7 +33,7 @@ config:
 
   # Optional: Custom broker target URL
   # Override the default broker server URL if needed
-  brokerTargetUrl: ''
+  brokerTargetUrl: 'https://broker.aikidobroker.com'
 
 # Docker image configuration
 image:
