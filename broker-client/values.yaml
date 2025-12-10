@@ -85,7 +85,7 @@ resources:
 
 # Persistent volume for client_id and resource configuration
 persistence:
-  enabled: true
+  enabled: false
   storageClass: ''
   accessMode: ReadWriteOnce
   size: 100Mi
