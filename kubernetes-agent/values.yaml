@@ -94,6 +94,8 @@ sbomCollector:
     name: ''
     # Image pull secrets to attach to the SBOM collector's service account.
     # These secrets are used to authenticate with private container registries when pulling images from remote registries.
+    # Note: This does not grant the SBOM collector access to secrets.
+    # Configure sbomCollector.secretsAccess.imagePullSecretNames for that.
     imagePullSecrets: []
   logging:
     # Suppress error logs from the SBOM collector.
