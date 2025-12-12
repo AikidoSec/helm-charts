@@ -66,6 +66,8 @@ spec:
               value: "{{ .Values.sbomCollector.secretsAccess.enabled }}"
             - name: RUN_COLLECTOR_AS_DAEMONSET
               value: "false"
+            - name: SUPPRESS_ERROR_LOGS
+              value: "{{ .Values.sbomCollector.logging.suppressErrors }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
             - name: HTTP_PROXY
               value: {{ .Values.config.proxy.httpProxy | quote }}
