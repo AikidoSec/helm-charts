@@ -3,6 +3,26 @@ entries:
   broker-client:
   - apiVersion: v2
     appVersion: 1.0.7
+    created: "2025-12-15T16:44:54.988367384Z"
+    description: Aikido Broker Client - Securely forward requests to internal resources
+    digest: a6fc7e1fd0c7dbba5dbff36abe8e15ef3a8a84124e5f56d17e9357566b61e2bc
+    home: https://github.com/AikidoSec/broker
+    keywords:
+    - security
+    - broker
+    - proxy
+    maintainers:
+    - name: Aikido Security
+      url: https://aikido.dev
+    name: broker-client
+    sources:
+    - https://github.com/AikidoSec/broker
+    type: application
+    urls:
+    - https://github.com/AikidoSec/helm-charts/releases/download/broker-client-1.0.7/broker-client-1.0.7.tgz
+    version: 1.0.7
+  - apiVersion: v2
+    appVersion: 1.0.7
     created: "2025-12-09T21:55:48.149364905Z"
     description: Aikido Broker Client - Securely forward requests to internal resources
     digest: 966b1fd91ae63ce22b8051defc1d99cc33fc21871af8147e584e3e5c00bd1a24
@@ -394,4 +414,4 @@ entries:
     urls:
     - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-1.0.0/kubernetes-agent-1.0.0.tgz
     version: 1.0.0
-generated: "2025-12-09T21:55:48.149455403Z"
+generated: "2025-12-15T16:44:54.988446221Z"
