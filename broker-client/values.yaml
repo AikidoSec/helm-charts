@@ -35,6 +35,10 @@ config:
   # Override the default broker server URL if needed
   brokerTargetUrl: 'https://broker.aikidobroker.com'
 
+  # Optional: Disable TLS certificate validation (not recommended for production)
+  # Set to "0" to disable TLS certificate verification
+  nodeTlsRejectUnauthorized: ''
+
 # Docker image configuration
 image:
   repository: aikidosecurity/broker-client
