@@ -63,8 +63,6 @@ spec:
               value: {{ .Values.sbomCollector.enabled | quote }}
             - name: AUTO_UPDATE_ENABLED
               value: {{ .Values.agent.autoUpdate.enabled | quote }}
-            - name: IGNORE_AIKIDO_NAMESPACE
-              value: {{ .Values.agent.ignoreAikidoNamespace | quote }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}

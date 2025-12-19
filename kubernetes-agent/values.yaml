@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.8.1
+    tag: v1.8.2
   service:
     port: 8091
     metricsPort: 8080
@@ -14,9 +14,6 @@ agent:
   # When disabled, RBAC permissions for updating deployments/daemonsets will not be granted
   autoUpdate:
     enabled: true
-  # When true, the namespace where Aikido is deployed will not be scanned or monitored,
-  # preventing the agent from reporting on its own pods and resources.
-  ignoreAikidoNamespace: true
   resources:
     requests:
       cpu: 100m
