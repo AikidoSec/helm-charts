@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.7.2
+    tag: v1.8.2
   service:
     port: 8091
     metricsPort: 8080
@@ -28,7 +28,7 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.2.2
+    tag: v1.3.0
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
@@ -92,6 +92,16 @@ sbomCollector:
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template
     name: ''
+    # Image pull secrets to attach to the SBOM collector's service account.
+    # These secrets are used to authenticate with private container registries when pulling images from remote registries.
+    # Note: This does not grant the SBOM collector access to secrets.
+    # Configure sbomCollector.secretsAccess.imagePullSecretNames for that.
+    imagePullSecrets: []
+  logging:
+    # Suppress error logs from the SBOM collector.
+    # When true, error messages during SBOM generation, image scanning, and registry
+    # authentication will not be logged.
+    suppressErrors: false
 
 config:
   apiToken: ''
