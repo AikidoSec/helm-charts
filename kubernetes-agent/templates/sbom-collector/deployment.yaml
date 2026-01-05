@@ -103,8 +103,15 @@ spec:
               name: ecr-cache-config
             - name: docker-sock
               mountPath: /var/run/docker.sock
+              readOnly: true
             - name: containerd-sock
               mountPath: /run/containerd/containerd.sock
+              readOnly: true
+            {{- if .Values.sbomCollector.pullSecretMount.secretName }}
+            - name: registry-pull-secret
+              mountPath: /var/run/secrets/pull-secret
+              readOnly: true
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -128,4 +135,10 @@ spec:
         - name: containerd-sock
           hostPath:
             path: /run/containerd/containerd.sock
+        {{- if .Values.sbomCollector.pullSecretMount.secretName }}
+        - name: registry-pull-secret
+          secret:
+            secretName: {{ .Values.sbomCollector.pullSecretMount.secretName }}
+            optional: false
+        {{- end }}
 {{- end }}

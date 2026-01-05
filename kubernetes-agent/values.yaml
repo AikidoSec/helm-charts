@@ -97,6 +97,16 @@ sbomCollector:
     # Note: This does not grant the SBOM collector access to secrets.
     # Configure sbomCollector.secretsAccess.imagePullSecretNames for that.
     imagePullSecrets: []
+
+  # Pull secret mount configuration
+  # Mount a Docker config secret as a volume to authenticate with private registries.
+  # This is useful for authenticating with registries like OpenShift's internal registry,
+  # Red Hat registries, and other private registries.
+  # To enable, provide a secretName. Leave empty to disable.
+  pullSecretMount:
+    # Name of the secret containing the Docker config (.dockerconfigjson key)
+    # The secret must be of type kubernetes.io/dockerconfigjson or contain a .dockerconfigjson key
+    secretName: ''
   logging:
     # Suppress error logs from the SBOM collector.
     # When true, error messages during SBOM generation, image scanning, and registry
