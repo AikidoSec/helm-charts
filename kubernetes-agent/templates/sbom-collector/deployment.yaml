@@ -6,15 +6,6 @@ metadata:
   labels:
     {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
-  {{- /*
-    When autoUpdate is enabled, the agent will manage the replicas count of the collector.
-    Otherwise, the agent might not have permissions to update the collector, so we will default it to 1.
-  */}}
-  {{- if .Values.agent.autoUpdate.enabled }}
-  replicas: 0
-  {{- else }}
-  replicas: 1
-  {{- end }}
   selector:
     matchLabels:
       {{- include "sbom-collector.selectorLabels" . | nindent 6 }}
@@ -103,8 +94,15 @@ spec:
               name: ecr-cache-config
             - name: docker-sock
               mountPath: /var/run/docker.sock
+              readOnly: true
             - name: containerd-sock
               mountPath: /run/containerd/containerd.sock
+              readOnly: true
+            {{- if .Values.sbomCollector.pullSecretMount.secretName }}
+            - name: registry-pull-secret
+              mountPath: /var/run/secrets/pull-secret
+              readOnly: true
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -128,4 +126,10 @@ spec:
         - name: containerd-sock
           hostPath:
             path: /run/containerd/containerd.sock
+        {{- if .Values.sbomCollector.pullSecretMount.secretName }}
+        - name: registry-pull-secret
+          secret:
+            secretName: {{ .Values.sbomCollector.pullSecretMount.secretName }}
+            optional: false
+        {{- end }}
 {{- end }}
