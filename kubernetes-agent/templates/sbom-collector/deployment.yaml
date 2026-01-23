@@ -75,13 +75,18 @@ spec:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
               protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 30 # account for the agent startup
+            failureThreshold: {{ include "kubernetes-agent.startupProbeFailureThreshold" . }}
+            periodSeconds: 10
           livenessProbe:
-            initialDelaySeconds: 90
             httpGet:
               path: /healthz
               port: health
           readinessProbe:
-            initialDelaySeconds: 90
             httpGet:
               path: /readyz
               port: health
