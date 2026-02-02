@@ -166,6 +166,10 @@ tolerations: []
 
 additionalEnvVars: []
 
+additionalVolumes: []
+
+additionalVolumeMounts: []
+
 # Extra Kubernetes objects to deploy alongside the chart
 # Useful for deploying ExternalSecret resources when using secret managers
 # like HashiCorp Vault, AWS Secrets Manager, etc. with the ExternalSecrets Operator.
