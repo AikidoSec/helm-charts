@@ -24,6 +24,29 @@ config:
     noProxy: 'localhost,127.0.0.1,.local,.cluster.local'
 ```
 
+### Custom CA Certificates
+
+If your cluster uses a TLS-intercepting proxy, the agent container may not trust the proxy's CA certificate. You can mount a custom CA bundle using `additionalVolumes` and `additionalVolumeMounts`, and point Go's TLS stack at it with the `SSL_CERT_FILE` or `SSL_CERT_DIR` environment variable.
+
+```yaml
+additionalEnvVars:
+  - name: SSL_CERT_FILE
+    value: /etc/ssl/custom/ca-certificates.crt
+
+additionalVolumes:
+  - name: custom-ca
+    hostPath:
+      path: /etc/ssl/certs
+      type: Directory
+
+additionalVolumeMounts:
+  - name: custom-ca
+    mountPath: /etc/ssl/custom
+    readOnly: true
+```
+
+The volume source can be a `hostPath`, `configMap`, `secret`, or any other Kubernetes volume type that contains your CA bundle.
+
 ## Installation
 
 ```bash

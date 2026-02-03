@@ -108,6 +108,9 @@ spec:
               mountPath: /var/run/secrets/pull-secret
               readOnly: true
             {{- end }}
+            {{- with .Values.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -136,5 +139,8 @@ spec:
           secret:
             secretName: {{ .Values.sbomCollector.pullSecretMount.secretName }}
             optional: false
+        {{- end }}
+        {{- with .Values.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
 {{- end }}
