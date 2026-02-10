@@ -4,6 +4,8 @@ metadata:
   name: {{ include "kubernetes-agent.fullname" . }}
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
+  annotations:
+    ignore-check.kube-linter.io/env-var-secret: "False positive: CONFIG_SECRET_NAME is referencing a Secret name. It does not contain credentials, tokens, or secret data"
 spec:
   replicas: 1
   selector:
