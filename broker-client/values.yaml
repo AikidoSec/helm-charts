@@ -43,6 +43,11 @@ config:
   # Set to "true" to force WebSocket connection
   forceWebsocket: ''
 
+  # Optional: No proxy configuration
+  # Comma-separated list of hosts/domains that should bypass the proxy
+  # Example: "localhost,127.0.0.1,.company.local"
+  noProxy: ''
+
 # Docker image configuration
 image:
   repository: aikidosecurity/broker-client
