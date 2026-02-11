@@ -74,6 +74,8 @@ helm install broker-client aikido/broker-client -f my-values.yaml --namespace ai
 | `config.brokerTargetUrl`       | Custom broker target URL                   | `"https://broker.aikidobroker.com"`|
 | `config.customCaBundleContent` | Custom CA certificate content (PEM format) | `""`                               |
 | `config.nodeTlsRejectUnauthorized` | Disable TLS certificate validation (set to "0") | `""`                               |
+| `config.forceWebsocket`        | Force WebSocket connection (set to "true") | `""`                               |
+| `config.noProxy`               | Comma-separated hosts/domains to bypass proxy | `""`                               |
 | `image.repository`             | Docker image repository                    | `aikidosecurity/broker-client`     |
 | `image.tag`                    | Docker image tag                           | Chart appVersion                   |
 | `persistence.enabled`          | Enable persistent storage for client_id    | `true`                             |
