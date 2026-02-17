@@ -52,7 +52,7 @@ sbomCollector:
       operator: Exists
       effect: NoSchedule
   securityContext:
-    # Running as root allows the conenctor to access images cached on the node
+    # Running as root allows the collector to access images cached on the node
     # instead of always pulling them from the registry.
     # If your security policy does not allow this, you can adjust these values.
     runAsUser: 0
