@@ -28,7 +28,7 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.4.3
+    tag: v1.4.5
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
@@ -52,7 +52,9 @@ sbomCollector:
       operator: Exists
       effect: NoSchedule
   securityContext:
-    # The collector needs to run as root to be able to mount the containerd/docker sockets
+    # Running as root allows the collector to access images cached on the node
+    # instead of always pulling them from the registry.
+    # If your security policy does not allow this, you can adjust these values.
     runAsUser: 0
     runAsGroup: 0
     allowPrivilegeEscalation: false
