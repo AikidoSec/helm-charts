@@ -2,8 +2,8 @@ apiVersion: v2
 name: broker-client
 description: Aikido Broker Client - Securely forward requests to internal resources
 type: application
-version: 1.0.13
-appVersion: "1.0.17"
+version: 1.0.14
+appVersion: "1.0.18"
 keywords:
   - security
   - broker
