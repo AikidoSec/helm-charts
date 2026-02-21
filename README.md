@@ -122,6 +122,15 @@ sbomCollector:
 
 For GKE Workload Identity, you can add a policy binding directly for the SBOM collector service account. The default values use the `aikido-kubernetes-agent-sbom-collector` service account and namespace `aikido`. Read more in the [GCP docs](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/workload-identity).
 
+You can use the following command to create a policy binding, replacing `PROJECT_ID` and `PROJECT_NUMBER` with your values:
+
+```bash
+gcloud projects add-iam-policy-binding projects/PROJECT_ID \
+  --role=roles/artifactregistry.reader \
+  --member=principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/aikido/sa/aikido-kubernetes-agent-sbom-collector \
+  --condition=None
+```
+
 ## Using ExternalSecrets with the Chart
 
 If you use a secret management solution like HashiCorp Vault or AWS Secrets Manager with the [ExternalSecrets Operator](https://external-secrets.io/), you can use the `extraObjects` field to deploy an ExternalSecret resource alongside the chart. This eliminates the need for a separate Helm release or manifest application.
