@@ -66,9 +66,9 @@ spec:
             - name: AUTO_UPDATE_ENABLED
               value: {{ .Values.agent.autoUpdate.enabled | quote }}
             - name: TDR_ENABLED
-              value: "{{ .Values.threatdetection.enabled }}"
+              value: "{{ .Values.tdr.enabled }}"
             - name: TDR_PORT
-              value: "{{ .Values.agent.service.threatDetectionPort }}"
+              value: "{{ .Values.tdr.port }}"
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
@@ -96,8 +96,8 @@ spec:
             - containerPort: {{ .Values.agent.service.metricsPort }}
               name: metrics-port
               protocol: TCP
-            {{- if .Values.threatdetection.enabled }}
-            - containerPort: {{ .Values.agent.service.threatDetectionPort }}
+            {{- if .Values.tdr.enabled }}
+            - containerPort: {{ .Values.tdr.port }}
               name: tdr-gateway
               protocol: TCP
             {{- end }}

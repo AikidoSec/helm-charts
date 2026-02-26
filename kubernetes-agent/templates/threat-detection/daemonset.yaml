@@ -1,4 +1,4 @@
-{{- if .Values.threatdetection.enabled -}}
+{{- if .Values.tdr.enabled -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -6,12 +6,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "threat-detection.labels" . | nindent 4 }}
-    {{- if .Values.threatdetection.controller.labels }}
-      {{- toYaml .Values.threatdetection.controller.labels | nindent 4 }}
+    {{- if .Values.tdr.controller.labels }}
+      {{- toYaml .Values.tdr.controller.labels | nindent 4 }}
     {{- end }}
-  {{- if .Values.threatdetection.controller.annotations }}
+  {{- if .Values.tdr.controller.annotations }}
   annotations:
-  {{ toYaml .Values.threatdetection.controller.annotations | nindent 4 }}
+  {{ toYaml .Values.tdr.controller.annotations | nindent 4 }}
   {{- end }}
 spec:
   selector:
@@ -19,7 +19,7 @@ spec:
       {{- include "threat-detection.selectorLabels" . | nindent 6 }}
   template:
     {{- include "threat-detection.podTemplate" . | nindent 4 }}
-  {{- with .Values.threatdetection.controller.daemonset.updateStrategy }}
+  {{- with .Values.tdr.controller.daemonset.updateStrategy }}
   updateStrategy:
     {{- toYaml . | nindent 4 }}
   {{- end }}

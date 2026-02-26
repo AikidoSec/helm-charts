@@ -6,7 +6,6 @@ agent:
   service:
     port: 8091
     metricsPort: 8080
-    threatDetectionPort: 8241
   priorityClassName: ''
   controllerCacheSyncTimeout: '60m'
   externalSecret: ''
@@ -198,8 +197,9 @@ additionalVolumeMounts: []
 #             key: secrets/aikido/config
 extraObjects: []
 
-threatdetection:
+tdr:
   enabled: true
+  port: 8241
   image:
     pullPolicy: IfNotPresent
     registry: docker.io

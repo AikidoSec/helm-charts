@@ -3,60 +3,60 @@ metadata:
   name: {{ include "threat-detection.name" . }}
   labels:
     {{- include "threat-detection.selectorLabels" . | nindent 4 }}
-    {{- with .Values.threatdetection.podLabels }}
+    {{- with .Values.tdr.podLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
     checksum/config: {{ include (print $.Template.BasePath "/threat-detection/configmap.yaml") . | sha256sum }}
-    {{- if .Values.threatdetection.driver.enabled }}
-    {{- if (or (eq .Values.threatdetection.driver.kind "modern_ebpf") (eq .Values.threatdetection.driver.kind "modern-bpf")) }}
-    {{- if .Values.threatdetection.driver.modernEbpf.leastPrivileged }}
+    {{- if .Values.tdr.driver.enabled }}
+    {{- if (or (eq .Values.tdr.driver.kind "modern_ebpf") (eq .Values.tdr.driver.kind "modern-bpf")) }}
+    {{- if .Values.tdr.driver.modernEbpf.leastPrivileged }}
     container.apparmor.security.beta.kubernetes.io/{{ .Chart.Name }}: unconfined
     {{- end }}
-    {{- else if eq .Values.threatdetection.driver.kind "ebpf" }}
-    {{- if .Values.threatdetection.driver.ebpf.leastPrivileged }}
+    {{- else if eq .Values.tdr.driver.kind "ebpf" }}
+    {{- if .Values.tdr.driver.ebpf.leastPrivileged }}
     container.apparmor.security.beta.kubernetes.io/{{ .Chart.Name }}: unconfined
     {{- end }}
     {{- end }}
     {{- end }}
-    {{- with .Values.threatdetection.podAnnotations }}
+    {{- with .Values.tdr.podAnnotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- if .Values.threatdetection.falco.podHostname }}
-  hostname: {{ .Values.threatdetection.falco.podHostname }}
+  {{- if .Values.tdr.falco.podHostname }}
+  hostname: {{ .Values.tdr.falco.podHostname }}
   {{- end }}
   serviceAccountName: {{ include "threat-detection.serviceAccountName" . }}
-  {{- with .Values.threatdetection.podSecurityContext }}
+  {{- with .Values.tdr.podSecurityContext }}
   securityContext:
     {{- toYaml . | nindent 4}}
   {{- end }}
-  {{- if .Values.threatdetection.driver.enabled }}
-  {{- if and (eq .Values.threatdetection.driver.kind "ebpf") .Values.threatdetection.driver.ebpf.hostNetwork }}
+  {{- if .Values.tdr.driver.enabled }}
+  {{- if and (eq .Values.tdr.driver.kind "ebpf") .Values.tdr.driver.ebpf.hostNetwork }}
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
   {{- end }}
   {{- end }}
-  {{- if .Values.threatdetection.podPriorityClassName }}
-  priorityClassName: {{ .Values.threatdetection.podPriorityClassName }}
+  {{- if .Values.tdr.podPriorityClassName }}
+  priorityClassName: {{ .Values.tdr.podPriorityClassName }}
   {{- end }}
-  {{- with .Values.threatdetection.nodeSelector }}
+  {{- with .Values.tdr.nodeSelector }}
   nodeSelector:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.threatdetection.affinity }}
+  {{- with .Values.tdr.affinity }}
   affinity:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.threatdetection.tolerations }}
+  {{- with .Values.tdr.tolerations }}
   tolerations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.threatdetection.imagePullSecrets }}
+  {{- with .Values.tdr.imagePullSecrets }}
   imagePullSecrets: 
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if eq .Values.threatdetection.driver.kind "gvisor" }}
+  {{- if eq .Values.tdr.driver.kind "gvisor" }}
   hostNetwork: true
   hostPID: true
   dnsPolicy: ClusterFirstWithHostNet
@@ -64,15 +64,15 @@ spec:
   containers:
     - name: {{ .Chart.Name }}
       image: {{ include "threat-detection.image" . }}
-      imagePullPolicy: {{ .Values.threatdetection.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.tdr.image.pullPolicy }}
       resources:
-        {{- toYaml .Values.threatdetection.resources | nindent 8 }}
+        {{- toYaml .Values.tdr.resources | nindent 8 }}
       securityContext:
         {{- include "threat-detection.securityContext" . | nindent 8 }}
       args:
         - /usr/bin/falco
         {{- include "threat-detection.configSyscallSource" . | indent 8 }}
-    {{- with .Values.threatdetection.extra.args }}
+    {{- with .Values.tdr.extra.args }}
       {{- toYaml . | nindent 8 }}
     {{- end }}
       env:
@@ -86,45 +86,45 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-      {{- if .Values.threatdetection.extra.env }}
-      {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.threatdetection.extra.env "context" $) | nindent 8 }}
+      {{- if .Values.tdr.extra.env }}
+      {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.extra.env "context" $) | nindent 8 }}
       {{- end }}
-      tty: {{ .Values.threatdetection.tty }}
-      {{- if .Values.threatdetection.falco.webserver.enabled }}
+      tty: {{ .Values.tdr.tty }}
+      {{- if .Values.tdr.falco.webserver.enabled }}
       ports:
-        - containerPort: {{ .Values.threatdetection.falco.webserver.listen_port }}
+        - containerPort: {{ .Values.tdr.falco.webserver.listen_port }}
           name: web
           protocol: TCP
       livenessProbe:
-        initialDelaySeconds: {{ .Values.threatdetection.healthChecks.livenessProbe.initialDelaySeconds }}
-        timeoutSeconds: {{ .Values.threatdetection.healthChecks.livenessProbe.timeoutSeconds }}
-        periodSeconds: {{ .Values.threatdetection.healthChecks.livenessProbe.periodSeconds }}
+        initialDelaySeconds: {{ .Values.tdr.healthChecks.livenessProbe.initialDelaySeconds }}
+        timeoutSeconds: {{ .Values.tdr.healthChecks.livenessProbe.timeoutSeconds }}
+        periodSeconds: {{ .Values.tdr.healthChecks.livenessProbe.periodSeconds }}
         failureThreshold: 45
         httpGet:
-          path: {{ .Values.threatdetection.falco.webserver.k8s_healthz_endpoint }}
-          port: {{ .Values.threatdetection.falco.webserver.listen_port }}
-          {{- if .Values.threatdetection.falco.webserver.ssl_enabled }}
+          path: {{ .Values.tdr.falco.webserver.k8s_healthz_endpoint }}
+          port: {{ .Values.tdr.falco.webserver.listen_port }}
+          {{- if .Values.tdr.falco.webserver.ssl_enabled }}
           scheme: HTTPS
           {{- end }}
       readinessProbe:
-        initialDelaySeconds: {{ .Values.threatdetection.healthChecks.readinessProbe.initialDelaySeconds }}
-        timeoutSeconds: {{ .Values.threatdetection.healthChecks.readinessProbe.timeoutSeconds }}
-        periodSeconds: {{ .Values.threatdetection.healthChecks.readinessProbe.periodSeconds }}
+        initialDelaySeconds: {{ .Values.tdr.healthChecks.readinessProbe.initialDelaySeconds }}
+        timeoutSeconds: {{ .Values.tdr.healthChecks.readinessProbe.timeoutSeconds }}
+        periodSeconds: {{ .Values.tdr.healthChecks.readinessProbe.periodSeconds }}
         httpGet:
-          path: {{ .Values.threatdetection.falco.webserver.k8s_healthz_endpoint }}
-          port: {{ .Values.threatdetection.falco.webserver.listen_port }}
-          {{- if .Values.threatdetection.falco.webserver.ssl_enabled }}
+          path: {{ .Values.tdr.falco.webserver.k8s_healthz_endpoint }}
+          port: {{ .Values.tdr.falco.webserver.listen_port }}
+          {{- if .Values.tdr.falco.webserver.ssl_enabled }}
           scheme: HTTPS
           {{- end }}
       {{- end }}
       volumeMounts:
       {{- include "threat-detection.containerPluginVolumeMounts" . | nindent 8 -}}
-      {{- if or .Values.threatdetection.falcoctl.artifact.install.enabled .Values.threatdetection.falcoctl.artifact.follow.enabled }}
-      {{- if has "rulesfile" .Values.threatdetection.falcoctl.config.artifact.allowedTypes }}
+      {{- if or .Values.tdr.falcoctl.artifact.install.enabled .Values.tdr.falcoctl.artifact.follow.enabled }}
+      {{- if has "rulesfile" .Values.tdr.falcoctl.config.artifact.allowedTypes }}
         - mountPath: /etc/falco
           name: rulesfiles-install-dir
       {{- end }}
-      {{- if has "plugin" .Values.threatdetection.falcoctl.config.artifact.allowedTypes }}
+      {{- if has "plugin" .Values.tdr.falcoctl.config.artifact.allowedTypes }}
         - mountPath: /usr/share/falco/plugins
           name: plugins-install-dir
       {{- end }}
@@ -137,7 +137,7 @@ spec:
           name: root-falco-fs
         - mountPath: /host/proc
           name: proc-fs
-        {{- if and .Values.threatdetection.driver.enabled (not .Values.threatdetection.driver.loader.enabled) }}
+        {{- if and .Values.tdr.driver.enabled (not .Values.tdr.driver.loader.enabled) }}
           readOnly: true
         - mountPath: /host/boot
           name: boot-fs
@@ -148,19 +148,19 @@ spec:
           name: usr-fs
           readOnly: true
         {{- end }}
-        {{- if .Values.threatdetection.driver.enabled }}
+        {{- if .Values.tdr.driver.enabled }}
         - mountPath: /host/etc
           name: etc-fs
           readOnly: true
         {{- end -}}
-        {{- if and .Values.threatdetection.driver.enabled (or (eq .Values.threatdetection.driver.kind "kmod") (eq .Values.threatdetection.driver.kind "module") (eq .Values.threatdetection.driver.kind "auto")) }}
+        {{- if and .Values.tdr.driver.enabled (or (eq .Values.tdr.driver.kind "kmod") (eq .Values.tdr.driver.kind "module") (eq .Values.tdr.driver.kind "auto")) }}
         - mountPath: /host/dev
           name: dev-fs
           readOnly: true
         - name: sys-fs
           mountPath: /sys/module
         {{- end }}
-        {{- if and .Values.threatdetection.driver.enabled (and (eq .Values.threatdetection.driver.kind "ebpf") (contains "falco-no-driver" .Values.threatdetection.image.repository)) }}
+        {{- if and .Values.tdr.driver.enabled (and (eq .Values.tdr.driver.kind "ebpf") (contains "falco-no-driver" .Values.tdr.image.repository)) }}
         - name: debugfs
           mountPath: /sys/kernel/debug
         {{- end }}
@@ -169,31 +169,31 @@ spec:
           subPath: falco.yaml
         - mountPath: /etc/falco/aikido-rules.d
           name: aikido-rules-volume
-        {{- if eq .Values.threatdetection.driver.kind "gvisor" }}
+        {{- if eq .Values.tdr.driver.kind "gvisor" }}
         - mountPath: /usr/local/bin/runsc
           name: runsc-path
           readOnly: true
-        - mountPath: /host{{ .Values.threatdetection.driver.gvisor.runsc.root }}
+        - mountPath: /host{{ .Values.tdr.driver.gvisor.runsc.root }}
           name: runsc-root
-        - mountPath: /host{{ .Values.threatdetection.driver.gvisor.runsc.config }}
+        - mountPath: /host{{ .Values.tdr.driver.gvisor.runsc.config }}
           name: runsc-config
         - mountPath: /gvisor-config
           name: falco-gvisor-config
         {{- end }}
-  {{- if .Values.threatdetection.falcoctl.artifact.follow.enabled }}
+  {{- if .Values.tdr.falcoctl.artifact.follow.enabled }}
     {{- include "falcoctl.sidecar" . | nindent 4 }}
   {{- end }}
   initContainers:
-  {{- with .Values.threatdetection.extra.initContainers }}
+  {{- with .Values.tdr.extra.initContainers }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if eq .Values.threatdetection.driver.kind "gvisor" }}
+  {{- if eq .Values.tdr.driver.kind "gvisor" }}
   {{- include "threat-detection.gvisor.initContainer" . | nindent 4 }}
   {{- end }}
   {{- if eq (include "threat-detection.driverLoader.enabled" .) "true" }}
     {{- include "threat-detection.driverLoader.initContainer" . | nindent 4 }}
   {{- end }}
-  {{- if .Values.threatdetection.falcoctl.artifact.install.enabled }}
+  {{- if .Values.tdr.falcoctl.artifact.install.enabled }}
     {{- include "falcoctl.initContainer" . | nindent 4 }}
   {{- end }}
   volumes:
@@ -202,7 +202,7 @@ spec:
     - name: specialized-falco-configs
       emptyDir: {}
     {{- end }}
-    {{- if or .Values.threatdetection.falcoctl.artifact.install.enabled .Values.threatdetection.falcoctl.artifact.follow.enabled }}
+    {{- if or .Values.tdr.falcoctl.artifact.install.enabled .Values.tdr.falcoctl.artifact.follow.enabled }}
     - name: plugins-install-dir
       emptyDir: {}
     - name: rulesfiles-install-dir
@@ -210,7 +210,7 @@ spec:
     {{- end }}
     - name: root-falco-fs
       emptyDir: {}
-    {{- if .Values.threatdetection.driver.enabled }}  
+    {{- if .Values.tdr.driver.enabled }}  
     - name: boot-fs
       hostPath:
         path: /boot
@@ -224,7 +224,7 @@ spec:
       hostPath:
         path: /etc
     {{- end }}
-    {{- if and .Values.threatdetection.driver.enabled (or (eq .Values.threatdetection.driver.kind "kmod") (eq .Values.threatdetection.driver.kind "module") (eq .Values.threatdetection.driver.kind "auto")) }}
+    {{- if and .Values.tdr.driver.enabled (or (eq .Values.tdr.driver.kind "kmod") (eq .Values.tdr.driver.kind "module") (eq .Values.tdr.driver.kind "auto")) }}
     - name: dev-fs
       hostPath:
         path: /dev
@@ -232,7 +232,7 @@ spec:
       hostPath:
         path: /sys/module
     {{- end }}
-    {{- if and .Values.threatdetection.driver.enabled (and (eq .Values.threatdetection.driver.kind "ebpf") (contains "falco-no-driver" .Values.threatdetection.image.repository)) }}
+    {{- if and .Values.tdr.driver.enabled (and (eq .Values.tdr.driver.kind "ebpf") (contains "falco-no-driver" .Values.tdr.image.repository)) }}
     - name: debugfs
       hostPath:
         path: /sys/kernel/debug
@@ -240,17 +240,17 @@ spec:
     - name: proc-fs
       hostPath:
         path: /proc
-    {{- if eq .Values.threatdetection.driver.kind "gvisor" }}
+    {{- if eq .Values.tdr.driver.kind "gvisor" }}
     - name: runsc-path
       hostPath:
-        path: {{ .Values.threatdetection.driver.gvisor.runsc.path }}/runsc
+        path: {{ .Values.tdr.driver.gvisor.runsc.path }}/runsc
         type: File
     - name: runsc-root
       hostPath:
-        path: {{ .Values.threatdetection.driver.gvisor.runsc.root }}
+        path: {{ .Values.tdr.driver.gvisor.runsc.root }}
     - name: runsc-config
       hostPath:
-        path: {{ .Values.threatdetection.driver.gvisor.runsc.config }}
+        path: {{ .Values.tdr.driver.gvisor.runsc.config }}
         type: File
     - name: falco-gvisor-config
       emptyDir: {}
@@ -275,26 +275,26 @@ spec:
 {{- define "threat-detection.driverLoader.initContainer" -}}
 - name: {{ .Chart.Name }}-driver-loader
   image: {{ include "threat-detection.driverLoader.image" . }}
-  imagePullPolicy: {{ .Values.threatdetection.driver.loader.initContainer.image.pullPolicy }}
+  imagePullPolicy: {{ .Values.tdr.driver.loader.initContainer.image.pullPolicy }}
   args:
-  {{- with .Values.threatdetection.driver.loader.initContainer.args }}
+  {{- with .Values.tdr.driver.loader.initContainer.args }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if eq .Values.threatdetection.driver.kind "module" }}
+  {{- if eq .Values.tdr.driver.kind "module" }}
     - kmod
-  {{- else if eq .Values.threatdetection.driver.kind "modern-bpf"}}
+  {{- else if eq .Values.tdr.driver.kind "modern-bpf"}}
     - modern_ebpf
   {{- else }}
-    - {{ .Values.threatdetection.driver.kind }}
+    - {{ .Values.tdr.driver.kind }}
   {{- end }}
-  {{- with .Values.threatdetection.driver.loader.initContainer.resources }}
+  {{- with .Values.tdr.driver.loader.initContainer.resources }}
   resources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   securityContext:
-  {{- if .Values.threatdetection.driver.loader.initContainer.securityContext }}
-    {{- toYaml .Values.threatdetection.driver.loader.initContainer.securityContext | nindent 4 }}
-  {{- else if (or (eq .Values.threatdetection.driver.kind "kmod") (eq .Values.threatdetection.driver.kind "module") (eq .Values.threatdetection.driver.kind "auto")) }}
+  {{- if .Values.tdr.driver.loader.initContainer.securityContext }}
+    {{- toYaml .Values.tdr.driver.loader.initContainer.securityContext | nindent 4 }}
+  {{- else if (or (eq .Values.tdr.driver.kind "kmod") (eq .Values.tdr.driver.kind "module") (eq .Values.tdr.driver.kind "auto")) }}
     privileged: true
   {{- end }}
   volumeMounts:
@@ -319,10 +319,10 @@ spec:
   env:
     - name: HOST_ROOT
       value: /host
-  {{- if .Values.threatdetection.driver.loader.initContainer.env }}
-  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.threatdetection.driver.loader.initContainer.env "context" $) | nindent 4 }}
+  {{- if .Values.tdr.driver.loader.initContainer.env }}
+  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.driver.loader.initContainer.env "context" $) | nindent 4 }}
   {{- end }}
-  {{- if eq .Values.threatdetection.driver.kind "auto" }}
+  {{- if eq .Values.tdr.driver.kind "auto" }}
     - name: FALCOCTL_DRIVER_CONFIG_NAMESPACE
       valueFrom:
         fieldRef:
@@ -337,27 +337,27 @@ spec:
 
 {{- define "threat-detection.securityContext" -}}
 {{- $securityContext := dict -}}
-{{- if .Values.threatdetection.driver.enabled -}}
-  {{- if (or (eq .Values.threatdetection.driver.kind "kmod") (eq .Values.threatdetection.driver.kind "module") (eq .Values.threatdetection.driver.kind "auto")) -}}
+{{- if .Values.tdr.driver.enabled -}}
+  {{- if (or (eq .Values.tdr.driver.kind "kmod") (eq .Values.tdr.driver.kind "module") (eq .Values.tdr.driver.kind "auto")) -}}
     {{- $securityContext := set $securityContext "privileged" true -}}
   {{- end -}}
-  {{- if eq .Values.threatdetection.driver.kind "ebpf" -}}
-    {{- if .Values.threatdetection.driver.ebpf.leastPrivileged -}}
+  {{- if eq .Values.tdr.driver.kind "ebpf" -}}
+    {{- if .Values.tdr.driver.ebpf.leastPrivileged -}}
       {{- $securityContext := set $securityContext "capabilities" (dict "add" (list "SYS_ADMIN" "SYS_RESOURCE" "SYS_PTRACE")) -}}
     {{- else -}}
       {{- $securityContext := set $securityContext "privileged" true -}}
     {{- end -}}
   {{- end -}}
-  {{- if (or (eq .Values.threatdetection.driver.kind "modern_ebpf") (eq .Values.threatdetection.driver.kind "modern-bpf")) -}}
-    {{- if .Values.threatdetection.driver.modernEbpf.leastPrivileged -}}
+  {{- if (or (eq .Values.tdr.driver.kind "modern_ebpf") (eq .Values.tdr.driver.kind "modern-bpf")) -}}
+    {{- if .Values.tdr.driver.modernEbpf.leastPrivileged -}}
       {{- $securityContext := set $securityContext "capabilities" (dict "add" (list "BPF" "SYS_RESOURCE" "PERFMON" "SYS_PTRACE")) -}}
     {{- else -}}
       {{- $securityContext := set $securityContext "privileged" true -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- if not (empty (.Values.threatdetection.containerSecurityContext)) -}}
-  {{-  toYaml .Values.threatdetection.containerSecurityContext }}
+{{- if not (empty (.Values.tdr.containerSecurityContext)) -}}
+  {{-  toYaml .Values.tdr.containerSecurityContext }}
 {{- else -}}
   {{- toYaml $securityContext }}
 {{- end -}}

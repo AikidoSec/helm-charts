@@ -186,17 +186,17 @@ Threat detection labels
 {{- define "threat-detection.labels" -}}
 helm.sh/chart: {{ include "kubernetes-agent.chart" . }}
 {{ include "threat-detection.selectorLabels" . }}
-{{- if .Values.threatdetection.image.tag }}
-app.kubernetes.io/version: {{ .Values.threatdetection.image.tag | quote }}
+{{- if .Values.tdr.image.tag }}
+app.kubernetes.io/version: {{ .Values.tdr.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{- define "threat-detection.serviceAccountName" -}}
-{{- if .Values.threatdetection.serviceAccount.create }}
-{{- default (include "threat-detection.name" .) .Values.threatdetection.serviceAccount.name }}
+{{- if .Values.tdr.serviceAccount.create }}
+{{- default (include "threat-detection.name" .) .Values.tdr.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.threatdetection.serviceAccount.name }}
+{{- default "default" .Values.tdr.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -204,37 +204,37 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Return the proper Falco image name
 */}}
 {{- define "threat-detection.image" -}}
-{{- with .Values.threatdetection.image.registry -}}
+{{- with .Values.tdr.image.registry -}}
     {{- . }}/
 {{- end -}}
-{{- .Values.threatdetection.image.repository }}:
-{{- .Values.threatdetection.image.tag -}}
+{{- .Values.tdr.image.repository }}:
+{{- .Values.tdr.image.tag -}}
 {{- end -}}
 
 {{/*
 Return the proper Falco driver loader image name
 */}}
 {{- define "threat-detection.driverLoader.image" -}}
-{{- with .Values.threatdetection.driver.loader.initContainer.image.registry -}}
+{{- with .Values.tdr.driver.loader.initContainer.image.registry -}}
     {{- . }}/
 {{- end -}}
-{{- .Values.threatdetection.driver.loader.initContainer.image.repository }}:
-{{- .Values.threatdetection.driver.loader.initContainer.image.tag | default .Chart.AppVersion -}}
+{{- .Values.tdr.driver.loader.initContainer.image.repository }}:
+{{- .Values.tdr.driver.loader.initContainer.image.tag | default .Chart.AppVersion -}}
 {{- end -}}
 
 {{/*
 Return the proper Falcoctl image name
 */}}
 {{- define "falcoctl.image" -}}
-{{ printf "%s/%s:%s" .Values.threatdetection.falcoctl.image.registry .Values.threatdetection.falcoctl.image.repository .Values.threatdetection.falcoctl.image.tag }}
+{{ printf "%s/%s:%s" .Values.tdr.falcoctl.image.registry .Values.tdr.falcoctl.image.repository .Values.tdr.falcoctl.image.tag }}
 {{- end -}}
 
 {{/*
 Extract the unixSocket's directory path
 */}}
 {{- define "threat-detection.unixSocketDir" -}}
-{{- if and .Values.threatdetection.grpc.enabled .Values.threatdetection.grpc.bind_address (hasPrefix "unix://" .Values.threatdetection.grpc.bind_address) -}}
-{{- .Values.threatdetection.grpc.bind_address | trimPrefix "unix://" | dir -}}
+{{- if and .Values.tdr.grpc.enabled .Values.tdr.grpc.bind_address (hasPrefix "unix://" .Values.tdr.grpc.bind_address) -}}
+{{- .Values.tdr.grpc.bind_address | trimPrefix "unix://" | dir -}}
 {{- end -}}
 {{- end -}}
 
@@ -246,9 +246,9 @@ we just disable the sycall source.
 */}}
 {{- define "threat-detection.configSyscallSource" -}}
 {{- $userspaceDisabled := true -}}
-{{- $gvisorDisabled := (ne .Values.threatdetection.driver.kind  "gvisor") -}}
-{{- $driverDisabled :=  (not .Values.threatdetection.driver.enabled) -}}
-{{- if or (has "-u" .Values.threatdetection.extra.args) (has "--userspace" .Values.threatdetection.extra.args) -}}
+{{- $gvisorDisabled := (ne .Values.tdr.driver.kind  "gvisor") -}}
+{{- $driverDisabled :=  (not .Values.tdr.driver.enabled) -}}
+{{- if or (has "-u" .Values.tdr.extra.args) (has "--userspace" .Values.tdr.extra.args) -}}
 {{- $userspaceDisabled = false -}}
 {{- end -}}
 {{- if and $driverDisabled $userspaceDisabled $gvisorDisabled }}
@@ -266,7 +266,7 @@ be temporary and will stay here until we move this logic to the falcoctl tool.
 {{- define "threat-detection.gvisor.initContainer" -}}
 - name: {{ .Chart.Name }}-gvisor-init
   image: {{ include "threat-detection.image" . }}
-  imagePullPolicy: {{ .Values.threatdetection.image.pullPolicy }}
+  imagePullPolicy: {{ .Values.tdr.image.pullPolicy }}
   args:
     - /bin/bash
     - -c
@@ -275,8 +275,8 @@ be temporary and will stay here until we move this logic to the falcoctl tool.
       set -o nounset
       set -o pipefail
 
-      root={{ .Values.threatdetection.driver.gvisor.runsc.root }}
-      config={{ .Values.threatdetection.driver.gvisor.runsc.config }}
+      root={{ .Values.tdr.driver.gvisor.runsc.root }}
+      config={{ .Values.tdr.driver.gvisor.runsc.config }}
 
       echo "* Configuring Falco+gVisor integration...".
       # Check if gVisor is configured on the node.
@@ -301,12 +301,12 @@ be temporary and will stay here until we move this logic to the falcoctl tool.
       echo "* Falco+gVisor correctly configured."
       exit 0
   volumeMounts:
-    - mountPath: /host{{ .Values.threatdetection.driver.gvisor.runsc.path }}
+    - mountPath: /host{{ .Values.tdr.driver.gvisor.runsc.path }}
       name: runsc-path
       readOnly: true
-    - mountPath: /host{{ .Values.threatdetection.driver.gvisor.runsc.root }}
+    - mountPath: /host{{ .Values.tdr.driver.gvisor.runsc.root }}
       name: runsc-root
-    - mountPath: /host{{ .Values.threatdetection.driver.gvisor.runsc.config }}
+    - mountPath: /host{{ .Values.tdr.driver.gvisor.runsc.config }}
       name: runsc-config
     - mountPath: /gvisor-config
       name: falco-gvisor-config
@@ -316,76 +316,76 @@ be temporary and will stay here until we move this logic to the falcoctl tool.
 {{- define "falcoctl.initContainer" -}}
 - name: falcoctl-artifact-install
   image: {{ include "falcoctl.image" . }}
-  imagePullPolicy: {{ .Values.threatdetection.falcoctl.image.pullPolicy }}
+  imagePullPolicy: {{ .Values.tdr.falcoctl.image.pullPolicy }}
   args: 
     - artifact
     - install
-  {{- with .Values.threatdetection.falcoctl.artifact.install.args }}
+  {{- with .Values.tdr.falcoctl.artifact.install.args }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.threatdetection.falcoctl.artifact.install.resources }}
+  {{- with .Values.tdr.falcoctl.artifact.install.resources }}
   resources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   securityContext:
-  {{- if .Values.threatdetection.falcoctl.artifact.install.securityContext }}
-    {{- toYaml .Values.threatdetection.falcoctl.artifact.install.securityContext | nindent 4 }}
+  {{- if .Values.tdr.falcoctl.artifact.install.securityContext }}
+    {{- toYaml .Values.tdr.falcoctl.artifact.install.securityContext | nindent 4 }}
   {{- end }}
   volumeMounts:
-    - mountPath: {{ .Values.threatdetection.falcoctl.config.artifact.install.pluginsDir }}
+    - mountPath: {{ .Values.tdr.falcoctl.config.artifact.install.pluginsDir }}
       name: plugins-install-dir
-    - mountPath: {{ .Values.threatdetection.falcoctl.config.artifact.install.rulesfilesDir }}
+    - mountPath: {{ .Values.tdr.falcoctl.config.artifact.install.rulesfilesDir }}
       name: rulesfiles-install-dir
     - mountPath: /etc/falcoctl
       name: falcoctl-config-volume
-      {{- with .Values.threatdetection.falcoctl.artifact.install.mounts.volumeMounts }}
+      {{- with .Values.tdr.falcoctl.artifact.install.mounts.volumeMounts }}
         {{- toYaml . | nindent 4 }}
       {{- end }}
-  {{- if .Values.threatdetection.falcoctl.artifact.install.env }}
+  {{- if .Values.tdr.falcoctl.artifact.install.env }}
   env:
-  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.threatdetection.falcoctl.artifact.install.env "context" $) | nindent 4 }}
+  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.falcoctl.artifact.install.env "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.threatdetection.falcoctl.artifact.install.envFrom }}
+  {{- if .Values.tdr.falcoctl.artifact.install.envFrom }}
   envFrom:
-  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.threatdetection.falcoctl.artifact.install.envFrom "context" $) | nindent 4 }}
+  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.falcoctl.artifact.install.envFrom "context" $) | nindent 4 }}
   {{- end }}
 {{- end -}}
 
 {{- define "falcoctl.sidecar" -}}
 - name: falcoctl-artifact-follow
   image: {{ include "falcoctl.image" . }}
-  imagePullPolicy: {{ .Values.threatdetection.falcoctl.image.pullPolicy }}
+  imagePullPolicy: {{ .Values.tdr.falcoctl.image.pullPolicy }}
   args:
     - artifact
     - follow
-  {{- with .Values.threatdetection.falcoctl.artifact.follow.args }}
+  {{- with .Values.tdr.falcoctl.artifact.follow.args }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.threatdetection.falcoctl.artifact.follow.resources }}
+  {{- with .Values.tdr.falcoctl.artifact.follow.resources }}
   resources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   securityContext:
-  {{- if .Values.threatdetection.falcoctl.artifact.follow.securityContext }}
-    {{- toYaml .Values.threatdetection.falcoctl.artifact.follow.securityContext | nindent 4 }}
+  {{- if .Values.tdr.falcoctl.artifact.follow.securityContext }}
+    {{- toYaml .Values.tdr.falcoctl.artifact.follow.securityContext | nindent 4 }}
   {{- end }}
   volumeMounts:
-    - mountPath: {{ .Values.threatdetection.falcoctl.config.artifact.follow.pluginsDir }}
+    - mountPath: {{ .Values.tdr.falcoctl.config.artifact.follow.pluginsDir }}
       name: plugins-install-dir
-    - mountPath: {{ .Values.threatdetection.falcoctl.config.artifact.follow.rulesfilesDir }}
+    - mountPath: {{ .Values.tdr.falcoctl.config.artifact.follow.rulesfilesDir }}
       name: rulesfiles-install-dir
     - mountPath: /etc/falcoctl
       name: falcoctl-config-volume
-      {{- with .Values.threatdetection.falcoctl.artifact.follow.mounts.volumeMounts }}
+      {{- with .Values.tdr.falcoctl.artifact.follow.mounts.volumeMounts }}
         {{- toYaml . | nindent 4 }}
       {{- end }}
-  {{- if .Values.threatdetection.falcoctl.artifact.follow.env }}
+  {{- if .Values.tdr.falcoctl.artifact.follow.env }}
   env:
-  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.threatdetection.falcoctl.artifact.follow.env "context" $) | nindent 4 }}
+  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.falcoctl.artifact.follow.env "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.threatdetection.falcoctl.artifact.follow.envFrom }}
+  {{- if .Values.tdr.falcoctl.artifact.follow.envFrom }}
   envFrom:
-  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.threatdetection.falcoctl.artifact.follow.envFrom "context" $) | nindent 4 }}
+  {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.falcoctl.artifact.follow.envFrom "context" $) | nindent 4 }}
   {{- end }}
 {{- end -}}
 
@@ -393,28 +393,28 @@ be temporary and will stay here until we move this logic to the falcoctl tool.
 Based on the user input it populates the driver configuration in the falco config map.
 */}}
 {{- define "threat-detection.engineConfiguration" -}}
-{{- if .Values.threatdetection.driver.enabled -}}
+{{- if .Values.tdr.driver.enabled -}}
 {{- $supportedDrivers := list "kmod" "ebpf" "modern_ebpf" "gvisor" "auto" -}}
 {{- $aliasDrivers := list "module" "modern-bpf" -}}
-{{- if and (not (has .Values.threatdetection.driver.kind $supportedDrivers)) (not (has .Values.threatdetection.driver.kind $aliasDrivers)) -}}
-{{- fail (printf "unsupported driver kind: \"%s\". Supported drivers %s, alias %s" .Values.threatdetection.driver.kind $supportedDrivers $aliasDrivers) -}}
+{{- if and (not (has .Values.tdr.driver.kind $supportedDrivers)) (not (has .Values.tdr.driver.kind $aliasDrivers)) -}}
+{{- fail (printf "unsupported driver kind: \"%s\". Supported drivers %s, alias %s" .Values.tdr.driver.kind $supportedDrivers $aliasDrivers) -}}
 {{- end -}}
-{{- if or (eq .Values.threatdetection.driver.kind "kmod") (eq .Values.threatdetection.driver.kind "module") -}}
-{{- $kmodConfig := dict "kind" "kmod" "kmod" (dict "buf_size_preset" .Values.threatdetection.driver.kmod.bufSizePreset "drop_failed_exit" .Values.threatdetection.driver.kmod.dropFailedExit) -}}
-{{- $_ := set .Values.threatdetection.falco "engine" $kmodConfig -}}
-{{- else if eq .Values.threatdetection.driver.kind "ebpf" -}}
-{{- $ebpfConfig := dict "kind" "ebpf" "ebpf" (dict "buf_size_preset" .Values.threatdetection.driver.ebpf.bufSizePreset "drop_failed_exit" .Values.threatdetection.driver.ebpf.dropFailedExit "probe" .Values.threatdetection.driver.ebpf.path) -}}
-{{- $_ := set .Values.threatdetection.falco "engine" $ebpfConfig -}}
-{{- else if or (eq .Values.threatdetection.driver.kind "modern_ebpf") (eq .Values.threatdetection.driver.kind "modern-bpf") -}}
-{{- $ebpfConfig := dict "kind" "modern_ebpf" "modern_ebpf" (dict "buf_size_preset" .Values.threatdetection.driver.modernEbpf.bufSizePreset "drop_failed_exit" .Values.threatdetection.driver.modernEbpf.dropFailedExit "cpus_for_each_buffer" .Values.threatdetection.driver.modernEbpf.cpusForEachBuffer) -}}
-{{- $_ := set .Values.threatdetection.falco "engine" $ebpfConfig -}}
-{{- else if eq .Values.threatdetection.driver.kind "gvisor" -}}
-{{- $root := printf "/host%s/k8s.io" .Values.threatdetection.driver.gvisor.runsc.root -}}
+{{- if or (eq .Values.tdr.driver.kind "kmod") (eq .Values.tdr.driver.kind "module") -}}
+{{- $kmodConfig := dict "kind" "kmod" "kmod" (dict "buf_size_preset" .Values.tdr.driver.kmod.bufSizePreset "drop_failed_exit" .Values.tdr.driver.kmod.dropFailedExit) -}}
+{{- $_ := set .Values.tdr.falco "engine" $kmodConfig -}}
+{{- else if eq .Values.tdr.driver.kind "ebpf" -}}
+{{- $ebpfConfig := dict "kind" "ebpf" "ebpf" (dict "buf_size_preset" .Values.tdr.driver.ebpf.bufSizePreset "drop_failed_exit" .Values.tdr.driver.ebpf.dropFailedExit "probe" .Values.tdr.driver.ebpf.path) -}}
+{{- $_ := set .Values.tdr.falco "engine" $ebpfConfig -}}
+{{- else if or (eq .Values.tdr.driver.kind "modern_ebpf") (eq .Values.tdr.driver.kind "modern-bpf") -}}
+{{- $ebpfConfig := dict "kind" "modern_ebpf" "modern_ebpf" (dict "buf_size_preset" .Values.tdr.driver.modernEbpf.bufSizePreset "drop_failed_exit" .Values.tdr.driver.modernEbpf.dropFailedExit "cpus_for_each_buffer" .Values.tdr.driver.modernEbpf.cpusForEachBuffer) -}}
+{{- $_ := set .Values.tdr.falco "engine" $ebpfConfig -}}
+{{- else if eq .Values.tdr.driver.kind "gvisor" -}}
+{{- $root := printf "/host%s/k8s.io" .Values.tdr.driver.gvisor.runsc.root -}}
 {{- $gvisorConfig := dict "kind" "gvisor" "gvisor" (dict "config" "/gvisor-config/pod-init.json" "root" $root) -}}
-{{- $_ := set .Values.threatdetection.falco "engine" $gvisorConfig -}}
-{{- else if eq .Values.threatdetection.driver.kind "auto" -}}
-{{- $engineConfig := dict "kind" "modern_ebpf" "kmod" (dict "buf_size_preset" .Values.threatdetection.driver.kmod.bufSizePreset "drop_failed_exit" .Values.threatdetection.driver.kmod.dropFailedExit) "ebpf" (dict "buf_size_preset" .Values.threatdetection.driver.ebpf.bufSizePreset "drop_failed_exit" .Values.threatdetection.driver.ebpf.dropFailedExit "probe" .Values.threatdetection.driver.ebpf.path) "modern_ebpf" (dict "buf_size_preset" .Values.threatdetection.driver.modernEbpf.bufSizePreset "drop_failed_exit" .Values.threatdetection.driver.modernEbpf.dropFailedExit "cpus_for_each_buffer" .Values.threatdetection.driver.modernEbpf.cpusForEachBuffer) -}}
-{{- $_ := set .Values.threatdetection.falco "engine" $engineConfig -}}
+{{- $_ := set .Values.tdr.falco "engine" $gvisorConfig -}}
+{{- else if eq .Values.tdr.driver.kind "auto" -}}
+{{- $engineConfig := dict "kind" "modern_ebpf" "kmod" (dict "buf_size_preset" .Values.tdr.driver.kmod.bufSizePreset "drop_failed_exit" .Values.tdr.driver.kmod.dropFailedExit) "ebpf" (dict "buf_size_preset" .Values.tdr.driver.ebpf.bufSizePreset "drop_failed_exit" .Values.tdr.driver.ebpf.dropFailedExit "probe" .Values.tdr.driver.ebpf.path) "modern_ebpf" (dict "buf_size_preset" .Values.tdr.driver.modernEbpf.bufSizePreset "drop_failed_exit" .Values.tdr.driver.modernEbpf.dropFailedExit "cpus_for_each_buffer" .Values.tdr.driver.modernEbpf.cpusForEachBuffer) -}}
+{{- $_ := set .Values.tdr.falco "engine" $engineConfig -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -423,7 +423,7 @@ Based on the user input it populates the driver configuration in the falco confi
 It returns "true" if the driver loader has to be enabled, otherwise false.
 */}}
 {{- define "threat-detection.driverLoader.enabled" -}}
-{{- if or (eq .Values.threatdetection.driver.kind "modern_ebpf") (eq .Values.threatdetection.driver.kind "modern-bpf") (eq .Values.threatdetection.driver.kind "gvisor") (not .Values.threatdetection.driver.enabled) (not .Values.threatdetection.driver.loader.enabled) -}}
+{{- if or (eq .Values.tdr.driver.kind "modern_ebpf") (eq .Values.tdr.driver.kind "modern-bpf") (eq .Values.tdr.driver.kind "gvisor") (not .Values.tdr.driver.enabled) (not .Values.tdr.driver.loader.enabled) -}}
 false
 {{- else -}}
 true
@@ -434,40 +434,40 @@ true
 This helper is used to add the container plugin to the falco configuration.
 */}}
 {{ define "threat-detection.containerPlugin" -}}
-{{ if and .Values.threatdetection.driver.enabled .Values.threatdetection.collectors.enabled -}}
-{{ if and (or .Values.threatdetection.collectors.docker.enabled .Values.threatdetection.collectors.crio.enabled .Values.threatdetection.collectors.containerd.enabled) .Values.threatdetection.collectors.containerEngine.enabled -}}
+{{ if and .Values.tdr.driver.enabled .Values.tdr.collectors.enabled -}}
+{{ if and (or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled) .Values.tdr.collectors.containerEngine.enabled -}}
 {{ fail "You can not enable any of the [docker, containerd, crio] collectors configuration and the containerEngine configuration at the same time. Please use the containerEngine configuration since the old configurations are deprecated." }}
-{{ else if or .Values.threatdetection.collectors.docker.enabled .Values.threatdetection.collectors.crio.enabled .Values.threatdetection.collectors.containerd.enabled .Values.threatdetection.collectors.containerEngine.enabled -}}
-{{ if or .Values.threatdetection.collectors.docker.enabled .Values.threatdetection.collectors.crio.enabled .Values.threatdetection.collectors.containerd.enabled -}}
-{{ $_ := set .Values.threatdetection.collectors.containerEngine.engines.docker "enabled" .Values.threatdetection.collectors.docker.enabled -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.docker "sockets" (list .Values.threatdetection.collectors.docker.socket) -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.containerd "enabled" .Values.threatdetection.collectors.containerd.enabled -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.containerd "sockets" (list .Values.threatdetection.collectors.containerd.socket) -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.cri "enabled" .Values.threatdetection.collectors.crio.enabled -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.cri "sockets" (list .Values.threatdetection.collectors.crio.socket) -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.podman "enabled" false -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.lxc "enabled" false -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.libvirt_lxc "enabled" false -}}
-{{ $_ = set .Values.threatdetection.collectors.containerEngine.engines.bpm "enabled" false -}}
+{{ else if or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled .Values.tdr.collectors.containerEngine.enabled -}}
+{{ if or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled -}}
+{{ $_ := set .Values.tdr.collectors.containerEngine.engines.docker "enabled" .Values.tdr.collectors.docker.enabled -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.docker "sockets" (list .Values.tdr.collectors.docker.socket) -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.containerd "enabled" .Values.tdr.collectors.containerd.enabled -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.containerd "sockets" (list .Values.tdr.collectors.containerd.socket) -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.cri "enabled" .Values.tdr.collectors.crio.enabled -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.cri "sockets" (list .Values.tdr.collectors.crio.socket) -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.podman "enabled" false -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.lxc "enabled" false -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.libvirt_lxc "enabled" false -}}
+{{ $_ = set .Values.tdr.collectors.containerEngine.engines.bpm "enabled" false -}}
 {{ end -}}
 {{ $hasConfig := false -}}
-{{ range .Values.threatdetection.plugins -}}
+{{ range .Values.tdr.plugins -}}
 {{ if eq (get . "name") "container" -}}
 {{ $hasConfig = true -}}
 {{ end -}}
 {{ end -}}
 {{ if not $hasConfig -}}
 {{ $pluginConfig := dict -}}
-{{ with .Values.threatdetection.collectors.containerEngine -}}
+{{ with .Values.tdr.collectors.containerEngine -}}
 {{ $pluginConfig = dict "name" "container" "library_path" "libcontainer.so" "init_config" (dict "label_max_len" .labelMaxLen "with_size" .withSize "hooks" .hooks "engines" .engines) -}}
 {{ end -}}
-{{ $newConfig := append .Values.threatdetection.falco.plugins $pluginConfig -}}
-{{ $_ := set .Values.threatdetection.falco "plugins" ($newConfig | uniq) -}}
-{{ $loadedPlugins := append .Values.threatdetection.falco.load_plugins "container" -}}
-{{ $_ = set .Values.threatdetection.falco "load_plugins" ($loadedPlugins | uniq) -}}
+{{ $newConfig := append .Values.tdr.falco.plugins $pluginConfig -}}
+{{ $_ := set .Values.tdr.falco "plugins" ($newConfig | uniq) -}}
+{{ $loadedPlugins := append .Values.tdr.falco.load_plugins "container" -}}
+{{ $_ = set .Values.tdr.falco "load_plugins" ($loadedPlugins | uniq) -}}
 {{ end -}}
-{{ $_ := set .Values.threatdetection.falcoctl.config.artifact.install "refs" ((append .Values.threatdetection.falcoctl.config.artifact.install.refs .Values.threatdetection.collectors.containerEngine.pluginRef) | uniq) -}}
-{{ $_ = set .Values.threatdetection.falcoctl.config.artifact "allowedTypes" ((append .Values.threatdetection.falcoctl.config.artifact.allowedTypes "plugin") | uniq) -}}
+{{ $_ := set .Values.tdr.falcoctl.config.artifact.install "refs" ((append .Values.tdr.falcoctl.config.artifact.install.refs .Values.tdr.collectors.containerEngine.pluginRef) | uniq) -}}
+{{ $_ = set .Values.tdr.falcoctl.config.artifact "allowedTypes" ((append .Values.tdr.falcoctl.config.artifact.allowedTypes "plugin") | uniq) -}}
 {{ end -}}
 {{ end -}}
 {{ end -}}
@@ -476,26 +476,26 @@ This helper is used to add the container plugin to the falco configuration.
 This helper is used to add container plugin volumes to the falco pod.
 */}}
 {{- define "threat-detection.containerPluginVolumes" -}}
-{{- if and .Values.threatdetection.driver.enabled .Values.threatdetection.collectors.enabled -}}
-{{- if and (or .Values.threatdetection.collectors.docker.enabled .Values.threatdetection.collectors.crio.enabled .Values.threatdetection.collectors.containerd.enabled) .Values.threatdetection.collectors.containerEngine.enabled -}}
+{{- if and .Values.tdr.driver.enabled .Values.tdr.collectors.enabled -}}
+{{- if and (or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled) .Values.tdr.collectors.containerEngine.enabled -}}
 {{ fail "You can not enable any of the [docker, containerd, crio] collectors configuration and the containerEngine configuration at the same time. Please use the containerEngine configuration since the old configurations are deprecated." }}
 {{- end -}}
 {{ $volumes := list -}}
-{{- if .Values.threatdetection.collectors.docker.enabled -}}
-{{ $volumes = append $volumes (dict "name" "docker-socket" "hostPath" (dict "path" .Values.threatdetection.collectors.docker.socket)) -}}
+{{- if .Values.tdr.collectors.docker.enabled -}}
+{{ $volumes = append $volumes (dict "name" "docker-socket" "hostPath" (dict "path" .Values.tdr.collectors.docker.socket)) -}}
 {{- end -}}
-{{- if .Values.threatdetection.collectors.crio.enabled -}}
-{{ $volumes = append $volumes (dict "name" "crio-socket" "hostPath" (dict "path" .Values.threatdetection.collectors.crio.socket)) -}}
+{{- if .Values.tdr.collectors.crio.enabled -}}
+{{ $volumes = append $volumes (dict "name" "crio-socket" "hostPath" (dict "path" .Values.tdr.collectors.crio.socket)) -}}
 {{- end -}}
-{{- if .Values.threatdetection.collectors.containerd.enabled -}}
-{{ $volumes = append $volumes (dict "name" "containerd-socket" "hostPath" (dict "path" .Values.threatdetection.collectors.containerd.socket)) -}}
+{{- if .Values.tdr.collectors.containerd.enabled -}}
+{{ $volumes = append $volumes (dict "name" "containerd-socket" "hostPath" (dict "path" .Values.tdr.collectors.containerd.socket)) -}}
 {{- end -}}
-{{- if .Values.threatdetection.collectors.containerEngine.enabled -}}
+{{- if .Values.tdr.collectors.containerEngine.enabled -}}
 {{- $seenPaths := dict -}}
 {{- $idx := 0 -}}
 {{- $engineOrder := list "docker" "podman" "containerd" "cri" "lxc" "libvirt_lxc" "bpm" -}}
 {{- range $engineName := $engineOrder -}}
-{{- $val := index $.Values.threatdetection.collectors.containerEngine.engines $engineName -}}
+{{- $val := index $.Values.tdr.collectors.containerEngine.engines $engineName -}}
 {{- if and $val $val.enabled -}}
 {{- range $index, $socket := $val.sockets -}}
 {{- $mountPath := print "/host" $socket -}}
@@ -518,26 +518,26 @@ This helper is used to add container plugin volumes to the falco pod.
 This helper is used to add container plugin volumeMounts to the falco pod.
 */}}
 {{- define "threat-detection.containerPluginVolumeMounts" -}}
-{{- if and .Values.threatdetection.driver.enabled .Values.threatdetection.collectors.enabled -}}
-{{- if and (or .Values.threatdetection.collectors.docker.enabled .Values.threatdetection.collectors.crio.enabled .Values.threatdetection.collectors.containerd.enabled) .Values.threatdetection.collectors.containerEngine.enabled -}}
+{{- if and .Values.tdr.driver.enabled .Values.tdr.collectors.enabled -}}
+{{- if and (or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled) .Values.tdr.collectors.containerEngine.enabled -}}
 {{ fail "You can not enable any of the [docker, containerd, crio] collectors configuration and the containerEngine configuration at the same time. Please use the containerEngine configuration since the old configurations are deprecated." }}
 {{- end -}}
 {{ $volumeMounts := list -}}
-{{- if .Values.threatdetection.collectors.docker.enabled -}}
-{{ $volumeMounts = append $volumeMounts (dict "name" "docker-socket" "mountPath" (print "/host" .Values.threatdetection.collectors.docker.socket)) -}}
+{{- if .Values.tdr.collectors.docker.enabled -}}
+{{ $volumeMounts = append $volumeMounts (dict "name" "docker-socket" "mountPath" (print "/host" .Values.tdr.collectors.docker.socket)) -}}
 {{- end -}}
-{{- if .Values.threatdetection.collectors.crio.enabled -}}
-{{ $volumeMounts = append $volumeMounts (dict "name" "crio-socket" "mountPath" (print "/host" .Values.threatdetection.collectors.crio.socket)) -}}
+{{- if .Values.tdr.collectors.crio.enabled -}}
+{{ $volumeMounts = append $volumeMounts (dict "name" "crio-socket" "mountPath" (print "/host" .Values.tdr.collectors.crio.socket)) -}}
 {{- end -}}
-{{- if .Values.threatdetection.collectors.containerd.enabled -}}
-{{ $volumeMounts = append $volumeMounts (dict "name" "containerd-socket" "mountPath" (print "/host" .Values.threatdetection.collectors.containerd.socket)) -}}
+{{- if .Values.tdr.collectors.containerd.enabled -}}
+{{ $volumeMounts = append $volumeMounts (dict "name" "containerd-socket" "mountPath" (print "/host" .Values.tdr.collectors.containerd.socket)) -}}
 {{- end -}}
-{{- if .Values.threatdetection.collectors.containerEngine.enabled -}}
+{{- if .Values.tdr.collectors.containerEngine.enabled -}}
 {{- $seenPaths := dict -}}
 {{- $idx := 0 -}}
 {{- $engineOrder := list "docker" "podman" "containerd" "cri" "lxc" "libvirt_lxc" "bpm" -}}
 {{- range $engineName := $engineOrder -}}
-{{- $val := index $.Values.threatdetection.collectors.containerEngine.engines $engineName -}}
+{{- $val := index $.Values.tdr.collectors.containerEngine.engines $engineName -}}
 {{- if and $val $val.enabled -}}
 {{- range $index, $socket := $val.sockets -}}
 {{- $mountPath := print "/host" $socket -}}

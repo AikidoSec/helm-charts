@@ -8,7 +8,7 @@ templates:
 tests:
   - it: should not render when disabled
     set:
-      threatdetection.enabled: false
+      tdr.enabled: false
     asserts:
       - hasDocuments:
           count: 0
@@ -53,7 +53,7 @@ tests:
 
   - it: service account should use name override when set
     set:
-      threatdetection.serviceAccount.name: my-falco-sa
+      tdr.serviceAccount.name: my-falco-sa
     asserts:
       - equal:
           path: metadata.name
@@ -62,7 +62,7 @@ tests:
 
   - it: service account should not be created when disabled
     set:
-      threatdetection.serviceAccount.create: false
+      tdr.serviceAccount.create: false
     asserts:
       - hasDocuments:
           count: 0
@@ -77,7 +77,7 @@ tests:
 
   - it: daemonset should reference overridden service account name
     set:
-      threatdetection.serviceAccount.name: my-falco-sa
+      tdr.serviceAccount.name: my-falco-sa
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
@@ -93,7 +93,7 @@ tests:
 
   - it: configmap should send events to custom port when overridden
     set:
-      agent.service.threatDetectionPort: 9999
+      tdr.port: 9999
     asserts:
       - matchRegex:
           path: data["falco.yaml"]

@@ -1,4 +1,4 @@
-{{- if and .Values.threatdetection.enabled (or .Values.threatdetection.falcoctl.artifact.install.enabled .Values.threatdetection.falcoctl.artifact.follow.enabled) }}
+{{- if and .Values.tdr.enabled (or .Values.tdr.falcoctl.artifact.install.enabled .Values.tdr.falcoctl.artifact.follow.enabled) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,5 +9,5 @@ metadata:
 data:
   falcoctl.yaml: |-
     {{- include "threat-detection.containerPlugin" . -}}
-    {{- toYaml .Values.threatdetection.falcoctl.config | nindent 4 }}
+    {{- toYaml .Values.tdr.falcoctl.config | nindent 4 }}
 {{- end }}
