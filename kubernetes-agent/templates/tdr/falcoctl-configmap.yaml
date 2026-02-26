@@ -2,12 +2,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "threat-detection.name" . }}-falcoctl
+  name: {{ include "tdr.name" . }}-falcoctl
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "threat-detection.labels" . | nindent 4 }}
+    {{- include "tdr.labels" . | nindent 4 }}
 data:
   falcoctl.yaml: |-
-    {{- include "threat-detection.containerPlugin" . -}}
+    {{- include "tdr.containerPlugin" . -}}
     {{- toYaml .Values.tdr.falcoctl.config | nindent 4 }}
 {{- end }}

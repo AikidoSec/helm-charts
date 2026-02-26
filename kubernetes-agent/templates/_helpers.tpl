@@ -170,31 +170,31 @@ app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{- define "threat-detection.name" -}}
-{{- printf "%s-threat-detection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "tdr.name" -}}
+{{- printf "%s-tdr" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "threat-detection.selectorLabels" -}}
+{{- define "tdr.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "kubernetes-agent.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: threat-detection
+app.kubernetes.io/component: tdr
 {{- end }}
 
 {{/*
 Threat detection labels
 */}}
-{{- define "threat-detection.labels" -}}
+{{- define "tdr.labels" -}}
 helm.sh/chart: {{ include "kubernetes-agent.chart" . }}
-{{ include "threat-detection.selectorLabels" . }}
+{{ include "tdr.selectorLabels" . }}
 {{- if .Values.tdr.image.tag }}
 app.kubernetes.io/version: {{ .Values.tdr.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{- define "threat-detection.serviceAccountName" -}}
+{{- define "tdr.serviceAccountName" -}}
 {{- if .Values.tdr.serviceAccount.create }}
-{{- default (include "threat-detection.name" .) .Values.tdr.serviceAccount.name }}
+{{- default (include "tdr.name" .) .Values.tdr.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.tdr.serviceAccount.name }}
 {{- end }}
@@ -203,7 +203,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Return the proper Falco image name
 */}}
-{{- define "threat-detection.image" -}}
+{{- define "tdr.image" -}}
 {{- with .Values.tdr.image.registry -}}
     {{- . }}/
 {{- end -}}
@@ -214,7 +214,7 @@ Return the proper Falco image name
 {{/*
 Return the proper Falco driver loader image name
 */}}
-{{- define "threat-detection.driverLoader.image" -}}
+{{- define "tdr.driverLoader.image" -}}
 {{- with .Values.tdr.driver.loader.initContainer.image.registry -}}
     {{- . }}/
 {{- end -}}
@@ -232,7 +232,7 @@ Return the proper Falcoctl image name
 {{/*
 Extract the unixSocket's directory path
 */}}
-{{- define "threat-detection.unixSocketDir" -}}
+{{- define "tdr.unixSocketDir" -}}
 {{- if and .Values.tdr.grpc.enabled .Values.tdr.grpc.bind_address (hasPrefix "unix://" .Values.tdr.grpc.bind_address) -}}
 {{- .Values.tdr.grpc.bind_address | trimPrefix "unix://" | dir -}}
 {{- end -}}
@@ -244,7 +244,7 @@ By default the syscall source is always enabled in threat-detection. If no sysca
 exits. Here we check that no producers for syscalls event has been configured, and if true
 we just disable the sycall source.
 */}}
-{{- define "threat-detection.configSyscallSource" -}}
+{{- define "tdr.configSyscallSource" -}}
 {{- $userspaceDisabled := true -}}
 {{- $gvisorDisabled := (ne .Values.tdr.driver.kind  "gvisor") -}}
 {{- $driverDisabled :=  (not .Values.tdr.driver.enabled) -}}
@@ -263,9 +263,9 @@ is deployed within the Falco pod when gVisor is enabled. The image is the same a
 deploying and the configuration logic is a bash script passed as argument on the fly. This solution should
 be temporary and will stay here until we move this logic to the falcoctl tool.
 */}}
-{{- define "threat-detection.gvisor.initContainer" -}}
+{{- define "tdr.gvisor.initContainer" -}}
 - name: {{ .Chart.Name }}-gvisor-init
-  image: {{ include "threat-detection.image" . }}
+  image: {{ include "tdr.image" . }}
   imagePullPolicy: {{ .Values.tdr.image.pullPolicy }}
   args:
     - /bin/bash
@@ -392,7 +392,7 @@ be temporary and will stay here until we move this logic to the falcoctl tool.
 {{/*
 Based on the user input it populates the driver configuration in the falco config map.
 */}}
-{{- define "threat-detection.engineConfiguration" -}}
+{{- define "tdr.engineConfiguration" -}}
 {{- if .Values.tdr.driver.enabled -}}
 {{- $supportedDrivers := list "kmod" "ebpf" "modern_ebpf" "gvisor" "auto" -}}
 {{- $aliasDrivers := list "module" "modern-bpf" -}}
@@ -422,7 +422,7 @@ Based on the user input it populates the driver configuration in the falco confi
 {{/*
 It returns "true" if the driver loader has to be enabled, otherwise false.
 */}}
-{{- define "threat-detection.driverLoader.enabled" -}}
+{{- define "tdr.driverLoader.enabled" -}}
 {{- if or (eq .Values.tdr.driver.kind "modern_ebpf") (eq .Values.tdr.driver.kind "modern-bpf") (eq .Values.tdr.driver.kind "gvisor") (not .Values.tdr.driver.enabled) (not .Values.tdr.driver.loader.enabled) -}}
 false
 {{- else -}}
@@ -433,7 +433,7 @@ true
 {{/*
 This helper is used to add the container plugin to the falco configuration.
 */}}
-{{ define "threat-detection.containerPlugin" -}}
+{{ define "tdr.containerPlugin" -}}
 {{ if and .Values.tdr.driver.enabled .Values.tdr.collectors.enabled -}}
 {{ if and (or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled) .Values.tdr.collectors.containerEngine.enabled -}}
 {{ fail "You can not enable any of the [docker, containerd, crio] collectors configuration and the containerEngine configuration at the same time. Please use the containerEngine configuration since the old configurations are deprecated." }}
@@ -475,7 +475,7 @@ This helper is used to add the container plugin to the falco configuration.
 {{/*
 This helper is used to add container plugin volumes to the falco pod.
 */}}
-{{- define "threat-detection.containerPluginVolumes" -}}
+{{- define "tdr.containerPluginVolumes" -}}
 {{- if and .Values.tdr.driver.enabled .Values.tdr.collectors.enabled -}}
 {{- if and (or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled) .Values.tdr.collectors.containerEngine.enabled -}}
 {{ fail "You can not enable any of the [docker, containerd, crio] collectors configuration and the containerEngine configuration at the same time. Please use the containerEngine configuration since the old configurations are deprecated." }}
@@ -517,7 +517,7 @@ This helper is used to add container plugin volumes to the falco pod.
 {{/*
 This helper is used to add container plugin volumeMounts to the falco pod.
 */}}
-{{- define "threat-detection.containerPluginVolumeMounts" -}}
+{{- define "tdr.containerPluginVolumeMounts" -}}
 {{- if and .Values.tdr.driver.enabled .Values.tdr.collectors.enabled -}}
 {{- if and (or .Values.tdr.collectors.docker.enabled .Values.tdr.collectors.crio.enabled .Values.tdr.collectors.containerd.enabled) .Values.tdr.collectors.containerEngine.enabled -}}
 {{ fail "You can not enable any of the [docker, containerd, crio] collectors configuration and the containerEngine configuration at the same time. Please use the containerEngine configuration since the old configurations are deprecated." }}

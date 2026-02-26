@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ include "threat-detection.name" . }}
+  name: {{ include "tdr.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "threat-detection.labels" . | nindent 4 }}
+    {{- include "tdr.labels" . | nindent 4 }}
     {{- if .Values.tdr.controller.labels }}
       {{- toYaml .Values.tdr.controller.labels | nindent 4 }}
     {{- end }}
@@ -16,9 +16,9 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "threat-detection.selectorLabels" . | nindent 6 }}
+      {{- include "tdr.selectorLabels" . | nindent 6 }}
   template:
-    {{- include "threat-detection.podTemplate" . | nindent 4 }}
+    {{- include "tdr.podTemplate" . | nindent 4 }}
   {{- with .Values.tdr.controller.daemonset.updateStrategy }}
   updateStrategy:
     {{- toYaml . | nindent 4 }}

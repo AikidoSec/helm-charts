@@ -28,7 +28,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: threat-detection
+              app.kubernetes.io/component: tdr
       ports:
         - protocol: TCP
           port: {{ .Values.tdr.port }}

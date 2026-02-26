@@ -2,15 +2,15 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "threat-detection.name" . }}
+  name: {{ include "tdr.name" . }}
   labels:
-    {{- include "threat-detection.labels" . | nindent 4 }}
+    {{- include "tdr.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "threat-detection.serviceAccountName" . }}
+    name: {{ include "tdr.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ include "threat-detection.name" . }}
+  name: {{ include "tdr.name" . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}

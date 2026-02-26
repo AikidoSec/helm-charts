@@ -1,13 +1,13 @@
-{{- define "threat-detection.podTemplate" -}}
+{{- define "tdr.podTemplate" -}}
 metadata:
-  name: {{ include "threat-detection.name" . }}
+  name: {{ include "tdr.name" . }}
   labels:
-    {{- include "threat-detection.selectorLabels" . | nindent 4 }}
+    {{- include "tdr.selectorLabels" . | nindent 4 }}
     {{- with .Values.tdr.podLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    checksum/config: {{ include (print $.Template.BasePath "/threat-detection/configmap.yaml") . | sha256sum }}
+    checksum/config: {{ include (print $.Template.BasePath "/tdr/configmap.yaml") . | sha256sum }}
     {{- if .Values.tdr.driver.enabled }}
     {{- if (or (eq .Values.tdr.driver.kind "modern_ebpf") (eq .Values.tdr.driver.kind "modern-bpf")) }}
     {{- if .Values.tdr.driver.modernEbpf.leastPrivileged }}
@@ -26,7 +26,7 @@ spec:
   {{- if .Values.tdr.falco.podHostname }}
   hostname: {{ .Values.tdr.falco.podHostname }}
   {{- end }}
-  serviceAccountName: {{ include "threat-detection.serviceAccountName" . }}
+  serviceAccountName: {{ include "tdr.serviceAccountName" . }}
   {{- with .Values.tdr.podSecurityContext }}
   securityContext:
     {{- toYaml . | nindent 4}}
@@ -63,15 +63,15 @@ spec:
   {{- end }}
   containers:
     - name: {{ .Chart.Name }}
-      image: {{ include "threat-detection.image" . }}
+      image: {{ include "tdr.image" . }}
       imagePullPolicy: {{ .Values.tdr.image.pullPolicy }}
       resources:
         {{- toYaml .Values.tdr.resources | nindent 8 }}
       securityContext:
-        {{- include "threat-detection.securityContext" . | nindent 8 }}
+        {{- include "tdr.securityContext" . | nindent 8 }}
       args:
         - /usr/bin/falco
-        {{- include "threat-detection.configSyscallSource" . | indent 8 }}
+        {{- include "tdr.configSyscallSource" . | indent 8 }}
     {{- with .Values.tdr.extra.args }}
       {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -118,7 +118,7 @@ spec:
           {{- end }}
       {{- end }}
       volumeMounts:
-      {{- include "threat-detection.containerPluginVolumeMounts" . | nindent 8 -}}
+      {{- include "tdr.containerPluginVolumeMounts" . | nindent 8 -}}
       {{- if or .Values.tdr.falcoctl.artifact.install.enabled .Values.tdr.falcoctl.artifact.follow.enabled }}
       {{- if has "rulesfile" .Values.tdr.falcoctl.config.artifact.allowedTypes }}
         - mountPath: /etc/falco
@@ -129,7 +129,7 @@ spec:
           name: plugins-install-dir
       {{- end }}
       {{- end }}
-      {{- if eq (include "threat-detection.driverLoader.enabled" .) "true" }}
+      {{- if eq (include "tdr.driverLoader.enabled" .) "true" }}
         - mountPath: /etc/falco/config.d
           name: specialized-falco-configs
       {{- end }}
@@ -188,17 +188,17 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- if eq .Values.tdr.driver.kind "gvisor" }}
-  {{- include "threat-detection.gvisor.initContainer" . | nindent 4 }}
+  {{- include "tdr.gvisor.initContainer" . | nindent 4 }}
   {{- end }}
-  {{- if eq (include "threat-detection.driverLoader.enabled" .) "true" }}
-    {{- include "threat-detection.driverLoader.initContainer" . | nindent 4 }}
+  {{- if eq (include "tdr.driverLoader.enabled" .) "true" }}
+    {{- include "tdr.driverLoader.initContainer" . | nindent 4 }}
   {{- end }}
   {{- if .Values.tdr.falcoctl.artifact.install.enabled }}
     {{- include "falcoctl.initContainer" . | nindent 4 }}
   {{- end }}
   volumes:
-    {{- include "threat-detection.containerPluginVolumes" . | nindent 4 -}}
-    {{- if eq (include "threat-detection.driverLoader.enabled" .) "true" }}
+    {{- include "tdr.containerPluginVolumes" . | nindent 4 -}}
+    {{- if eq (include "tdr.driverLoader.enabled" .) "true" }}
     - name: specialized-falco-configs
       emptyDir: {}
     {{- end }}
@@ -257,24 +257,24 @@ spec:
     {{- end }}
     - name: falcoctl-config-volume
       configMap: 
-        name: {{ include "threat-detection.name" . }}-falcoctl
+        name: {{ include "tdr.name" . }}-falcoctl
         items:
           - key: falcoctl.yaml
             path: falcoctl.yaml
     - name: falco-yaml
       configMap:
-        name: {{ include "threat-detection.name" . }}
+        name: {{ include "tdr.name" . }}
         items:
         - key: falco.yaml
           path: falco.yaml
     - name: aikido-rules-volume
       configMap:
-        name: {{ include "threat-detection.name" . }}-custom-rules
+        name: {{ include "tdr.name" . }}-custom-rules
     {{- end -}}
 
-{{- define "threat-detection.driverLoader.initContainer" -}}
+{{- define "tdr.driverLoader.initContainer" -}}
 - name: {{ .Chart.Name }}-driver-loader
-  image: {{ include "threat-detection.driverLoader.image" . }}
+  image: {{ include "tdr.driverLoader.image" . }}
   imagePullPolicy: {{ .Values.tdr.driver.loader.initContainer.image.pullPolicy }}
   args:
   {{- with .Values.tdr.driver.loader.initContainer.args }}
@@ -328,14 +328,14 @@ spec:
         fieldRef:
           fieldPath: metadata.namespace
     - name: FALCOCTL_DRIVER_CONFIG_CONFIGMAP
-      value: {{ include "threat-detection.name" . }}
+      value: {{ include "tdr.name" . }}
   {{- else }}
     - name: FALCOCTL_DRIVER_CONFIG_UPDATE_FALCO
       value: "false"
   {{- end }}
 {{- end -}}
 
-{{- define "threat-detection.securityContext" -}}
+{{- define "tdr.securityContext" -}}
 {{- $securityContext := dict -}}
 {{- if .Values.tdr.driver.enabled -}}
   {{- if (or (eq .Values.tdr.driver.kind "kmod") (eq .Values.tdr.driver.kind "module") (eq .Values.tdr.driver.kind "auto")) -}}

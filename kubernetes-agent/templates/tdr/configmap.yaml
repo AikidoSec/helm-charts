@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "threat-detection.name" . }}
+  name: {{ include "tdr.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "threat-detection.labels" . | nindent 4 }}
+    {{- include "tdr.labels" . | nindent 4 }}
 data:
   falco.yaml: |-
-    {{- include "threat-detection.engineConfiguration" . -}}
-    {{- include "threat-detection.containerPlugin" . -}}
+    {{- include "tdr.engineConfiguration" . -}}
+    {{- include "tdr.containerPlugin" . -}}
     {{- $falcoConfig := deepCopy .Values.tdr.falco }}
     {{- $url := printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (int .Values.tdr.port) }}
     {{- $_ := set $falcoConfig.http_output "url" $url }}

@@ -2,9 +2,9 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "threat-detection.name" . }}
+  name: {{ include "tdr.name" . }}
   labels:
-    {{- include "threat-detection.labels" . | nindent 4 }}
+    {{- include "tdr.labels" . | nindent 4 }}
 rules:
   - apiGroups:
       - ""
