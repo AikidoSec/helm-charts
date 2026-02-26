@@ -1,0 +1,114 @@
+suite: threat detection
+templates:
+  - threat-detection/daemonset.yaml
+  - threat-detection/pod-template.tpl
+  - threat-detection/serviceaccount.yaml
+  - threat-detection/configmap.yaml
+
+tests:
+  - it: should not render when disabled
+    set:
+      threatdetection.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+    template: threat-detection/daemonset.yaml
+
+  - it: daemonset should use the configured image
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/falcosecurity/falco:0.41.3
+    template: threat-detection/daemonset.yaml
+
+  - it: daemonset should tolerate control-plane nodes
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/control-plane
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/master
+    template: threat-detection/daemonset.yaml
+
+  - it: daemonset should use rolling update strategy
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: RollingUpdate
+    template: threat-detection/daemonset.yaml
+
+  - it: service account should be created with generated name by default
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kubernetes-agent-threat-detection
+    template: threat-detection/serviceaccount.yaml
+
+  - it: service account should use name override when set
+    set:
+      threatdetection.serviceAccount.name: my-falco-sa
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-falco-sa
+    template: threat-detection/serviceaccount.yaml
+
+  - it: service account should not be created when disabled
+    set:
+      threatdetection.serviceAccount.create: false
+    asserts:
+      - hasDocuments:
+          count: 0
+    template: threat-detection/serviceaccount.yaml
+
+  - it: daemonset should reference the correct service account
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-kubernetes-agent-threat-detection
+    template: threat-detection/daemonset.yaml
+
+  - it: daemonset should reference overridden service account name
+    set:
+      threatdetection.serviceAccount.name: my-falco-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: my-falco-sa
+    template: threat-detection/daemonset.yaml
+
+  - it: configmap should send events to the agent HTTP endpoint
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "url: http://RELEASE-NAME-kubernetes-agent:8241/detection"
+    template: threat-detection/configmap.yaml
+
+  - it: configmap should send events to custom port when overridden
+    set:
+      agent.service.threatDetectionPort: 9999
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "url: http://RELEASE-NAME-kubernetes-agent:9999/detection"
+    template: threat-detection/configmap.yaml
+
+  - it: configmap should enable JSON output with output fields
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_output: true"
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_include_output_fields_property: true"
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_include_tags_property: true"
+    template: threat-detection/configmap.yaml

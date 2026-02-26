@@ -1,4 +1,4 @@
-{{- if and .Values.threatdetection.rbac.create (eq .Values.threatdetection.driver.kind "auto")}}
+{{- if and .Values.threatdetection.enabled .Values.threatdetection.rbac.create (eq .Values.threatdetection.driver.kind "auto")}}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:

@@ -1,4 +1,4 @@
-{{- if or .Values.threatdetection.falcoctl.artifact.install.enabled .Values.threatdetection.falcoctl.artifact.follow.enabled }}
+{{- if and .Values.threatdetection.enabled (or .Values.threatdetection.falcoctl.artifact.install.enabled .Values.threatdetection.falcoctl.artifact.follow.enabled) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

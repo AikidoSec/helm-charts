@@ -1,3 +1,4 @@
+{{- if .Values.threatdetection.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,3 +14,4 @@ data:
     {{- $url := printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (int .Values.agent.service.threatDetectionPort) }}
     {{- $_ := set $falcoConfig.http_output "url" $url }}
     {{- toYaml $falcoConfig | nindent 4 }}
+{{- end }}

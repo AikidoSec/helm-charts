@@ -1,3 +1,4 @@
+{{- if .Values.threatdetection.enabled -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -21,4 +22,5 @@ spec:
   {{- with .Values.threatdetection.controller.daemonset.updateStrategy }}
   updateStrategy:
     {{- toYaml . | nindent 4 }}
-  {{- end }}  
+  {{- end }}
+{{- end }}
