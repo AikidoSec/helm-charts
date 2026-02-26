@@ -206,14 +206,9 @@ tdr:
     repository: falcosecurity/falco
     tag: "0.41.3"
 
-  imagePullSecrets: [ ]
-  nameOverride: ""
-  fullnameOverride: ""
-  namespaceOverride: ""
   podAnnotations: { }
 
   serviceAccount:
-    imagePullSecrets: [ ]
     create: true
     annotations: { }
     name: ""
@@ -252,8 +247,6 @@ tdr:
       initialDelaySeconds: 30
       timeoutSeconds: 5
       periodSeconds: 15
-
-  tty: false
 
   controller:
     annotations: {}
@@ -333,8 +326,6 @@ tdr:
     env: [ ]
     args: [ ]
     initContainers: [ ]
-
-  podHostname:
 
   falcoctl:
     image:

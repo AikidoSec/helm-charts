@@ -52,8 +52,8 @@ spec:
   tolerations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.tdr.imagePullSecrets }}
-  imagePullSecrets: 
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- if eq .Values.tdr.driver.kind "gvisor" }}
@@ -89,7 +89,6 @@ spec:
       {{- if .Values.tdr.extra.env }}
       {{- include "kubernetes-agent.renderTemplate" ( dict "value" .Values.tdr.extra.env "context" $) | nindent 8 }}
       {{- end }}
-      tty: {{ .Values.tdr.tty }}
       {{- if .Values.tdr.falco.webserver.enabled }}
       ports:
         - containerPort: {{ .Values.tdr.falco.webserver.listen_port }}
