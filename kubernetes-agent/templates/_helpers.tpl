@@ -194,7 +194,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 {{- define "threat-detection.serviceAccountName" -}}
 {{- if .Values.threatdetection.serviceAccount.create }}
-{{- default (include "threat-detection.name" .) .Values.serviceAccount.name }}
+{{- default (include "threat-detection.name" .) .Values.threatdetection.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.threatdetection.serviceAccount.name }}
 {{- end }}
