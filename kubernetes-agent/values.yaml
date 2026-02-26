@@ -217,9 +217,9 @@ tdr:
     create: true
 
   podLabels: { }
-  podPriorityClassName:
+  priorityClassName:
   podSecurityContext: { }
-  containerSecurityContext: { }
+  securityContext: { }
 
   resources:
     requests:

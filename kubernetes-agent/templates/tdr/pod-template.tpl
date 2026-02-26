@@ -37,8 +37,8 @@ spec:
   dnsPolicy: ClusterFirstWithHostNet
   {{- end }}
   {{- end }}
-  {{- if .Values.tdr.podPriorityClassName }}
-  priorityClassName: {{ .Values.tdr.podPriorityClassName }}
+  {{- if .Values.tdr.priorityClassName }}
+  priorityClassName: {{ .Values.tdr.priorityClassName }}
   {{- end }}
   {{- with .Values.tdr.nodeSelector }}
   nodeSelector:
@@ -355,8 +355,8 @@ spec:
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- if not (empty (.Values.tdr.containerSecurityContext)) -}}
-  {{-  toYaml .Values.tdr.containerSecurityContext }}
+{{- if not (empty (.Values.tdr.securityContext)) -}}
+  {{-  toYaml .Values.tdr.securityContext }}
 {{- else -}}
   {{- toYaml $securityContext }}
 {{- end -}}
