@@ -365,7 +365,7 @@ threatdetection:
       filename: ./events.txt
     http_output:
       enabled: true
-      url: http://aikido-kubernetes-agent:8241/tdr
+      url: http://aikido-kubernetes-agent:8241/detection
 
     program_output:
       enabled: false
