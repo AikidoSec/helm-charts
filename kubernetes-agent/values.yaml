@@ -1,39 +1,46 @@
 agent:
   image:
-    repository: 'public.ecr.aws/aikido-cloud/kubernetes-agent'
+    repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: 'v1.6.6'
+    tag: v1.11.0
   service:
     port: 8091
     metricsPort: 8080
     threatDetectionPort: 8241
+  priorityClassName: ''
   controllerCacheSyncTimeout: '60m'
   externalSecret: ''
+  # Enable auto-updates of the agent and SBOM collector
+  # When enabled, the agent can update itself and the SBOM collector by patching deployments/daemonsets
+  # When disabled, RBAC permissions for updating deployments/daemonsets will not be granted
+  autoUpdate:
+    enabled: true
   resources:
     requests:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 1500m
+      # cpu: 1500m # No CPU limit by default
       memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
   # Enable or disable the SBOM collector, and all its components
   enabled: false
   image:
-    repository: 'public.ecr.aws/aikido-cloud/kubernetes-sbom-collector'
+    repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: 'v1.2.0'
+    tag: v1.5.1
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
+  priorityClassName: ''
   resources:
     requests:
       cpu: 100m
       memory: 100Mi
       ephemeral-storage: 500Mi
     limits:
-      cpu: 1500m
+      # cpu: 1500m # No CPU limit by default
       memory: 5Gi # Only Mi and Gi are supported
       ephemeral-storage: 10Gi
   daemonSetTolerations:
@@ -46,7 +53,9 @@ sbomCollector:
       operator: Exists
       effect: NoSchedule
   securityContext:
-    # The collector needs to run as root to be able to mount the containerd/docker sockets
+    # Running as root allows the collector to access images cached on the node
+    # instead of always pulling them from the registry.
+    # If your security policy does not allow this, you can adjust these values.
     runAsUser: 0
     runAsGroup: 0
     allowPrivilegeEscalation: false
@@ -86,6 +95,26 @@ sbomCollector:
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template
     name: ''
+    # Image pull secrets to attach to the SBOM collector's service account.
+    # These secrets are used to authenticate with private container registries when pulling images from remote registries.
+    # Note: This does not grant the SBOM collector access to secrets.
+    # Configure sbomCollector.secretsAccess.imagePullSecretNames for that.
+    imagePullSecrets: []
+
+  # Pull secret mount configuration
+  # Mount a Docker config secret as a volume to authenticate with private registries.
+  # This is useful for authenticating with registries like OpenShift's internal registry,
+  # Red Hat registries, and other private registries.
+  # To enable, provide a secretName. Leave empty to disable.
+  pullSecretMount:
+    # Name of the secret containing the Docker config (.dockerconfigjson key)
+    # The secret must be of type kubernetes.io/dockerconfigjson or contain a .dockerconfigjson key
+    secretName: ''
+  logging:
+    # Suppress error logs from the SBOM collector.
+    # When true, error messages during SBOM generation, image scanning, and registry
+    # authentication will not be logged.
+    suppressErrors: false
 
 config:
   apiToken: ''
@@ -128,6 +157,7 @@ securityContext:
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
+  allowPrivilegeEscalation: false
 
 healthCheck:
   port: 8081
@@ -139,6 +169,34 @@ affinity: {}
 tolerations: []
 
 additionalEnvVars: []
+
+additionalVolumes: []
+
+additionalVolumeMounts: []
+
+# Extra Kubernetes objects to deploy alongside the chart
+# Useful for deploying ExternalSecret resources when using secret managers
+# like HashiCorp Vault, AWS Secrets Manager, etc. with the ExternalSecrets Operator.
+#
+# Example - ExternalSecret that creates the agent's config secret:
+# extraObjects:
+#   - |
+#     apiVersion: external-secrets.io/v1beta1
+#     kind: ExternalSecret
+#     metadata:
+#       name: aikido-credentials
+#       namespace: {{ .Release.Namespace }}
+#     spec:
+#       secretStoreRef:
+#         kind: ClusterSecretStore
+#         name: vault
+#       target:
+#         name: aikido-credentials
+#       data:
+#         - secretKey: config.yaml
+#           remoteRef:
+#             key: secrets/aikido/config
+extraObjects: []
 
 threatdetection:
   enabled: true

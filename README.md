@@ -24,6 +24,29 @@ config:
     noProxy: 'localhost,127.0.0.1,.local,.cluster.local'
 ```
 
+### Custom CA Certificates
+
+If your cluster uses a TLS-intercepting proxy, the agent container may not trust the proxy's CA certificate. You can mount a custom CA bundle using `additionalVolumes` and `additionalVolumeMounts`, and point Go's TLS stack at it with the `SSL_CERT_FILE` or `SSL_CERT_DIR` environment variable.
+
+```yaml
+additionalEnvVars:
+  - name: SSL_CERT_FILE
+    value: /etc/ssl/custom/ca-certificates.crt
+
+additionalVolumes:
+  - name: custom-ca
+    hostPath:
+      path: /etc/ssl/certs
+      type: Directory
+
+additionalVolumeMounts:
+  - name: custom-ca
+    mountPath: /etc/ssl/custom
+    readOnly: true
+```
+
+The volume source can be a `hostPath`, `configMap`, `secret`, or any other Kubernetes volume type that contains your CA bundle.
+
 ## Installation
 
 ```bash
@@ -98,3 +121,46 @@ sbomCollector:
 ### GKE Workload Identity
 
 For GKE Workload Identity, you can add a policy binding directly for the SBOM collector service account. The default values use the `aikido-kubernetes-agent-sbom-collector` service account and namespace `aikido`. Read more in the [GCP docs](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/workload-identity).
+
+You can use the following command to create a policy binding, replacing `PROJECT_ID` and `PROJECT_NUMBER` with your values:
+
+```bash
+gcloud projects add-iam-policy-binding projects/PROJECT_ID \
+  --role=roles/artifactregistry.reader \
+  --member=principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/aikido/sa/aikido-kubernetes-agent-sbom-collector \
+  --condition=None
+```
+
+## Using ExternalSecrets with the Chart
+
+If you use a secret management solution like HashiCorp Vault or AWS Secrets Manager with the [ExternalSecrets Operator](https://external-secrets.io/), you can use the `extraObjects` field to deploy an ExternalSecret resource alongside the chart. This eliminates the need for a separate Helm release or manifest application.
+
+### Example Configuration
+
+```yaml
+agent:
+  externalSecret: 'aikido-credentials'
+
+extraObjects:
+  - |
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: {{ .Values.agent.externalSecret }}
+      namespace: {{ .Release.Namespace }}
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: vault
+      target:
+        name: {{ .Values.agent.externalSecret }}
+        creationPolicy: Owner
+      data:
+        - secretKey: config.yaml
+          remoteRef:
+            key: secrets/aikido/config
+            property: config.yaml
+```
+
+**Note:** The ExternalSecret should create a secret with a `config.yaml` key containing the agent configuration in YAML format with `apiEndpoint` and `apiToken` fields, as shown in the [External Secret Requirements](#external-secret-requirements) section above.

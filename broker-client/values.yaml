@@ -1,0 +1,114 @@
+# Default values for broker-client
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Broker client configuration
+config:
+  # REQUIRED: Your broker client secret from Aikido
+  clientSecret: ''
+
+  # REQUIRED: Allowed internal subnets (comma-separated CIDR blocks)
+  # Example: "192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,127.0.0.0/8"
+  allowedInternalSubnets: '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+
+  # Optional: Custom DNS servers for internal hostname resolution (comma-separated)
+  # Example: "10.0.0.2,10.0.0.3"
+  dnsServers: ''
+
+  # Optional: Custom CA certificate bundle content for self-signed certificates
+  # Provide the actual certificate content (PEM format)
+  # Example: |
+  #   -----BEGIN CERTIFICATE-----
+  #   MIIDXTCCAkWgAwIBAgIJAKJ...
+  #   -----END CERTIFICATE-----
+  customCaBundleContent: ''
+
+  # Optional: Proxy configuration for outbound requests
+  # HTTP proxy for HTTP requests (e.g., "http://proxy.company.local:8080")
+  httpProxy: ''
+  # HTTPS proxy for HTTPS requests (e.g., "http://proxy.company.local:8080")
+  httpsProxy: ''
+  # Universal proxy fallback for all protocols if protocol-specific proxy is not set
+  allProxy: ''
+
+  # Optional: Custom broker target URL
+  # Override the default broker server URL if needed
+  brokerTargetUrl: 'https://broker.aikidobroker.com'
+
+  # Optional: Disable TLS certificate validation (not recommended for production)
+  # Set to "0" to disable TLS certificate verification
+  nodeTlsRejectUnauthorized: ''
+
+  # Optional: Force WebSocket connection
+  # Set to "true" to force WebSocket connection
+  forceWebsocket: ''
+
+  # Optional: No proxy configuration
+  # Comma-separated list of hosts/domains that should bypass the proxy
+  # Example: "localhost,127.0.0.1,.company.local"
+  noProxy: ''
+
+# Docker image configuration
+image:
+  repository: aikidosecurity/broker-client
+  pullPolicy: IfNotPresent
+  tag: '1.0.19' # Overrides the image tag (default is the appVersion from Chart.yaml)
+
+imagePullSecrets: []
+nameOverride: ''
+fullnameOverride: ''
+
+# Service account configuration
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ''
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod labels
+podLabels: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Resource limits and requests
+resources:
+  limits:
+    # cpu: 2000m # No CPU limit by default
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Persistent volume for client_id and resource configuration
+persistence:
+  enabled: false
+  storageClass: ''
+  accessMode: ReadWriteOnce
+  size: 100Mi
+  annotations: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity: {}

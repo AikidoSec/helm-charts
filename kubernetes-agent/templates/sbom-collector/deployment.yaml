@@ -6,7 +6,6 @@ metadata:
   labels:
     {{- include "sbom-collector.labels" . | nindent 4 }}
 spec:
-  replicas: 0
   selector:
     matchLabels:
       {{- include "sbom-collector.selectorLabels" . | nindent 6 }}
@@ -29,6 +28,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "sbom-collector.serviceAccountName" . }}
+      {{- with .Values.sbomCollector.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.sbomCollector.podSecurityContext | nindent 8 }}
       containers:
@@ -51,6 +53,12 @@ spec:
               value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
+            - name: SECRETS_ACCESS_ENABLED
+              value: "{{ .Values.sbomCollector.secretsAccess.enabled }}"
+            - name: RUN_COLLECTOR_AS_DAEMONSET
+              value: "false"
+            - name: SUPPRESS_ERROR_LOGS
+              value: "{{ .Values.sbomCollector.logging.suppressErrors }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
             - name: HTTP_PROXY
               value: {{ .Values.config.proxy.httpProxy | quote }}
@@ -67,13 +75,18 @@ spec:
             - name: health
               containerPort: {{ .Values.healthCheck.port }}
               protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 30 # account for the agent startup
+            failureThreshold: {{ include "kubernetes-agent.startupProbeFailureThreshold" . }}
+            periodSeconds: 10
           livenessProbe:
-            initialDelaySeconds: 90
             httpGet:
               path: /healthz
               port: health
           readinessProbe:
-            initialDelaySeconds: 90
             httpGet:
               path: /readyz
               port: health
@@ -86,8 +99,18 @@ spec:
               name: ecr-cache-config
             - name: docker-sock
               mountPath: /var/run/docker.sock
+              readOnly: true
             - name: containerd-sock
               mountPath: /run/containerd/containerd.sock
+              readOnly: true
+            {{- if .Values.sbomCollector.pullSecretMount.secretName }}
+            - name: registry-pull-secret
+              mountPath: /var/run/secrets/pull-secret
+              readOnly: true
+            {{- end }}
+            {{- with .Values.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -111,4 +134,13 @@ spec:
         - name: containerd-sock
           hostPath:
             path: /run/containerd/containerd.sock
+        {{- if .Values.sbomCollector.pullSecretMount.secretName }}
+        - name: registry-pull-secret
+          secret:
+            secretName: {{ .Values.sbomCollector.pullSecretMount.secretName }}
+            optional: false
+        {{- end }}
+        {{- with .Values.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
 {{- end }}

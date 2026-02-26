@@ -4,6 +4,8 @@ metadata:
   name: {{ include "kubernetes-agent.fullname" . }}
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
+  annotations:
+    ignore-check.kube-linter.io/env-var-secret: "False positive: CONFIG_SECRET_NAME is referencing a Secret name. It does not contain credentials, tokens, or secret data"
 spec:
   replicas: 1
   selector:
@@ -28,6 +30,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "kubernetes-agent.serviceAccountName" . }}
+      {{- with .Values.agent.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -57,7 +62,9 @@ spec:
             - name: CONFIG_SECRET_NAME
               value: "{{ include "kubernetes-agent.secretName" . }}"
             - name: SBOM_COLLECTOR_ENABLED
-              value: "{{ .Values.sbomCollector.enabled }}"
+              value: {{ .Values.sbomCollector.enabled | quote }}
+            - name: AUTO_UPDATE_ENABLED
+              value: {{ .Values.agent.autoUpdate.enabled | quote }}
             - name: TDR_ENABLED
               value: "{{ .Values.threatdetection.enabled }}"
             - name: TDR_PORT
@@ -122,6 +129,9 @@ spec:
             - name: config
               mountPath: "/etc/kubernetes-agent"
               readOnly: true
+            {{- with .Values.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -138,3 +148,6 @@ spec:
         - name: config
           secret:
             secretName: {{ include "kubernetes-agent.secretName" . }}
+        {{- with .Values.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}

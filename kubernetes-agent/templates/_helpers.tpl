@@ -36,9 +36,7 @@ Common labels
 {{- define "kubernetes-agent.labels" -}}
 helm.sh/chart: {{ include "kubernetes-agent.chart" . }}
 {{ include "kubernetes-agent.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Values.agent.image.tag | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 

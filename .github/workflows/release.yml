@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'broker-client/**'
+      - 'kubernetes-agent/**'
 
 jobs:
   release:
@@ -26,5 +29,6 @@ jobs:
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: .
+          skip_existing: true
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
