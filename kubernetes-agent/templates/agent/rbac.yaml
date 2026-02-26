@@ -17,6 +17,10 @@ rules:
       - {{ include "kubernetes-agent.fullname" . }}
       # The agent needs to be able to update the replica count/node selector of the collector
       - {{ include "sbom-collector.name" . }}
+      - {{ include "tdr.name" . }}
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "update","patch" ]
   - apiGroups: [ "metrics.k8s.io" ]
     resources: [ "pods" ]
     verbs: [ "get", "list" ]

@@ -1,0 +1,26 @@
+{{- if .Values.tdr.enabled -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "tdr.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tdr.labels" . | nindent 4 }}
+    {{- if .Values.tdr.controller.labels }}
+      {{- toYaml .Values.tdr.controller.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.tdr.controller.annotations }}
+  annotations:
+  {{ toYaml .Values.tdr.controller.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tdr.selectorLabels" . | nindent 6 }}
+  template:
+    {{- include "tdr.podTemplate" . | nindent 4 }}
+  {{- with .Values.tdr.controller.daemonset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
