@@ -12,6 +12,8 @@ tests:
           count: 0
 
   - it: detection config should send events to the agent HTTP endpoint
+    set:
+      tdr.enabled: true
     template: templates/tdr/falco-detection-config.yaml
     asserts:
       - matchRegex:
@@ -20,6 +22,7 @@ tests:
 
   - it: detection config URL should follow tdr.port
     set:
+      tdr.enabled: true
       tdr.port: 9999
     template: templates/tdr/falco-detection-config.yaml
     asserts:
@@ -29,6 +32,7 @@ tests:
 
   - it: detection config should use httpOutputUrl override when set
     set:
+      tdr.enabled: true
       tdr.httpOutputUrl: "http://my-custom-agent:7777/detection"
     template: templates/tdr/falco-detection-config.yaml
     asserts:
@@ -39,6 +43,8 @@ tests:
   # --- Falco DaemonSet (subchart) ---
 
   - it: daemonset should be named with tdr suffix
+    set:
+      tdr.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
@@ -46,6 +52,8 @@ tests:
           value: RELEASE-NAME-tdr
 
   - it: daemonset should tolerate control-plane nodes
+    set:
+      tdr.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - contains:
@@ -60,6 +68,8 @@ tests:
             key: node-role.kubernetes.io/master
 
   - it: daemonset should use rolling update strategy
+    set:
+      tdr.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
@@ -69,6 +79,8 @@ tests:
   # --- Falco ConfigMap (subchart) ---
 
   - it: falco configmap should enable JSON output
+    set:
+      tdr.enabled: true
     template: charts/falco/templates/configmap.yaml
     asserts:
       - matchRegex:
@@ -84,6 +96,8 @@ tests:
   # --- agent deployment ---
 
   - it: agent deployment should include TDR env vars when enabled
+    set:
+      tdr.enabled: true
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
@@ -125,6 +139,8 @@ tests:
   # --- agent service ---
 
   - it: service should expose tdr-gateway port when enabled
+    set:
+      tdr.enabled: true
     template: templates/agent/service.yaml
     asserts:
       - contains:
@@ -148,6 +164,8 @@ tests:
   # --- network policy ---
 
   - it: network policy should allow ingress from falco pods when enabled
+    set:
+      tdr.enabled: true
     template: templates/agent/network_policy.yaml
     asserts:
       - contains:
