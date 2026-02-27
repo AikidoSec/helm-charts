@@ -16,3 +16,9 @@ spec:
       protocol: TCP
       port: {{ .Values.agent.service.metricsPort }}
       targetPort: metrics-port
+    {{- if .Values.tdr.enabled }}
+    - name: tdr-gateway
+      protocol: TCP
+      port: {{ .Values.tdr.port }}
+      targetPort: tdr-gateway
+    {{- end }}

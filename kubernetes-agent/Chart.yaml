@@ -4,3 +4,8 @@ description: Install the Aikido Kubernetes Agent to secure and integrate your Ku
 version: 2.7.4
 appVersion: v1.11.0
 type: application
+dependencies:
+  - name: falco
+    version: "7.0.1"
+    repository: https://falcosecurity.github.io/charts
+    condition: tdr.enabled

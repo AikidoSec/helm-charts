@@ -65,6 +65,16 @@ spec:
               value: {{ .Values.sbomCollector.enabled | quote }}
             - name: AUTO_UPDATE_ENABLED
               value: {{ .Values.agent.autoUpdate.enabled | quote }}
+            - name: TDR_ENABLED
+              value: {{ .Values.tdr.enabled | quote }}
+            {{- if .Values.tdr.enabled }}
+            - name: TDR_PORT
+              value: {{ .Values.tdr.port | quote }}
+            - name: TDR_DAEMONSET_NAME
+              value: {{ include "tdr.daemonSetName" . | quote }}
+            - name: TDR_RULES_CONFIGMAP_NAME
+              value: {{ include "tdr.customRulesConfigMapName" . | quote }}
+            {{- end }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
@@ -92,6 +102,11 @@ spec:
             - containerPort: {{ .Values.agent.service.metricsPort }}
               name: metrics-port
               protocol: TCP
+            {{- if .Values.tdr.enabled }}
+            - containerPort: {{ .Values.tdr.port }}
+              name: tdr-gateway
+              protocol: TCP
+            {{- end }}
           startupProbe:
             httpGet:
               path: /healthz
