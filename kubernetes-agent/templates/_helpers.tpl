@@ -156,3 +156,32 @@ app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/*
+The URL that Falco uses to deliver detection events to the agent.
+Uses tdr.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
+*/}}
+{{- define "tdr.httpOutputUrl" -}}
+{{- if .Values.tdr.httpOutputUrl -}}
+{{- .Values.tdr.httpOutputUrl -}}
+{{- else -}}
+{{- printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (.Values.tdr.port | int) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Name of the Falco DaemonSet, derived from falco.nameOverride ("tdr") + release name.
+The agent uses this to restart the DaemonSet after rule changes.
+Mirrors the Falco chart's fullname template when nameOverride is set.
+*/}}
+{{- define "tdr.daemonSetName" -}}
+{{- printf "%s-tdr" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Name of the ConfigMap holding the custom Falco rules managed by the agent.
+The Falco chart creates this as RELEASE-NAME-tdr-rules when customRules is non-empty.
+*/}}
+{{- define "tdr.customRulesConfigMapName" -}}
+{{- printf "%s-tdr-rules" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

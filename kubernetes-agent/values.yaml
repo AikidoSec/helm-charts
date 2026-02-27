@@ -196,3 +196,59 @@ additionalVolumeMounts: []
 #           remoteRef:
 #             key: secrets/aikido/config
 extraObjects: []
+
+tdr:
+  enabled: false
+  # Port on the agent that Falco sends detection events to.
+  port: 8241
+  # Override the URL where Falco sends detection events. Defaults to the agent's in-cluster service URL.
+  # Useful if you install with a non-standard release name or use fullnameOverride.
+  # Default: http://RELEASE-NAME-kubernetes-agent:PORT/detection
+  httpOutputUrl: ""
+
+# Internal Falco subchart configuration. Not part of the public API of this chart and
+# may change between versions. See https://github.com/falcosecurity/charts/tree/falco-7.0.1/charts/falco
+# Only values that differ from the Falco chart's defaults are listed here.
+falco:
+  # Makes the DaemonSet name predictable: RELEASE-NAME-tdr
+  nameOverride: "tdr"
+
+  # Labels Falco pods so the network policy can target them
+  podLabels:
+    app.kubernetes.io/component: tdr
+
+  # Custom rules managed by the agent at runtime.
+  # Populated initially with an empty placeholder; the agent updates this ConfigMap
+  # when customers enable/disable rules or define custom rules via the Aikido UI.
+  customRules:
+    aikido-rules.yaml: ""
+
+  # Mounts our computed http_output config (see templates/tdr/falco-detection-config.yaml)
+  mounts:
+    volumes:
+      - name: aikido-detection-config
+        configMap:
+          name: kubernetes-agent-tdr-detection
+    volumeMounts:
+      - name: aikido-detection-config
+        mountPath: /etc/falco/aikido-config.d
+
+  falco:
+    # Add our aikido-config.d alongside the default config.d
+    config_files:
+      - /etc/falco/config.d
+      - /etc/falco/aikido-config.d
+
+    # Falco default is debug; warning reduces noise in production
+    priority: warning
+
+    # Falco default is false; we need structured JSON for event parsing
+    json_output: true
+
+    # Falco default is true; not useful in Kubernetes environments
+    syslog_output:
+      enabled: false
+
+    # Falco default is true; reduces verbose low-level noise
+    libs_logger:
+      enabled: false

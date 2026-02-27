@@ -131,6 +131,24 @@ gcloud projects add-iam-policy-binding projects/PROJECT_ID \
   --condition=None
 ```
 
+## Runtime Threat Detection
+
+Aikido can detect runtime threats in your Kubernetes cluster using [Falco](https://falco.org/). When enabled, a Falco DaemonSet is deployed alongside the agent and sends security events to it for processing and forwarding to the Aikido platform.
+
+### Non-standard release names
+
+If you install the chart with a release name other than the default (e.g. via `fullnameOverride`), Falco's internal service URL will differ. Set `tdr.httpOutputUrl` explicitly in that case:
+
+```yaml
+fullnameOverride: my-agent
+tdr:
+  httpOutputUrl: "http://my-agent:8241/detection"
+```
+
+### Falco configuration
+
+The `falco:` key in `values.yaml` passes configuration directly to the Falco subchart. It is not part of the public API of this chart and may change between versions. Only modify it if you need to override Falco behavior beyond what `tdr.*` exposes. See the [Falco chart documentation](https://github.com/falcosecurity/charts/tree/falco-7.0.1/charts/falco) for available values.
+
 ## Using ExternalSecrets with the Chart
 
 If you use a secret management solution like HashiCorp Vault or AWS Secrets Manager with the [ExternalSecrets Operator](https://external-secrets.io/), you can use the `extraObjects` field to deploy an ExternalSecret resource alongside the chart. This eliminates the need for a separate Helm release or manifest application.

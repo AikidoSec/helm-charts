@@ -1,0 +1,193 @@
+suite: threat detection runtime
+
+tests:
+  # --- detection config (our template) ---
+
+  - it: should not render when disabled
+    set:
+      tdr.enabled: false
+    template: templates/tdr/falco-detection-config.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: detection config should send events to the agent HTTP endpoint
+    set:
+      tdr.enabled: true
+    template: templates/tdr/falco-detection-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["http-output.yaml"]
+          pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:8241/detection"'
+
+  - it: detection config URL should follow tdr.port
+    set:
+      tdr.enabled: true
+      tdr.port: 9999
+    template: templates/tdr/falco-detection-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["http-output.yaml"]
+          pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:9999/detection"'
+
+  - it: detection config should use httpOutputUrl override when set
+    set:
+      tdr.enabled: true
+      tdr.httpOutputUrl: "http://my-custom-agent:7777/detection"
+    template: templates/tdr/falco-detection-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["http-output.yaml"]
+          pattern: 'url: "http://my-custom-agent:7777/detection"'
+
+  # --- Falco DaemonSet (subchart) ---
+
+  - it: daemonset should be named with tdr suffix
+    set:
+      tdr.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-tdr
+
+  - it: daemonset should tolerate control-plane nodes
+    set:
+      tdr.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/control-plane
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/master
+
+  - it: daemonset should use rolling update strategy
+    set:
+      tdr.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: RollingUpdate
+
+  # --- Falco ConfigMap (subchart) ---
+
+  - it: falco configmap should enable JSON output
+    set:
+      tdr.enabled: true
+    template: charts/falco/templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_output: true"
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_include_output_fields_property: true"
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_include_tags_property: true"
+
+  # --- agent deployment ---
+
+  - it: agent deployment should include TDR env vars when enabled
+    set:
+      tdr.enabled: true
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TDR_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TDR_PORT
+            value: "8241"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TDR_DAEMONSET_NAME
+            value: RELEASE-NAME-tdr
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TDR_RULES_CONFIGMAP_NAME
+            value: RELEASE-NAME-tdr-rules
+
+  - it: agent deployment should omit TDR detail env vars when disabled
+    set:
+      tdr.enabled: false
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TDR_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TDR_PORT
+
+  # --- agent service ---
+
+  - it: service should expose tdr-gateway port when enabled
+    set:
+      tdr.enabled: true
+    template: templates/agent/service.yaml
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: tdr-gateway
+            protocol: TCP
+            port: 8241
+            targetPort: tdr-gateway
+
+  - it: service should not expose tdr-gateway port when disabled
+    set:
+      tdr.enabled: false
+    template: templates/agent/service.yaml
+    asserts:
+      - notContains:
+          path: spec.ports
+          content:
+            name: tdr-gateway
+
+  # --- network policy ---
+
+  - it: network policy should allow ingress from falco pods when enabled
+    set:
+      tdr.enabled: true
+    template: templates/agent/network_policy.yaml
+    asserts:
+      - contains:
+          path: spec.ingress
+          content:
+            from:
+              - podSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: tdr
+            ports:
+              - protocol: TCP
+                port: 8241
+
+  - it: network policy should not include tdr rule when disabled
+    set:
+      tdr.enabled: false
+    template: templates/agent/network_policy.yaml
+    asserts:
+      - notContains:
+          path: spec.ingress
+          content:
+            from:
+              - podSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: tdr
