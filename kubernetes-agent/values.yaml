@@ -198,7 +198,7 @@ additionalVolumeMounts: []
 extraObjects: []
 
 tdr:
-  enabled: true
+  enabled: false
   # Port on the agent that Falco sends detection events to.
   port: 8241
   # Override the URL where Falco sends detection events. Defaults to the agent's in-cluster service URL.
