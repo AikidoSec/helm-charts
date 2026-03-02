@@ -137,17 +137,17 @@ Aikido can detect runtime threats in your Kubernetes cluster using [Falco](https
 
 ### Non-standard release names
 
-If you install the chart with a release name other than the default (e.g. via `fullnameOverride`), Falco's internal service URL will differ. Set `tdr.httpOutputUrl` explicitly in that case:
+If you install the chart with a release name other than the default (e.g. via `fullnameOverride`), Falco's internal service URL will differ. Set `threatDetection.httpOutputUrl` explicitly in that case:
 
 ```yaml
 fullnameOverride: my-agent
-tdr:
+threatDetection:
   httpOutputUrl: "http://my-agent:8241/detection"
 ```
 
 ### Falco configuration
 
-The `falco:` key in `values.yaml` passes configuration directly to the Falco subchart. It is not part of the public API of this chart and may change between versions. Only modify it if you need to override Falco behavior beyond what `tdr.*` exposes. See the [Falco chart documentation](https://github.com/falcosecurity/charts/tree/falco-7.0.1/charts/falco) for available values.
+The `falco:` key in `values.yaml` passes configuration directly to the Falco subchart. It is not part of the public API of this chart and may change between versions. Only modify it if you need to override Falco behavior beyond what `threatDetection.*` exposes. See the [Falco chart documentation](https://github.com/falcosecurity/charts/tree/falco-7.0.1/charts/falco) for available values.
 
 ## Using ExternalSecrets with the Chart
 

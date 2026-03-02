@@ -8,4 +8,4 @@ dependencies:
   - name: falco
     version: "7.0.1"
     repository: https://falcosecurity.github.io/charts
-    condition: tdr.enabled
+    condition: threatDetection.enabled

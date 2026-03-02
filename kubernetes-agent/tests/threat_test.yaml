@@ -5,26 +5,26 @@ tests:
 
   - it: should not render when disabled
     set:
-      tdr.enabled: false
-    template: templates/tdr/falco-detection-config.yaml
+      threatDetection.enabled: false
+    template: templates/threat-detection/falco-detection-config.yaml
     asserts:
       - hasDocuments:
           count: 0
 
   - it: detection config should send events to the agent HTTP endpoint
     set:
-      tdr.enabled: true
-    template: templates/tdr/falco-detection-config.yaml
+      threatDetection.enabled: true
+    template: templates/threat-detection/falco-detection-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
           pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:8241/detection"'
 
-  - it: detection config URL should follow tdr.port
+  - it: detection config URL should follow threatDetection.port
     set:
-      tdr.enabled: true
-      tdr.port: 9999
-    template: templates/tdr/falco-detection-config.yaml
+      threatDetection.enabled: true
+      threatDetection.port: 9999
+    template: templates/threat-detection/falco-detection-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
@@ -32,9 +32,9 @@ tests:
 
   - it: detection config should use httpOutputUrl override when set
     set:
-      tdr.enabled: true
-      tdr.httpOutputUrl: "http://my-custom-agent:7777/detection"
-    template: templates/tdr/falco-detection-config.yaml
+      threatDetection.enabled: true
+      threatDetection.httpOutputUrl: "http://my-custom-agent:7777/detection"
+    template: templates/threat-detection/falco-detection-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
@@ -42,18 +42,18 @@ tests:
 
   # --- Falco DaemonSet (subchart) ---
 
-  - it: daemonset should be named with tdr suffix
+  - it: daemonset should be named with threat-detection suffix
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-tdr
+          value: RELEASE-NAME-kubernetes-agent-threat-detection
 
   - it: daemonset should tolerate control-plane nodes
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - contains:
@@ -69,7 +69,7 @@ tests:
 
   - it: daemonset should use rolling update strategy
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
@@ -80,7 +80,7 @@ tests:
 
   - it: falco configmap should enable JSON output
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: charts/falco/templates/configmap.yaml
     asserts:
       - matchRegex:
@@ -95,77 +95,67 @@ tests:
 
   # --- agent deployment ---
 
-  - it: agent deployment should include TDR env vars when enabled
+  - it: agent deployment should include threat detection env vars when enabled
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: TDR_ENABLED
+            name: THREAT_DETECTION_ENABLED
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: TDR_PORT
+            name: THREAT_PROXY_PORT
             value: "8241"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: TDR_DAEMONSET_NAME
-            value: RELEASE-NAME-tdr
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: TDR_RULES_CONFIGMAP_NAME
-            value: RELEASE-NAME-tdr-rules
 
-  - it: agent deployment should omit TDR detail env vars when disabled
+  - it: agent deployment should omit threat detection detail env vars when disabled
     set:
-      tdr.enabled: false
+      threatDetection.enabled: false
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: TDR_ENABLED
+            name: THREAT_DETECTION_ENABLED
             value: "false"
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: TDR_PORT
+            name: THREAT_PROXY_PORT
 
   # --- agent service ---
 
-  - it: service should expose tdr-gateway port when enabled
+  - it: service should expose threat-detection-port port when enabled
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: templates/agent/service.yaml
     asserts:
       - contains:
           path: spec.ports
           content:
-            name: tdr-gateway
+            name: threat-detection-port
             protocol: TCP
             port: 8241
-            targetPort: tdr-gateway
+            targetPort: threat-detection-port
 
-  - it: service should not expose tdr-gateway port when disabled
+  - it: service should not expose threat-detection-port port when disabled
     set:
-      tdr.enabled: false
+      threatDetection.enabled: false
     template: templates/agent/service.yaml
     asserts:
       - notContains:
           path: spec.ports
           content:
-            name: tdr-gateway
+            name: threat-detection-port
 
   # --- network policy ---
 
   - it: network policy should allow ingress from falco pods when enabled
     set:
-      tdr.enabled: true
+      threatDetection.enabled: true
     template: templates/agent/network_policy.yaml
     asserts:
       - contains:
@@ -174,14 +164,14 @@ tests:
             from:
               - podSelector:
                   matchLabels:
-                    app.kubernetes.io/component: tdr
+                    app.kubernetes.io/component: kubernetes-agent-threat-detection
             ports:
               - protocol: TCP
                 port: 8241
 
-  - it: network policy should not include tdr rule when disabled
+  - it: network policy should not include threat detection rule when disabled
     set:
-      tdr.enabled: false
+      threatDetection.enabled: false
     template: templates/agent/network_policy.yaml
     asserts:
       - notContains:
@@ -190,4 +180,4 @@ tests:
             from:
               - podSelector:
                   matchLabels:
-                    app.kubernetes.io/component: tdr
+                    app.kubernetes.io/component: kubernetes-agent-threat-detection

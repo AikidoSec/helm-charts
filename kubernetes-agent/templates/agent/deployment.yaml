@@ -65,15 +65,11 @@ spec:
               value: {{ .Values.sbomCollector.enabled | quote }}
             - name: AUTO_UPDATE_ENABLED
               value: {{ .Values.agent.autoUpdate.enabled | quote }}
-            - name: TDR_ENABLED
-              value: {{ .Values.tdr.enabled | quote }}
-            {{- if .Values.tdr.enabled }}
-            - name: TDR_PORT
-              value: {{ .Values.tdr.port | quote }}
-            - name: TDR_DAEMONSET_NAME
-              value: {{ include "tdr.daemonSetName" . | quote }}
-            - name: TDR_RULES_CONFIGMAP_NAME
-              value: {{ include "tdr.customRulesConfigMapName" . | quote }}
+            - name: THREAT_DETECTION_ENABLED
+              value: {{ .Values.threatDetection.enabled | quote }}
+            {{- if .Values.threatDetection.enabled }}
+            - name: THREAT_PROXY_PORT
+              value: {{ .Values.threatDetection.port | quote }}
             {{- end }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
@@ -102,9 +98,9 @@ spec:
             - containerPort: {{ .Values.agent.service.metricsPort }}
               name: metrics-port
               protocol: TCP
-            {{- if .Values.tdr.enabled }}
-            - containerPort: {{ .Values.tdr.port }}
-              name: tdr-gateway
+            {{- if .Values.threatDetection.enabled }}
+            - containerPort: {{ .Values.threatDetection.port }}
+              name: threat-detection-port
               protocol: TCP
             {{- end }}
           startupProbe:
