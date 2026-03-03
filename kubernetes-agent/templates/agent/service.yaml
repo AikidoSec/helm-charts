@@ -17,8 +17,8 @@ spec:
       port: {{ .Values.agent.service.metricsPort }}
       targetPort: metrics-port
     {{- if .Values.threatDetection.enabled }}
-    - name: threat-detection-port
+    - name: td-port
       protocol: TCP
       port: {{ .Values.threatDetection.port }}
-      targetPort: threat-detection-port
+      targetPort: td-port
     {{- end }}

@@ -100,7 +100,7 @@ spec:
               protocol: TCP
             {{- if .Values.threatDetection.enabled }}
             - containerPort: {{ .Values.threatDetection.port }}
-              name: threat-detection-port
+              name: td-port
               protocol: TCP
             {{- end }}
           startupProbe:

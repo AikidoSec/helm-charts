@@ -128,7 +128,7 @@ tests:
 
   # --- agent service ---
 
-  - it: service should expose threat-detection-port port when enabled
+  - it: service should expose td-port port when enabled
     set:
       threatDetection.enabled: true
     template: templates/agent/service.yaml
@@ -136,12 +136,12 @@ tests:
       - contains:
           path: spec.ports
           content:
-            name: threat-detection-port
+            name: td-port
             protocol: TCP
             port: 8241
-            targetPort: threat-detection-port
+            targetPort: td-port
 
-  - it: service should not expose threat-detection-port port when disabled
+  - it: service should not expose td-port port when disabled
     set:
       threatDetection.enabled: false
     template: templates/agent/service.yaml
@@ -149,7 +149,7 @@ tests:
       - notContains:
           path: spec.ports
           content:
-            name: threat-detection-port
+            name: td-port
 
   # --- network policy ---
 
