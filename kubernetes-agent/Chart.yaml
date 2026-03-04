@@ -6,6 +6,6 @@ appVersion: v1.11.0
 type: application
 dependencies:
   - name: falco
-    version: "7.0.1"
+    version: "8.0.1"
     repository: https://falcosecurity.github.io/charts
     condition: threatDetection.enabled
