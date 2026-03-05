@@ -1,0 +1,11 @@
+{{- if .Values.tdr.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tdr.name" . }}-custom-rules
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tdr.labels" . | nindent 4 }}
+data:
+  aikido-custom-rules.yaml: |-
+{{- end }}

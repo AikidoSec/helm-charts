@@ -24,4 +24,13 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.agent.service.metricsPort }}
+    {{- if .Values.tdr.enabled }}
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: tdr
+      ports:
+        - protocol: TCP
+          port: {{ .Values.tdr.port }}
+    {{- end }}
 {{- end }}
