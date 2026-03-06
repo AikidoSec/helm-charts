@@ -1,0 +1,14 @@
+{{- if .Values.threatDetection.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-agent-threat-detection
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+data:
+  http-output.yaml: |
+    http_output:
+      enabled: true
+      url: {{ include "threatDetection.httpOutputUrl" . | quote }}
+{{- end }}

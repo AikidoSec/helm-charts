@@ -156,3 +156,15 @@ app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/*
+The URL that Falco uses to deliver detection events to the agent.
+Uses threatDetection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
+*/}}
+{{- define "threatDetection.httpOutputUrl" -}}
+{{- if .Values.threatDetection.httpOutputUrl -}}
+{{- .Values.threatDetection.httpOutputUrl -}}
+{{- else -}}
+{{- printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (.Values.threatDetection.port | int) -}}
+{{- end -}}
+{{- end -}}
