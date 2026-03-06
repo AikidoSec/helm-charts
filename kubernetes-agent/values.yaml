@@ -233,6 +233,10 @@ falco:
       - name: aikido-detection-config
         mountPath: /etc/falco/aikido-config.d
 
+  collectors:
+    kubernetes:
+      enabled: true
+
   falco:
     # Add our aikido-config.d alongside the default config.d
     config_files:

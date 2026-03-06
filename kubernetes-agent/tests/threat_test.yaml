@@ -151,6 +151,16 @@ tests:
           content:
             name: td-port
 
+  # --- k8s-metacollector (k8smeta plugin sidecar) ---
+
+  - it: k8s-metacollector should be deployed when threat detection is enabled
+    set:
+      threatDetection.enabled: true
+    template: charts/falco/charts/k8s-metacollector/templates/deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
   # --- network policy ---
 
   - it: network policy should allow ingress from falco pods when enabled
