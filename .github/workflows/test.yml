@@ -18,5 +18,8 @@ jobs:
       - name: Install helm-unittest plugin
         run: helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
 
+      - name: Update chart dependencies
+        run: helm dependency update kubernetes-agent
+
       - name: Run unit tests
         run: helm unittest kubernetes-agent
