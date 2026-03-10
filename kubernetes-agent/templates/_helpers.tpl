@@ -158,6 +158,22 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Name shared by all threat detection resources (Falco DaemonSet, config ConfigMap).
+Matches what the agent derives at runtime from its own pod name.
+*/}}
+{{- define "kubernetes-agent.threatDetectionName" -}}
+{{- printf "%s-threat-detection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Name of the Falco configuration ConfigMap (falco.yaml) that the agent updates at runtime
+to toggle disabled rules. Created by the Falco subchart under its own fullname.
+*/}}
+{{- define "kubernetes-agent.threatDetectionConfigMapName" -}}
+{{- include "kubernetes-agent.threatDetectionName" . }}
+{{- end }}
+
+{{/*
 The URL that Falco uses to deliver detection events to the agent.
 Uses threatDetection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
 */}}
