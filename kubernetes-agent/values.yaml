@@ -239,8 +239,8 @@ falco:
       - /etc/falco/config.d
       - /etc/falco/aikido-config.d
 
-    # Falco default is debug; warning reduces noise in production
-    priority: warning
+    # Falco default is debug; info is the lowest level we expose to customers
+    priority: info
 
     # Falco default is false; we need structured JSON for event parsing
     json_output: true
