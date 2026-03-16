@@ -252,3 +252,9 @@ falco:
     # Falco default is true; reduces verbose low-level noise
     libs_logger:
       enabled: false
+
+  falcoctl:
+    artifact:
+      follow:
+        # Falco default is true; the agent manages rule updates via ConfigMap so the sidecar is redundant
+        enabled: false
