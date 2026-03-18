@@ -93,6 +93,18 @@ tests:
           path: data["falco.yaml"]
           pattern: "json_include_tags_property: true"
 
+  - it: daemonset main container and driver loader init container should use the same image tag
+    set:
+      threatDetection.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ":0\\.43\\.0$"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].image
+          pattern: ":0\\.43\\.0$"
+
   # --- agent deployment ---
 
   - it: agent deployment should include threat detection env vars when enabled
