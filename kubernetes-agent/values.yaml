@@ -227,27 +227,32 @@ falco:
   podLabels:
     app.kubernetes.io/component: kubernetes-agent-threat-detection
 
-  # Custom rules managed by the agent at runtime.
-  # Populated initially with an empty placeholder; the agent updates this ConfigMap
-  # when customers enable/disable rules or define custom rules via the Aikido UI.
-  customRules:
-    aikido-rules.yaml: ""
-
   # Mounts our computed http_output config (see templates/threat-detection/falco-detection-config.yaml)
+  # and the agent-managed rules ConfigMap (see templates/threat-detection/falco-rules.yaml)
   mounts:
     volumes:
       - name: aikido-detection-config
         configMap:
           name: kubernetes-agent-threat-detection
+      - name: aikido-falco-rules
+        configMap:
+          name: kubernetes-agent-falco-rules
     volumeMounts:
       - name: aikido-detection-config
         mountPath: /etc/falco/aikido-config.d
+      - name: aikido-falco-rules
+        mountPath: /etc/falco/rules.d
 
   falco:
     # Add our aikido-config.d alongside the default config.d
     config_files:
       - /etc/falco/config.d
       - /etc/falco/aikido-config.d
+
+    # Load only our explicitly managed rules directory; the agent writes rule files
+    # here on startup. Falco default includes the falcoctl-populated path which we no longer use.
+    rules_files:
+      - /etc/falco/rules.d
 
     # Falco default is debug; info is the lowest level we expose to customers
     priority: info
@@ -265,6 +270,9 @@ falco:
 
   falcoctl:
     artifact:
+      install:
+        # Falco default is true; rules are embedded in the agent binary and written to a ConfigMap on startup
+        enabled: false
       follow:
         # Falco default is true; the agent manages rule updates via ConfigMap so the sidecar is redundant
         enabled: false

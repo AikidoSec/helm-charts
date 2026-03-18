@@ -14,6 +14,7 @@ rules:
     verbs: ["get","update","patch"]
     resourceNames:
       - {{ include "kubernetes-agent.threatDetectionConfigMapName" . }}
+      - {{ include "kubernetes-agent.falcoRulesConfigMapName" . }}
   - apiGroups: ["apps"]
     resources: ["deployments", "daemonsets"]
     verbs: ["update","patch"]

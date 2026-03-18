@@ -174,6 +174,13 @@ to toggle disabled rules. Created by the Falco subchart under its own fullname.
 {{- end }}
 
 {{/*
+Name of the ConfigMap holding all Falco rule files, written by the agent on startup.
+*/}}
+{{- define "kubernetes-agent.falcoRulesConfigMapName" -}}
+kubernetes-agent-falco-rules
+{{- end }}
+
+{{/*
 The URL that Falco uses to deliver detection events to the agent.
 Uses threatDetection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
 */}}
