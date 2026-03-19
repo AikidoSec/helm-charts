@@ -76,6 +76,8 @@ helm install broker-client aikido/broker-client -f my-values.yaml --namespace ai
 | `config.nodeTlsRejectUnauthorized` | Disable TLS certificate validation (set to "0") | `""`                               |
 | `config.forceWebsocket`        | Force WebSocket connection (set to "true") | `""`                               |
 | `config.noProxy`               | Comma-separated hosts/domains to bypass proxy | `""`                               |
+| `config.mtlsPemContent`        | Combined PEM content (cert + private key) for mTLS client auth to internal resources | `""` |
+| `config.mtlsCaContent`         | CA certificate content (PEM) to verify internal resource servers using a private/self-signed CA | `""` |
 | `image.repository`             | Docker image repository                    | `aikidosecurity/broker-client`     |
 | `image.tag`                    | Docker image tag                           | Chart appVersion                   |
 | `persistence.enabled`          | Enable persistent storage for client_id    | `true`                             |
@@ -97,6 +99,31 @@ config:
     MIIDXTCCAkWgAwIBAgIJAKJ...
     -----END CERTIFICATE-----
 ```
+
+### Example with mTLS client authentication
+
+Use this when internal resources require mutual TLS (mTLS) to authenticate the broker client.
+
+```yaml
+config:
+  clientSecret: 'AIK_BROKER_XXX_YYY_ZZZZ'
+  allowedInternalSubnets: '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+  # Combined PEM: certificate followed by private key
+  mtlsPemContent: |
+    -----BEGIN CERTIFICATE-----
+    MIIDXTCCAkWgAwIBAgIJAKJ...
+    -----END CERTIFICATE-----
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0B...
+    -----END PRIVATE KEY-----
+  # Only needed if the internal resource server uses a private/self-signed CA
+  mtlsCaContent: |
+    -----BEGIN CERTIFICATE-----
+    MIIDXTCCAkWgAwIBAgIJAKJ...
+    -----END CERTIFICATE-----
+```
+
+The chart stores the certificate content as Kubernetes Secrets and mounts them into the pod at `/certs/client.pem` and `/certs/internal-ca.crt` respectively
 
 ## Accessing Internal Services
 
@@ -191,6 +218,11 @@ kubectl get secret broker-client -o yaml
          MIIDXTCCAkWgAwIBAgIJAKJ...
          -----END CERTIFICATE-----
      ```
+
+5. **mTLS authentication issues**
+   - Ensure `config.mtlsPemContent` contains both the certificate and private key in PEM format (concatenated)
+   - If the server uses a private CA, also provide `config.mtlsCaContent` with the CA certificate
+   - Verify the certificate has not expired and matches the expected client identity
 
 ## Security Considerations
 

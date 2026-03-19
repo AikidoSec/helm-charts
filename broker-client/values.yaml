@@ -48,11 +48,32 @@ config:
   # Example: "localhost,127.0.0.1,.company.local"
   noProxy: ''
 
+  # Optional: mTLS client certificate — combined PEM file (certificate + private key)
+  # Used for mTLS client authentication when connecting to internal resources that require it
+  # Provide the actual certificate content (PEM format); it will be mounted at /certs/client.pem
+  # Example: |
+  #   -----BEGIN CERTIFICATE-----
+  #   MIIDXTCCAkWgAwIBAgIJAKJ...
+  #   -----END CERTIFICATE-----
+  #   -----BEGIN PRIVATE KEY-----
+  #   MIIEvQIBADANBgkqhkiG9w0B...
+  #   -----END PRIVATE KEY-----
+  mtlsPemContent: ''
+
+  # Optional: mTLS CA certificate — used to verify internal resource servers
+  # Only needed if the server uses a private/self-signed CA
+  # Provide the actual certificate content (PEM format); it will be mounted at /certs/internal-ca.crt
+  # Example: |
+  #   -----BEGIN CERTIFICATE-----
+  #   MIIDXTCCAkWgAwIBAgIJAKJ...
+  #   -----END CERTIFICATE-----
+  mtlsCaContent: ''
+
 # Docker image configuration
 image:
   repository: aikidosecurity/broker-client
   pullPolicy: IfNotPresent
-  tag: '1.0.25' # Overrides the image tag (default is the appVersion from Chart.yaml)
+  tag: '1.0.26' # Overrides the image tag (default is the appVersion from Chart.yaml)
 
 imagePullSecrets: []
 nameOverride: ''
