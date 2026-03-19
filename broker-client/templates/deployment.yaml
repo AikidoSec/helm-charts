@@ -50,6 +50,18 @@ spec:
           subPath: custom-ca.crt
           readOnly: true
         {{- end }}
+        {{- if .Values.config.mtlsPemContent }}
+        - name: mtls-pem
+          mountPath: /certs/client.pem
+          subPath: client.pem
+          readOnly: true
+        {{- end }}
+        {{- if .Values.config.mtlsCaContent }}
+        - name: mtls-ca
+          mountPath: /certs/internal-ca.crt
+          subPath: internal-ca.crt
+          readOnly: true
+        {{- end }}
       volumes:
       - name: config
         {{- if .Values.persistence.enabled }}
@@ -62,6 +74,16 @@ spec:
       - name: custom-ca
         secret:
           secretName: {{ include "broker-client.fullname" . }}-ca-bundle
+      {{- end }}
+      {{- if .Values.config.mtlsPemContent }}
+      - name: mtls-pem
+        secret:
+          secretName: {{ include "broker-client.fullname" . }}-mtls-pem
+      {{- end }}
+      {{- if .Values.config.mtlsCaContent }}
+      - name: mtls-ca
+        secret:
+          secretName: {{ include "broker-client.fullname" . }}-mtls-ca
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
