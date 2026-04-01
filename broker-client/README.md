@@ -75,6 +75,7 @@ helm install broker-client aikido/broker-client -f my-values.yaml --namespace ai
 | `config.customCaBundleContent` | Custom CA certificate content (PEM format) | `""`                               |
 | `config.nodeTlsRejectUnauthorized` | Disable TLS certificate validation (set to "0") | `""`                               |
 | `config.forceWebsocket`        | Force WebSocket connection (set to "true") | `""`                               |
+| `config.forcePolling`          | Force polling connection (set to "true")   | `""`                               |
 | `config.noProxy`               | Comma-separated hosts/domains to bypass proxy | `""`                               |
 | `config.mtlsPemContent`        | Combined PEM content (cert + private key) for mTLS client auth to internal resources | `""` |
 | `config.mtlsCaContent`         | CA certificate content (PEM) to verify internal resource servers using a private/self-signed CA | `""` |
