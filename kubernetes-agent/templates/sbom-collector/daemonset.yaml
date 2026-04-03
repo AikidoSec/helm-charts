@@ -111,7 +111,7 @@ spec:
               mountPath: /var/run/secrets/pull-secret
               readOnly: true
             {{- end }}
-            {{- with .Values.syftConfig }}
+            {{- with .Values.sbomCollector.syftConfig }}
             - name: syft-config
               mountPath: /var/run/configmaps/syft
               readOnly: true
@@ -137,7 +137,7 @@ spec:
             secretName: {{ .Values.sbomCollector.pullSecretMount.secretName }}
             optional: false
         {{- end }}
-        {{- with .Values.syftConfig }}
+        {{- with .Values.sbomCollector.syftConfig }}
         - name: syft-config
           configMap:
             name: {{ include "sbom-collector.name" . }}-syft-config

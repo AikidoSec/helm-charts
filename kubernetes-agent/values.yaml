@@ -62,6 +62,9 @@ sbomCollector:
     capabilities:
       drop:
         - ALL
+  # Custom Syft configuration for the SBOM collector.
+  # This value is mounted into the collector container as a Syft config file.
+  # For available configuration options, see the Syft documentation: https://oss.anchore.com/docs/reference/syft/configuration/
   syftConfig: {}
 
   # Access to image pull secrets for SBOM generation

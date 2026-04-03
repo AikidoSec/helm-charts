@@ -1,4 +1,4 @@
-{{- with .Values.syftConfig }}
+{{- with .Values.sbomCollector.syftConfig }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
