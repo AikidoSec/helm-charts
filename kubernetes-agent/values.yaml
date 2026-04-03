@@ -62,6 +62,7 @@ sbomCollector:
     capabilities:
       drop:
         - ALL
+  syftConfig: {}
 
   # Access to image pull secrets for SBOM generation
   # The SBOM collector needs to read container images to generate SBOMs.
