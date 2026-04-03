@@ -100,6 +100,26 @@ Set Go memory limit to 90% of container memory limit (min 100 MiB)
 {{- end -}}
 
 {{/*
+Validate sbomCollector.scratchDir configuration and fail early with a clear message.
+*/}}
+{{- define "sbom-collector.validateScratchDir" -}}
+{{- $validTypes := list "emptyDir" "hostPath" -}}
+{{- $scratchDir := .Values.sbomCollector.scratchDir | default dict -}}
+{{- $type := $scratchDir.type | default "emptyDir" -}}
+{{- if not (has $type $validTypes) -}}
+  {{- fail (printf "sbomCollector.scratchDir.type must be one of: %s" (join ", " $validTypes)) -}}
+{{- end -}}
+{{- if eq $type "hostPath" -}}
+  {{- if not $scratchDir.hostPath -}}
+    {{- fail "sbomCollector.scratchDir.hostPath must be set when type is 'hostPath'" -}}
+  {{- end -}}
+  {{- if eq $scratchDir.hostPath "/" -}}
+    {{- fail "sbomCollector.scratchDir.hostPath must not be the root filesystem '/'" -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the secret name to use for the agent configuration.
 Uses externalSecret if provided, otherwise uses the chart name.
 */}}
