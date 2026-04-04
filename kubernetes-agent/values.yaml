@@ -63,6 +63,18 @@ sbomCollector:
       drop:
         - ALL
 
+  # Optional SBOM collector Syft overrides.
+  # Supported keys:
+  # - select-catalogers: catalogers to include/exclude on top of the default set. Use "+" to include and "-" to exclude.
+  # - javascript.include-dev-dependencies
+  # Example:
+  # syftConfig:
+  #   select-catalogers:
+  #     - "+javascript-lock-cataloger"
+  #   javascript:
+  #     include-dev-dependencies: false
+  syftConfig: {}
+
   # Access to image pull secrets for SBOM generation
   # The SBOM collector needs to read container images to generate SBOMs.
   # When images are pulled from private registries, the collector requires

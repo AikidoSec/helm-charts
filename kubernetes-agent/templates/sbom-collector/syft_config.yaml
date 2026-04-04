@@ -1,0 +1,12 @@
+{{- with .Values.sbomCollector.syftConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sbom-collector.name" . }}-syft-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbom-collector.labels" . | nindent 4 }}
+data:
+  create-sbom-config.yaml: |
+{{ toYaml . | nindent 4 }}
+{{- end }}
