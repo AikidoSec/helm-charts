@@ -62,9 +62,17 @@ sbomCollector:
     capabilities:
       drop:
         - ALL
-  # Custom Syft configuration for the SBOM collector.
-  # This value is mounted into the collector container as a Syft config file.
-  # For available configuration options, see the Syft documentation: https://oss.anchore.com/docs/reference/syft/configuration/
+
+  # Optional SBOM collector Syft overrides.
+  # Supported keys:
+  # - select-catalogers: catalogers to include/exclude on top of the default set. Use "+" to include and "-" to exclude.
+  # - javascript.include-dev-dependencies
+  # Example:
+  # syftConfig:
+  #   select-catalogers:
+  #     - "+javascript-lock-cataloger"
+  #   javascript:
+  #     include-dev-dependencies: false
   syftConfig: {}
 
   # Access to image pull secrets for SBOM generation
