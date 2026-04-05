@@ -62,6 +62,14 @@ sbomCollector:
     capabilities:
       drop:
         - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Pod-level security context for the SBOM collector deployment
+  # (daemonset uses the root podSecurityContext)
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
 
   # Access to image pull secrets for SBOM generation
   # The SBOM collector needs to read container images to generate SBOMs.
@@ -146,7 +154,9 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
 # fsGroup: 2000
 
 securityContext:
@@ -157,6 +167,8 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
   allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
 
 healthCheck:
   port: 8081
