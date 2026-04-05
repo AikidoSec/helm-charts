@@ -9,6 +9,12 @@ rules:
     verbs: ["update","patch","get"]
     resourceNames:
       - {{ include "kubernetes-agent.secretName" . }}
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get","update","patch"]
+    resourceNames:
+      - {{ include "kubernetes-agent.threatDetectionConfigMapName" . }}
+      - {{ include "kubernetes-agent.falcoRulesConfigMapName" . }}
   - apiGroups: ["apps"]
     resources: ["deployments", "daemonsets"]
     verbs: ["update","patch"]
@@ -17,6 +23,8 @@ rules:
       - {{ include "kubernetes-agent.fullname" . }}
       # The agent needs to be able to update the replica count/node selector of the collector
       - {{ include "sbom-collector.name" . }}
+      # The agent needs to be able to restart Falco when threat detection rules change
+      - {{ include "kubernetes-agent.threatDetectionName" . }}
   - apiGroups: [ "metrics.k8s.io" ]
     resources: [ "pods" ]
     verbs: [ "get", "list" ]

@@ -1,0 +1,11 @@
+{{- if .Values.threatDetection.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kubernetes-agent.falcoRulesConfigMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+data:
+  threat-detection-rules.yaml: ""
+{{- end }}
