@@ -140,7 +140,7 @@ spec:
         {{- with .Values.sbomCollector.syftConfig }}
         - name: syft-config
           configMap:
-            name: {{ include "sbom-collector.name" . }}-syft-config
+            name: {{ include "sbom-collector.name" $ }}-syft-config
         {{- end }}
         {{- with .Values.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
