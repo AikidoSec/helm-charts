@@ -28,7 +28,7 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.5.1
+    tag: v1.6.0
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
@@ -62,6 +62,18 @@ sbomCollector:
     capabilities:
       drop:
         - ALL
+
+  # Optional SBOM collector Syft overrides.
+  # Supported keys:
+  # - select-catalogers: catalogers to include/exclude on top of the default set. Use "+" to include and "-" to exclude.
+  # - javascript.include-dev-dependencies
+  # Example:
+  # syftConfig:
+  #   select-catalogers:
+  #     - "+javascript-lock-cataloger"
+  #   javascript:
+  #     include-dev-dependencies: false
+  syftConfig: {}
 
   # Access to image pull secrets for SBOM generation
   # The SBOM collector needs to read container images to generate SBOMs.

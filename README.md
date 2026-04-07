@@ -103,6 +103,51 @@ For environments running on managed Kubernetes services, Aikido supports authent
 
 For EKS Pod Identity, you need to create a pod identity association for the SBOM collector service account, `aikido-kubernetes-agent-sbom-collector`, namespace `aikido` if using the default values. Read more in the [AWS docs](https://docs.aws.amazon.com/eks/latest/userguide/pod-id-association.html).
 
+1. Ensure the **EKS Pod Identity Agent** add-on is installed:
+
+```bash
+aws eks create-addon --cluster-name <cluster> --addon-name eks-pod-identity-agent
+```
+
+2. Create an IAM role with the following trust policy (the standard trust policy used when you create via the AWS Console), then attach `AmazonEC2ContainerRegistryReadOnly`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "Service": "pods.eks.amazonaws.com" },
+      "Action": ["sts:AssumeRole", "sts:TagSession"]
+    }
+  ]
+}
+```
+
+```bash
+aws iam create-role --role-name aikido-sbom-collector-ecr --assume-role-policy-document file://trust-policy.json
+aws iam attach-role-policy --role-name aikido-sbom-collector-ecr --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+```
+
+3. Create the pod identity association (replace `<cluster>`, `<namespace>`, `<release-name>`, and `<account-id>`):
+
+```bash
+aws eks create-pod-identity-association \
+  --cluster-name <cluster> \
+  --namespace <namespace> \
+  --service-account <release-name>-sbom-collector \
+  --role-arn arn:aws:iam::<account-id>:role/aikido-sbom-collector-ecr
+```
+
+No Helm values changes are needed — credentials are injected automatically at runtime. If the SBOM collector was already running before the association was created, restart it to pick up the credentials:
+
+```bash
+# DaemonSet (default)
+kubectl rollout restart daemonset/<release-name>-sbom-collector -n <namespace>
+# Deployment (if runAsDaemonSet: false)
+kubectl rollout restart deployment/<release-name>-sbom-collector -n <namespace>
+```
+
 ### Azure Workload Identity
 
 For Azure Workload Identity, follow the [Azure docs](https://learn.microsoft.com/en-us/azure/aks/workload-identity-deploy-cluster).
