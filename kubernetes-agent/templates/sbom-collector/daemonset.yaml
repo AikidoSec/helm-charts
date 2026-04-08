@@ -1,4 +1,5 @@
 {{- if and .Values.sbomCollector.enabled (eq .Values.sbomCollector.runAsDaemonSet true) }}
+{{- include "sbom-collector.validateScratchDir" . }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -121,10 +122,33 @@ spec:
             {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
+        {{- $scratchDir := .Values.sbomCollector.scratchDir | default dict }}
         - name: tmp
-          emptyDir: { }
+          {{- if eq ($scratchDir.type | default "emptyDir") "hostPath" }}
+          hostPath:
+            path: {{ $scratchDir.hostPath }}/tmp
+            type: DirectoryOrCreate
+          {{- else }}
+          emptyDir:
+            {{- if $scratchDir.sizeLimit }}
+            sizeLimit: {{ $scratchDir.sizeLimit }}
+            {{- else }}
+            {}
+            {{- end }}
+          {{- end }}
         - name: ecr-cache-config
-          emptyDir: { }
+          {{- if eq ($scratchDir.type | default "emptyDir") "hostPath" }}
+          hostPath:
+            path: {{ $scratchDir.hostPath }}/ecr
+            type: DirectoryOrCreate
+          {{- else }}
+          emptyDir:
+            {{- if $scratchDir.sizeLimit }}
+            sizeLimit: {{ $scratchDir.sizeLimit }}
+            {{- else }}
+            {}
+            {{- end }}
+          {{- end }}
         - name: docker-sock
           hostPath:
             path: /var/run/docker.sock
