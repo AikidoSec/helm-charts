@@ -112,6 +112,30 @@ sbomCollector:
     # Configure sbomCollector.secretsAccess.imagePullSecretNames for that.
     imagePullSecrets: []
 
+  # Scratch space configuration for temporary files used during SBOM generation.
+  # By default, emptyDir volumes are used for /tmp and /.ecr scratch space.
+  #
+  # type: emptyDir (default)
+  #   Kubernetes tracks ephemeral storage usage and can evict the pod if it exceeds limits.
+  #   Optionally set sizeLimit to cap disk usage per node.
+  #   scratchDir:
+  #     type: emptyDir
+  #     sizeLimit: 20Gi
+  #
+  # type: hostPath
+  #   Use a directory on a specific host partition. Useful on systems like Bottlerocket OS
+  #   where the default partition is small and a larger data partition should be used instead.
+  #   hostPath is required when using this type.
+  #   NOTE: hostPath bypasses Kubernetes ephemeral storage tracking — monitor disk usage
+  #   on the host path manually to avoid disk pressure on the node.
+  #   scratchDir:
+  #     type: hostPath
+  #     hostPath: /var/data/aikido-sbom
+  scratchDir:
+    type: emptyDir
+    hostPath: null
+    sizeLimit: null
+
   # Pull secret mount configuration
   # Mount a Docker config secret as a volume to authenticate with private registries.
   # This is useful for authenticating with registries like OpenShift's internal registry,
