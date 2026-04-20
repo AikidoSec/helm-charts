@@ -66,10 +66,16 @@ rules:
       - imagetagmirrorsets
     verbs: [ "get","list","watch" ]
   # traefik.io
-  - apiGroups: ["traefik.io"]
+  - apiGroups: [ "traefik.io" ]
     resources:
       - ingressroutes
-    verbs: ["get","list","watch"]
+    verbs: [ "get","list","watch" ]
+  # gateway.networking.k8s.io
+  - apiGroups: [ "gateway.networking.k8s.io" ]
+    resources:
+      - gateways
+      - httproutes
+    verbs: [ "get","list","watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
