@@ -7,5 +7,5 @@ metadata:
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
 data:
-  threat-detection-rules.yaml: ""
+  01-threat-detection-rules.yaml: ""
 {{- end }}
