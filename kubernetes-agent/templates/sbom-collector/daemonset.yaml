@@ -100,12 +100,14 @@ spec:
               name: tmp
             - mountPath: /.ecr
               name: ecr-cache-config
+            {{- if eq (int .Values.sbomCollector.securityContext.runAsUser) 0 }}
             - name: docker-sock
               mountPath: /var/run/docker.sock
               readOnly: true
             - name: containerd-sock
               mountPath: /run/containerd/containerd.sock
               readOnly: true
+            {{- end }}
             {{- if .Values.sbomCollector.pullSecretMount.secretName }}
             - name: registry-pull-secret
               mountPath: /var/run/secrets/pull-secret
@@ -125,12 +127,14 @@ spec:
           emptyDir: { }
         - name: ecr-cache-config
           emptyDir: { }
+        {{- if eq (int .Values.sbomCollector.securityContext.runAsUser) 0 }}
         - name: docker-sock
           hostPath:
             path: /var/run/docker.sock
         - name: containerd-sock
           hostPath:
             path: /run/containerd/containerd.sock
+        {{- end }}
         {{- if .Values.sbomCollector.pullSecretMount.secretName }}
         - name: registry-pull-secret
           secret:
