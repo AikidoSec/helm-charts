@@ -197,7 +197,7 @@ additionalVolumeMounts: []
 #             key: secrets/aikido/config
 extraObjects: []
 
-threatDetection:
+runtimeProtection:
   enabled: false
   # Port on the agent that Falco sends detection events to.
   port: 8241
@@ -220,25 +220,25 @@ falco:
         image:
           tag: *falcoVersion
 
-  # Makes the DaemonSet name predictable: RELEASE-NAME-kubernetes-agent-threat-detection
-  nameOverride: "kubernetes-agent-threat-detection"
+  # Makes the DaemonSet name predictable: RELEASE-NAME-kubernetes-agent-runtime-protection
+  nameOverride: "kubernetes-agent-runtime-protection"
 
   # Labels Falco pods so the network policy can target them
   podLabels:
-    app.kubernetes.io/component: kubernetes-agent-threat-detection
+    app.kubernetes.io/component: kubernetes-agent-runtime-protection
 
-  # Mounts our computed http_output config (see templates/threat-detection/falco-detection-config.yaml)
-  # and the agent-managed rules ConfigMap (see templates/threat-detection/falco-rules.yaml)
+  # Mounts our computed http_output config (see templates/falco/falco-config.yaml)
+  # and the agent-managed rules ConfigMap (see templates/falco/falco-rules.yaml)
   mounts:
     volumes:
-      - name: aikido-detection-config
+      - name: kubernetes-agent-falco-config
         configMap:
-          name: kubernetes-agent-threat-detection
+          name: kubernetes-agent-runtime-protection
       - name: aikido-falco-rules
         configMap:
           name: kubernetes-agent-falco-rules
     volumeMounts:
-      - name: aikido-detection-config
+      - name: kubernetes-agent-falco-config
         mountPath: /etc/falco/aikido-config.d
       - name: aikido-falco-rules
         mountPath: /etc/falco/rules.d

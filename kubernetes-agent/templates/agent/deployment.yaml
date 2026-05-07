@@ -65,11 +65,11 @@ spec:
               value: {{ .Values.sbomCollector.enabled | quote }}
             - name: AUTO_UPDATE_ENABLED
               value: {{ .Values.agent.autoUpdate.enabled | quote }}
-            - name: THREAT_DETECTION_ENABLED
-              value: {{ .Values.threatDetection.enabled | quote }}
-            {{- if .Values.threatDetection.enabled }}
-            - name: THREAT_PROXY_PORT
-              value: {{ .Values.threatDetection.port | quote }}
+            - name: RUNTIME_PROTECTION_ENABLED
+              value: {{ .Values.runtimeProtection.enabled | quote }}
+            {{- if .Values.runtimeProtection.enabled }}
+            - name: FALCO_PROXY_PORT
+              value: {{ .Values.runtimeProtection.port | quote }}
             {{- end }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
@@ -98,8 +98,8 @@ spec:
             - containerPort: {{ .Values.agent.service.metricsPort }}
               name: metrics-port
               protocol: TCP
-            {{- if .Values.threatDetection.enabled }}
-            - containerPort: {{ .Values.threatDetection.port }}
+            {{- if .Values.runtimeProtection.enabled }}
+            - containerPort: {{ .Values.runtimeProtection.port }}
               name: td-port
               protocol: TCP
             {{- end }}

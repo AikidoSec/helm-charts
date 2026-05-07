@@ -158,19 +158,19 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Name shared by all threat detection resources (Falco DaemonSet, config ConfigMap).
+Name shared by all runtime protection resources (Falco DaemonSet, config ConfigMap).
 Matches what the agent derives at runtime from its own pod name.
 */}}
-{{- define "kubernetes-agent.threatDetectionName" -}}
-{{- printf "%s-threat-detection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "kubernetes-agent.runtimeProtectionName" -}}
+{{- printf "%s-runtime-protection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Name of the Falco configuration ConfigMap (falco.yaml) that the agent updates at runtime
 to toggle disabled rules. Created by the Falco subchart under its own fullname.
 */}}
-{{- define "kubernetes-agent.threatDetectionConfigMapName" -}}
-{{- include "kubernetes-agent.threatDetectionName" . }}
+{{- define "kubernetes-agent.runtimeProtectionConfigMapName" -}}
+{{- include "kubernetes-agent.runtimeProtectionName" . }}
 {{- end }}
 
 {{/*
@@ -182,12 +182,12 @@ kubernetes-agent-falco-rules
 
 {{/*
 The URL that Falco uses to deliver detection events to the agent.
-Uses threatDetection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
+Uses runtimeProtection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
 */}}
-{{- define "threatDetection.httpOutputUrl" -}}
-{{- if .Values.threatDetection.httpOutputUrl -}}
-{{- .Values.threatDetection.httpOutputUrl -}}
+{{- define "runtimeProtection.httpOutputUrl" -}}
+{{- if .Values.runtimeProtection.httpOutputUrl -}}
+{{- .Values.runtimeProtection.httpOutputUrl -}}
 {{- else -}}
-{{- printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (.Values.threatDetection.port | int) -}}
+{{- printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (.Values.runtimeProtection.port | int) -}}
 {{- end -}}
 {{- end -}}

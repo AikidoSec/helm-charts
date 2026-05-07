@@ -1,40 +1,40 @@
-suite: threat detection runtime
+suite: falco runtime protection
 
 tests:
-  # --- detection config (our template) ---
+  # --- falco config (our template) ---
 
   - it: should not render when disabled
     set:
-      threatDetection.enabled: false
-    template: templates/threat-detection/falco-detection-config.yaml
+      runtimeProtection.enabled: false
+    template: templates/falco/falco-config.yaml
     asserts:
       - hasDocuments:
           count: 0
 
-  - it: detection config should send events to the agent HTTP endpoint
+  - it: falco config should send events to the agent HTTP endpoint
     set:
-      threatDetection.enabled: true
-    template: templates/threat-detection/falco-detection-config.yaml
+      runtimeProtection.enabled: true
+    template: templates/falco/falco-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
           pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:8241/detection"'
 
-  - it: detection config URL should follow threatDetection.port
+  - it: falco config URL should follow runtimeProtection.port
     set:
-      threatDetection.enabled: true
-      threatDetection.port: 9999
-    template: templates/threat-detection/falco-detection-config.yaml
+      runtimeProtection.enabled: true
+      runtimeProtection.port: 9999
+    template: templates/falco/falco-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
           pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:9999/detection"'
 
-  - it: detection config should use httpOutputUrl override when set
+  - it: falco config should use httpOutputUrl override when set
     set:
-      threatDetection.enabled: true
-      threatDetection.httpOutputUrl: "http://my-custom-agent:7777/detection"
-    template: templates/threat-detection/falco-detection-config.yaml
+      runtimeProtection.enabled: true
+      runtimeProtection.httpOutputUrl: "http://my-custom-agent:7777/detection"
+    template: templates/falco/falco-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
@@ -42,18 +42,18 @@ tests:
 
   # --- Falco DaemonSet (subchart) ---
 
-  - it: daemonset should be named with threat-detection suffix
+  - it: daemonset should be named with runtime-protection suffix
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-kubernetes-agent-threat-detection
+          value: RELEASE-NAME-kubernetes-agent-runtime-protection
 
   - it: daemonset should tolerate control-plane nodes
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - contains:
@@ -69,7 +69,7 @@ tests:
 
   - it: daemonset should use rolling update strategy
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
@@ -80,7 +80,7 @@ tests:
 
   - it: falco configmap should enable JSON output
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: charts/falco/templates/configmap.yaml
     asserts:
       - matchRegex:
@@ -95,7 +95,7 @@ tests:
 
   - it: daemonset main container and driver loader init container should use the same image tag
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - matchRegex:
@@ -107,42 +107,42 @@ tests:
 
   # --- agent deployment ---
 
-  - it: agent deployment should include threat detection env vars when enabled
+  - it: agent deployment should include runtime protection env vars when enabled
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: THREAT_DETECTION_ENABLED
+            name: RUNTIME_PROTECTION_ENABLED
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: THREAT_PROXY_PORT
+            name: FALCO_PROXY_PORT
             value: "8241"
 
-  - it: agent deployment should omit threat detection detail env vars when disabled
+  - it: agent deployment should omit runtime protection detail env vars when disabled
     set:
-      threatDetection.enabled: false
+      runtimeProtection.enabled: false
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: THREAT_DETECTION_ENABLED
+            name: RUNTIME_PROTECTION_ENABLED
             value: "false"
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: THREAT_PROXY_PORT
+            name: FALCO_PROXY_PORT
 
   # --- agent service ---
 
   - it: service should expose td-port port when enabled
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: templates/agent/service.yaml
     asserts:
       - contains:
@@ -155,7 +155,7 @@ tests:
 
   - it: service should not expose td-port port when disabled
     set:
-      threatDetection.enabled: false
+      runtimeProtection.enabled: false
     template: templates/agent/service.yaml
     asserts:
       - notContains:
@@ -167,7 +167,7 @@ tests:
 
   - it: network policy should allow ingress from falco pods when enabled
     set:
-      threatDetection.enabled: true
+      runtimeProtection.enabled: true
     template: templates/agent/network_policy.yaml
     asserts:
       - contains:
@@ -176,14 +176,14 @@ tests:
             from:
               - podSelector:
                   matchLabels:
-                    app.kubernetes.io/component: kubernetes-agent-threat-detection
+                    app.kubernetes.io/component: kubernetes-agent-runtime-protection
             ports:
               - protocol: TCP
                 port: 8241
 
-  - it: network policy should not include threat detection rule when disabled
+  - it: network policy should not include runtime protection rule when disabled
     set:
-      threatDetection.enabled: false
+      runtimeProtection.enabled: false
     template: templates/agent/network_policy.yaml
     asserts:
       - notContains:
@@ -192,4 +192,4 @@ tests:
             from:
               - podSelector:
                   matchLabels:
-                    app.kubernetes.io/component: kubernetes-agent-threat-detection
+                    app.kubernetes.io/component: kubernetes-agent-runtime-protection

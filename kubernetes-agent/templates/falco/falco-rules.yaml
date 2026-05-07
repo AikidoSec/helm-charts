@@ -1,4 +1,4 @@
-{{- if .Values.threatDetection.enabled -}}
+{{- if .Values.runtimeProtection.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
