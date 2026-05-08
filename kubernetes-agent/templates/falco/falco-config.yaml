@@ -11,4 +11,5 @@ data:
     http_output:
       enabled: true
       url: {{ include "runtimeProtection.httpOutputUrl" . | quote }}
+  rules-override.yaml: ""
 {{- end }}
