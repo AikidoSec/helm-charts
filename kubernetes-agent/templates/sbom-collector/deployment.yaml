@@ -53,6 +53,8 @@ spec:
               value: http://{{ include "kubernetes-agent.fullname" . }}:{{ .Values.agent.service.port }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-sbom-collector.goMemLimit" . }}"
+            - name: AWS_ECR_CACHE_DIR
+              value: "/.ecr"
             - name: SECRETS_ACCESS_ENABLED
               value: "{{ .Values.sbomCollector.secretsAccess.enabled }}"
             - name: RUN_COLLECTOR_AS_DAEMONSET
