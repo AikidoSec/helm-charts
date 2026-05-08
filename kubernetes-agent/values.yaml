@@ -233,7 +233,7 @@ falco:
     volumes:
       - name: kubernetes-agent-falco-config
         configMap:
-          name: kubernetes-agent-runtime-protection
+          name: kubernetes-agent-falco-config
       - name: aikido-falco-rules
         configMap:
           name: kubernetes-agent-falco-rules

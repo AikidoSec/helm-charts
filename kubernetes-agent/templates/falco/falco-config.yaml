@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kubernetes-agent-runtime-protection
+  name: kubernetes-agent-falco-config
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}

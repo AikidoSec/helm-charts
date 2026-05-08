@@ -166,11 +166,11 @@ Matches what the agent derives at runtime from its own pod name.
 {{- end }}
 
 {{/*
-Name of the Falco configuration ConfigMap (falco.yaml) that the agent updates at runtime
-to toggle disabled rules. Created by the Falco subchart under its own fullname.
+Name of the Aikido-managed Falco config ConfigMap (http output + rules override).
+Fixed name — not release-prefixed — so the agent can reference it without knowing the release name.
 */}}
 {{- define "kubernetes-agent.runtimeProtectionConfigMapName" -}}
-{{- include "kubernetes-agent.runtimeProtectionName" . }}
+kubernetes-agent-falco-config
 {{- end }}
 
 {{/*
