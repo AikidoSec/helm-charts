@@ -1,11 +1,11 @@
-suite: falco runtime protection
+suite: falco runtime detection
 
 tests:
   # --- falco config (our template) ---
 
   - it: should not render when disabled
     set:
-      runtimeProtection.enabled: false
+      runtimeDetection.enabled: false
     template: templates/falco/falco-config.yaml
     asserts:
       - hasDocuments:
@@ -13,17 +13,17 @@ tests:
 
   - it: falco config should send events to the agent HTTP endpoint
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: templates/falco/falco-config.yaml
     asserts:
       - matchRegex:
           path: data["http-output.yaml"]
           pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:8241/detection"'
 
-  - it: falco config URL should follow runtimeProtection.port
+  - it: falco config URL should follow runtimeDetection.port
     set:
-      runtimeProtection.enabled: true
-      runtimeProtection.port: 9999
+      runtimeDetection.enabled: true
+      runtimeDetection.port: 9999
     template: templates/falco/falco-config.yaml
     asserts:
       - matchRegex:
@@ -32,8 +32,8 @@ tests:
 
   - it: falco config should use httpOutputUrl override when set
     set:
-      runtimeProtection.enabled: true
-      runtimeProtection.httpOutputUrl: "http://my-custom-agent:7777/detection"
+      runtimeDetection.enabled: true
+      runtimeDetection.httpOutputUrl: "http://my-custom-agent:7777/detection"
     template: templates/falco/falco-config.yaml
     asserts:
       - matchRegex:
@@ -42,18 +42,18 @@ tests:
 
   # --- Falco DaemonSet (subchart) ---
 
-  - it: daemonset should be named with runtime-protection suffix
+  - it: daemonset should be named with runtime-detection suffix
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-kubernetes-agent-runtime-protection
+          value: RELEASE-NAME-kubernetes-agent-runtime-detection
 
   - it: daemonset should tolerate control-plane nodes
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - contains:
@@ -69,7 +69,7 @@ tests:
 
   - it: daemonset should use rolling update strategy
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - equal:
@@ -80,7 +80,7 @@ tests:
 
   - it: falco configmap should enable JSON output
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: charts/falco/templates/configmap.yaml
     asserts:
       - matchRegex:
@@ -95,7 +95,7 @@ tests:
 
   - it: daemonset main container and driver loader init container should use the same image tag
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: charts/falco/templates/daemonset.yaml
     asserts:
       - matchRegex:
@@ -107,15 +107,15 @@ tests:
 
   # --- agent deployment ---
 
-  - it: agent deployment should include runtime protection env vars when enabled
+  - it: agent deployment should include runtime detection env vars when enabled
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: RUNTIME_PROTECTION_ENABLED
+            name: RUNTIME_DETECTION_ENABLED
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
@@ -123,15 +123,15 @@ tests:
             name: FALCO_PROXY_PORT
             value: "8241"
 
-  - it: agent deployment should omit runtime protection detail env vars when disabled
+  - it: agent deployment should omit runtime detection detail env vars when disabled
     set:
-      runtimeProtection.enabled: false
+      runtimeDetection.enabled: false
     template: templates/agent/deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: RUNTIME_PROTECTION_ENABLED
+            name: RUNTIME_DETECTION_ENABLED
             value: "false"
       - notContains:
           path: spec.template.spec.containers[0].env
@@ -142,7 +142,7 @@ tests:
 
   - it: service should expose td-port port when enabled
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: templates/agent/service.yaml
     asserts:
       - contains:
@@ -155,7 +155,7 @@ tests:
 
   - it: service should not expose td-port port when disabled
     set:
-      runtimeProtection.enabled: false
+      runtimeDetection.enabled: false
     template: templates/agent/service.yaml
     asserts:
       - notContains:
@@ -167,7 +167,7 @@ tests:
 
   - it: network policy should allow ingress from falco pods when enabled
     set:
-      runtimeProtection.enabled: true
+      runtimeDetection.enabled: true
     template: templates/agent/network_policy.yaml
     asserts:
       - contains:
@@ -176,14 +176,14 @@ tests:
             from:
               - podSelector:
                   matchLabels:
-                    app.kubernetes.io/component: kubernetes-agent-runtime-protection
+                    app.kubernetes.io/component: kubernetes-agent-runtime-detection
             ports:
               - protocol: TCP
                 port: 8241
 
-  - it: network policy should not include runtime protection rule when disabled
+  - it: network policy should not include runtime detection rule when disabled
     set:
-      runtimeProtection.enabled: false
+      runtimeDetection.enabled: false
     template: templates/agent/network_policy.yaml
     asserts:
       - notContains:
@@ -192,4 +192,4 @@ tests:
             from:
               - podSelector:
                   matchLabels:
-                    app.kubernetes.io/component: kubernetes-agent-runtime-protection
+                    app.kubernetes.io/component: kubernetes-agent-runtime-detection

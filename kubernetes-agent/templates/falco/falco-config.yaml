@@ -1,4 +1,4 @@
-{{- if .Values.runtimeProtection.enabled -}}
+{{- if .Values.runtimeDetection.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,6 +10,6 @@ data:
   http-output.yaml: |
     http_output:
       enabled: true
-      url: {{ include "runtimeProtection.httpOutputUrl" . | quote }}
+      url: {{ include "runtimeDetection.httpOutputUrl" . | quote }}
   rules-override.yaml: ""
 {{- end }}

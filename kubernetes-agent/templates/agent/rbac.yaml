@@ -13,7 +13,7 @@ rules:
     resources: ["configmaps"]
     verbs: ["get","update","patch"]
     resourceNames:
-      - {{ include "kubernetes-agent.runtimeProtectionConfigMapName" . }}
+      - {{ include "kubernetes-agent.runtimeDetectionConfigMapName" . }}
       - {{ include "kubernetes-agent.falcoRulesConfigMapName" . }}
   - apiGroups: ["apps"]
     resources: ["deployments", "daemonsets"]
@@ -24,7 +24,7 @@ rules:
       # The agent needs to be able to update the replica count/node selector of the collector
       - {{ include "sbom-collector.name" . }}
       # The agent needs to be able to restart Falco when runtime protection rules change
-      - {{ include "kubernetes-agent.runtimeProtectionName" . }}
+      - {{ include "kubernetes-agent.runtimeDetectionName" . }}
   - apiGroups: [ "metrics.k8s.io" ]
     resources: [ "pods" ]
     verbs: [ "get", "list" ]

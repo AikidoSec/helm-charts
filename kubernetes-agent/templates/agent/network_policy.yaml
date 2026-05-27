@@ -24,13 +24,13 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.agent.service.metricsPort }}
-    {{- if .Values.runtimeProtection.enabled }}
+    {{- if .Values.runtimeDetection.enabled }}
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: kubernetes-agent-runtime-protection
+              app.kubernetes.io/component: kubernetes-agent-runtime-detection
       ports:
         - protocol: TCP
-          port: {{ .Values.runtimeProtection.port }}
+          port: {{ .Values.runtimeDetection.port }}
     {{- end }}
 {{- end }}
