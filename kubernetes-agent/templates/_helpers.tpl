@@ -158,33 +158,19 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Name shared by all runtime protection resources (Falco DaemonSet, config ConfigMap).
-Matches what the agent derives at runtime from its own pod name.
+Name shared by all runtime detection resources (Falco DaemonSet, config ConfigMap).
+Must match the Falco subchart's DaemonSet name, which is derived from falco.nameOverride.
+The agent derives the same name at runtime from its own pod name.
 */}}
 {{- define "kubernetes-agent.runtimeDetectionName" -}}
-{{- printf "%s-runtime-protection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
-Name of the Aikido-managed Falco config ConfigMap (http output + rules override).
-Fixed name — not release-prefixed — so the agent can reference it without knowing the release name.
-*/}}
-{{- define "kubernetes-agent.runtimeDetectionConfigMapName" -}}
-kubernetes-agent-falco-config
-{{- end }}
-
-{{/*
-Name of the ConfigMap holding all Falco rule files, written by the agent on startup.
-*/}}
-{{- define "kubernetes-agent.falcoRulesConfigMapName" -}}
-kubernetes-agent-falco-rules
+{{- printf "%s-runtime-detection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 The URL that Falco uses to deliver detection events to the agent.
 Uses runtimeDetection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
 */}}
-{{- define "runtimeDetection.httpOutputUrl" -}}
+{{- define "kubernetes-agent.runtimeDetectionHttpOutputUrl" -}}
 {{- if .Values.runtimeDetection.httpOutputUrl -}}
 {{- .Values.runtimeDetection.httpOutputUrl -}}
 {{- else -}}

@@ -219,7 +219,7 @@ runtimeDetection:
   httpOutputUrl: ""
 
 # Internal Falco subchart configuration. Not part of the public API of this chart and
-# may change between versions. See https://github.com/falcosecurity/charts/tree/falco-8.0.1/charts/falco
+# may change between versions. See https://github.com/falcosecurity/charts/tree/falco-9.0.0/charts/falco
 # Only values that differ from the Falco chart's defaults are listed here.
 falco:
   image:
@@ -240,7 +240,7 @@ falco:
     app.kubernetes.io/component: kubernetes-agent-runtime-detection
 
   # Mounts our computed http_output config (see templates/falco/falco-config.yaml)
-  # and the agent-managed rules ConfigMap (see templates/falco/falco-rules.yaml)
+  # and the agent-managed rules ConfigMap (see templates/falco/falco-rules.yaml).
   mounts:
     volumes:
       - name: kubernetes-agent-falco-config

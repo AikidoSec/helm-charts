@@ -193,3 +193,26 @@ tests:
               - podSelector:
                   matchLabels:
                     app.kubernetes.io/component: kubernetes-agent-runtime-detection
+
+  # --- rbac ---
+
+  # Guards against drift between the RBAC resourceNames and the actual Falco
+  # DaemonSet name. If these diverge, the agent can't restart Falco on rule changes.
+  - it: rbac should permit patching the Falco DaemonSet by its actual name
+    set:
+      runtimeDetection.enabled: true
+    template: templates/agent/rbac.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+              - RELEASE-NAME-kubernetes-agent-sbom-collector
+              - RELEASE-NAME-kubernetes-agent-runtime-detection
