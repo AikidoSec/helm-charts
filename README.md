@@ -99,9 +99,141 @@ For pulling, the collector attempts first to pull the images from the nodes' cac
 
 For environments running on managed Kubernetes services, Aikido supports authentication via native workload identities.
 
+### Private registry authentication
+
+The SBOM collector supports multiple mechanisms for authenticating to private registries when it needs to fetch images for SBOM generation.
+
+#### Read workload image pull secrets
+
+The collector can read the same Kubernetes pull secrets used by workload pods.
+
+Relevant Helm values:
+
+```yaml
+sbomCollector:
+  secretsAccess:
+    enabled: true
+    imagePullSecretNames: []
+```
+
+How it works:
+
+- The collector reads `imagePullSecrets` referenced by workload pods in their own namespace through the Kubernetes API.
+- `sbomCollector.secretsAccess.imagePullSecretNames` limits which secret names the collector is allowed to read.
+- If `imagePullSecretNames` is empty, the collector can read all secrets cluster-wide.
+
+Notes:
+
+- `sbomCollector.secretsAccess.imagePullSecretNames` contains secret names only, not `namespace/name` pairs. Since Kubernetes secrets are namespace-scoped, allowing a name such as `regcred` allows access to secrets with that name in any namespace.
+
+#### Use pull secrets attached to the SBOM collector service account
+
+The collector can also use pull secrets attached to its own service account.
+
+Relevant Helm values:
+
+```yaml
+sbomCollector:
+  secretsAccess:
+    enabled: true
+    imagePullSecretNames: []
+  serviceAccount:
+    create: true
+    name: ''
+    imagePullSecrets: []
+```
+
+How it works:
+
+- The collector reads the pull secret names attached to its own service account.
+- It then resolves those secrets through the Kubernetes API when building the registry keychain.
+
+Notes:
+
+- This option still requires `sbomCollector.secretsAccess.enabled: true`.
+- If `sbomCollector.secretsAccess.imagePullSecretNames` is non-empty, it must include the secret names attached to the SBOM collector service account.
+- If you use this option together with a scoped `imagePullSecretNames` list, prefer a secret name unique to Aikido to avoid unintentionally granting access to unrelated secrets with the same name in other namespaces.
+- This option can reduce scope compared to workload-wide secret access, but it does not avoid secret-read RBAC entirely.
+
+#### Mount a Docker config secret directly into the collector
+
+The collector supports mounting a Docker config secret as a volume.
+
+Relevant Helm values:
+
+```yaml
+sbomCollector:
+  pullSecretMount:
+    secretName: ''
+```
+
+How it works:
+
+- The named secret is mounted directly into the SBOM collector pod.
+- Supported secret formats:
+  - `kubernetes.io/dockerconfigjson`
+  - `kubernetes.io/dockercfg`
+
+Notes:
+
+- The mounted secret must exist in the same namespace as the chart release.
+- This is useful when you want to provide a dedicated Docker config directly to the collector. Especially relevant for OpenShift clusters.
+
+#### Choosing a mechanism
+
+1. If the registry supports environment-based cloud auth (e.g., EKS Pod Identity), ensure the collector has the required identity and permissions. See the sections below.
+1. If the registry does not support cloud auth, `sbomCollector.secretsAccess` is the simplest option. Use this if granting RBAC read access to workload pull secrets is acceptable for you.
+1. If you want the collector to use its own pull secret instead of workload pull secrets, use `sbomCollector.serviceAccount.imagePullSecrets` together with `sbomCollector.secretsAccess.enabled=true`. If you scope `sbomCollector.secretsAccess.imagePullSecretNames`, include the collector service account pull secret names there as well.
+1. If granting secret-read RBAC is not an option, use `sbomCollector.pullSecretMount.secretName`.
+
 ### AWS EKS Pod Identity
 
 For EKS Pod Identity, you need to create a pod identity association for the SBOM collector service account, `aikido-kubernetes-agent-sbom-collector`, namespace `aikido` if using the default values. Read more in the [AWS docs](https://docs.aws.amazon.com/eks/latest/userguide/pod-id-association.html).
+
+1. Ensure the **EKS Pod Identity Agent** add-on is installed:
+
+```bash
+aws eks create-addon --cluster-name <cluster> --addon-name eks-pod-identity-agent
+```
+
+2. Create an IAM role with the following trust policy (the standard trust policy used when you create via the AWS Console), then attach `AmazonEC2ContainerRegistryReadOnly`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "Service": "pods.eks.amazonaws.com" },
+      "Action": ["sts:AssumeRole", "sts:TagSession"]
+    }
+  ]
+}
+```
+
+```bash
+aws iam create-role --role-name aikido-sbom-collector-ecr --assume-role-policy-document file://trust-policy.json
+aws iam attach-role-policy --role-name aikido-sbom-collector-ecr --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+```
+
+3. Create the pod identity association (replace `<cluster>`, `<namespace>`, `<release-name>`, and `<account-id>`):
+
+```bash
+aws eks create-pod-identity-association \
+  --cluster-name <cluster> \
+  --namespace <namespace> \
+  --service-account <release-name>-sbom-collector \
+  --role-arn arn:aws:iam::<account-id>:role/aikido-sbom-collector-ecr
+```
+
+No Helm values changes are needed — credentials are injected automatically at runtime. If the SBOM collector was already running before the association was created, restart it to pick up the credentials:
+
+```bash
+# DaemonSet (default)
+kubectl rollout restart daemonset/<release-name>-sbom-collector -n <namespace>
+# Deployment (if runAsDaemonSet: false)
+kubectl rollout restart deployment/<release-name>-sbom-collector -n <namespace>
+```
 
 ### Azure Workload Identity
 
