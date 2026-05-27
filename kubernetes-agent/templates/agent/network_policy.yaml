@@ -28,7 +28,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: kubernetes-agent-runtime-detection
+              aikido-security: kubernetes-agent-runtime-detection
       ports:
         - protocol: TCP
           port: {{ .Values.runtimeDetection.port }}

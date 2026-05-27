@@ -267,6 +267,10 @@ gcloud projects add-iam-policy-binding projects/PROJECT_ID \
 
 Aikido can detect runtime threats in your Kubernetes cluster using [Falco](https://falco.org/). When enabled, a Falco DaemonSet is deployed alongside the agent and sends security events to it for processing and forwarding to the Aikido platform.
 
+### Requirements
+
+Runtime detection uses Falco's modern eBPF driver, which requires Linux kernel **5.8 or newer** on every node where the Falco DaemonSet runs. Nodes with older kernels or non-Linux nodes are not supported and the Falco pod will fail to start on them.
+
 ### Non-standard release names
 
 If you install the chart with a release name other than the default (e.g. via `fullnameOverride`), Falco's internal service URL will differ. Set `runtimeDetection.httpOutputUrl` explicitly in that case:

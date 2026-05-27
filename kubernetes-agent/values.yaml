@@ -224,7 +224,9 @@ runtimeDetection:
 falco:
   image:
     # Pinned explicitly so the k8s API can read this version when seeding new clusters.
-    # Must be kept in sync with the falco subchart version in Chart.yaml (chart appVersion).
+    # Must match the appVersion of the falco chart pinned in Chart.yaml (i.e. the Falco
+    # image version that chart revision was built against). This is NOT the kubernetes-agent
+    # chart's appVersion.
     tag: &falcoVersion "0.44.0"
   driver:
     loader:
@@ -237,7 +239,8 @@ falco:
 
   # Labels Falco pods so the network policy can target them
   podLabels:
-    app.kubernetes.io/component: kubernetes-agent-runtime-detection
+    aikido-security: kubernetes-agent-runtime-detection
+    app.kubernetes.io/component: runtime-detection
 
   # Mounts our computed http_output config (see templates/falco/falco-config.yaml)
   # and the agent-managed rules ConfigMap (see templates/falco/falco-rules.yaml).
