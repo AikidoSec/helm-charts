@@ -272,13 +272,17 @@ falco:
     # Falco default is false; we need structured JSON for event parsing
     json_output: true
 
-    # Falco default is true; not useful in Kubernetes environments
+    # Falco default is true; /dev/log is not present in Kubernetes pods so syslog output fails silently
     syslog_output:
       enabled: false
 
     # Falco default is true; reduces verbose low-level noise
     libs_logger:
       enabled: false
+
+    # Falco defaults are true; listed explicitly since we depend on these fields being present in events
+    json_include_output_fields_property: true
+    json_include_tags_property: true
 
   falcoctl:
     artifact:

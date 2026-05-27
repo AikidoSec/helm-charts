@@ -68,7 +68,7 @@ spec:
             - name: RUNTIME_DETECTION_ENABLED
               value: {{ .Values.runtimeDetection.enabled | quote }}
             {{- if .Values.runtimeDetection.enabled }}
-            - name: FALCO_PROXY_PORT
+            - name: RUNTIME_DETECTION_PORT
               value: {{ .Values.runtimeDetection.port | quote }}
             {{- end }}
             - name: GOMEMLIMIT
@@ -100,7 +100,7 @@ spec:
               protocol: TCP
             {{- if .Values.runtimeDetection.enabled }}
             - containerPort: {{ .Values.runtimeDetection.port }}
-              name: td-port
+              name: rd-port
               protocol: TCP
             {{- end }}
           startupProbe:

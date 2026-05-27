@@ -17,8 +17,8 @@ spec:
       port: {{ .Values.agent.service.metricsPort }}
       targetPort: metrics-port
     {{- if .Values.runtimeDetection.enabled }}
-    - name: td-port
+    - name: rd-port
       protocol: TCP
       port: {{ .Values.runtimeDetection.port }}
-      targetPort: td-port
+      targetPort: rd-port
     {{- end }}

@@ -120,7 +120,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: FALCO_PROXY_PORT
+            name: RUNTIME_DETECTION_PORT
             value: "8241"
 
   - it: agent deployment should omit runtime detection detail env vars when disabled
@@ -136,11 +136,11 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: FALCO_PROXY_PORT
+            name: RUNTIME_DETECTION_PORT
 
   # --- agent service ---
 
-  - it: service should expose td-port port when enabled
+  - it: service should expose rd-port port when enabled
     set:
       runtimeDetection.enabled: true
     template: templates/agent/service.yaml
@@ -148,12 +148,12 @@ tests:
       - contains:
           path: spec.ports
           content:
-            name: td-port
+            name: rd-port
             protocol: TCP
             port: 8241
-            targetPort: td-port
+            targetPort: rd-port
 
-  - it: service should not expose td-port port when disabled
+  - it: service should not expose rd-port port when disabled
     set:
       runtimeDetection.enabled: false
     template: templates/agent/service.yaml
@@ -161,7 +161,7 @@ tests:
       - notContains:
           path: spec.ports
           content:
-            name: td-port
+            name: rd-port
 
   # --- network policy ---
 

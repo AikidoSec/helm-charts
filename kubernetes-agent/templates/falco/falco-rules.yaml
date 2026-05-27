@@ -6,6 +6,5 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-agent.labels" . | nindent 4 }}
-data:
-  01-threat-detection-rules.yaml: ""
+data: {}
 {{- end }}
