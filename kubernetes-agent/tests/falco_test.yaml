@@ -216,3 +216,32 @@ tests:
               - RELEASE-NAME-kubernetes-agent
               - RELEASE-NAME-kubernetes-agent-sbom-collector
               - RELEASE-NAME-kubernetes-agent-runtime-detection
+
+  # The Falco subchart does not honor the parent chart's fullnameOverride, so the
+  # runtime-detection name must stay anchored to Release.Name + falco.nameOverride.
+  - it: rbac runtime-detection resourceName must match Falco DaemonSet under fullnameOverride
+    set:
+      runtimeDetection.enabled: true
+      fullnameOverride: my-agent
+    templates:
+      - templates/agent/rbac.yaml
+      - charts/falco/templates/daemonset.yaml
+    asserts:
+      - template: charts/falco/templates/daemonset.yaml
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-kubernetes-agent-runtime-detection
+      - template: templates/agent/rbac.yaml
+        documentSelector:
+          path: kind
+          value: Role
+        contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - my-agent
+              - my-agent-sbom-collector
+              - RELEASE-NAME-kubernetes-agent-runtime-detection

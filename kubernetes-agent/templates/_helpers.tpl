@@ -160,11 +160,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Name shared by all runtime detection resources (Falco DaemonSet, config ConfigMap).
 Must match the Falco subchart's DaemonSet name, which is derived from falco.nameOverride.
-The agent derives the same name at runtime from its own pod name.
+Mirrors Falco's own fullname logic rather than reusing kubernetes-agent.fullname, because
+the Falco subchart does not see the parent chart's fullnameOverride.
 */}}
 {{- define "kubernetes-agent.runtimeDetectionName" -}}
-{{- printf "%s-runtime-detection" (include "kubernetes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- $name := "kubernetes-agent-runtime-detection" -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 The URL that Falco uses to deliver detection events to the agent.
