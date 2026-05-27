@@ -225,7 +225,7 @@ falco:
   image:
     # Pinned explicitly so the k8s API can read this version when seeding new clusters.
     # Must be kept in sync with the falco subchart version in Chart.yaml (chart appVersion).
-    tag: &falcoVersion "0.43.0"
+    tag: &falcoVersion "0.44.0"
   driver:
     loader:
       initContainer:
