@@ -208,3 +208,90 @@ additionalVolumeMounts: []
 #           remoteRef:
 #             key: secrets/aikido/config
 extraObjects: []
+
+runtimeDetection:
+  enabled: false
+  # Port on the agent that Falco sends detection events to.
+  port: 8241
+  # Override the URL where Falco sends detection events. Defaults to the agent's in-cluster service URL.
+  # Useful if you install with a non-standard release name or use fullnameOverride.
+  # Default: http://RELEASE-NAME-kubernetes-agent:PORT/detection
+  httpOutputUrl: ""
+
+# Internal Falco subchart configuration. Not part of the public API of this chart and
+# may change between versions. See https://github.com/falcosecurity/charts/tree/falco-9.0.0/charts/falco
+# Only values that differ from the Falco chart's defaults are listed here.
+falco:
+  image:
+    # Pinned explicitly so the k8s API can read this version when seeding new clusters.
+    # Must match the appVersion of the falco chart pinned in Chart.yaml (i.e. the Falco
+    # image version that chart revision was built against). This is NOT the kubernetes-agent
+    # chart's appVersion.
+    tag: &falcoVersion "0.44.0"
+  driver:
+    loader:
+      initContainer:
+        image:
+          tag: *falcoVersion
+
+  # Makes the DaemonSet name predictable: RELEASE-NAME-kubernetes-agent-runtime-detection
+  nameOverride: "kubernetes-agent-runtime-detection"
+
+  # Labels Falco pods so the network policy can target them
+  podLabels:
+    aikido-security: kubernetes-agent-runtime-detection
+    app.kubernetes.io/component: runtime-detection
+
+  # Mounts our computed http_output config (see templates/falco/falco-config.yaml)
+  # and the agent-managed rules ConfigMap (see templates/falco/falco-rules.yaml).
+  mounts:
+    volumes:
+      - name: kubernetes-agent-falco-config
+        configMap:
+          name: kubernetes-agent-falco-config
+      - name: aikido-falco-rules
+        configMap:
+          name: kubernetes-agent-falco-rules
+    volumeMounts:
+      - name: kubernetes-agent-falco-config
+        mountPath: /etc/falco/aikido-config.d
+      - name: aikido-falco-rules
+        mountPath: /etc/falco/rules.d
+
+  falco:
+    # Add our aikido-config.d alongside the default config.d
+    config_files:
+      - /etc/falco/config.d
+      - /etc/falco/aikido-config.d
+
+    # Load only our explicitly managed rules directory; the agent writes rule files
+    # here on startup. Falco default includes the falcoctl-populated path which we no longer use.
+    rules_files:
+      - /etc/falco/rules.d
+
+    # Falco default is debug; info is the lowest level we expose to customers
+    priority: info
+
+    # Falco default is false; we need structured JSON for event parsing
+    json_output: true
+
+    # Falco default is true; /dev/log is not present in Kubernetes pods so syslog output fails silently
+    syslog_output:
+      enabled: false
+
+    # Falco default is true; reduces verbose low-level noise
+    libs_logger:
+      enabled: false
+
+    # Falco defaults are true; listed explicitly since we depend on these fields being present in events
+    json_include_output_fields_property: true
+    json_include_tags_property: true
+
+  falcoctl:
+    artifact:
+      install:
+        # Falco default is true; rules are embedded in the agent binary and written to a ConfigMap on startup
+        enabled: false
+      follow:
+        # Falco default is true; the agent manages rule updates via ConfigMap so the sidecar is redundant
+        enabled: false

@@ -24,4 +24,13 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.agent.service.metricsPort }}
+    {{- if .Values.runtimeDetection.enabled }}
+    - from:
+        - podSelector:
+            matchLabels:
+              aikido-security: kubernetes-agent-runtime-detection
+      ports:
+        - protocol: TCP
+          port: {{ .Values.runtimeDetection.port }}
+    {{- end }}
 {{- end }}

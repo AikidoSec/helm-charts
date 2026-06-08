@@ -156,3 +156,30 @@ app.kubernetes.io/version: {{ .Values.sbomCollector.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/*
+Name shared by all runtime detection resources (Falco DaemonSet, config ConfigMap).
+Must match the Falco subchart's DaemonSet name, which is derived from falco.nameOverride.
+Mirrors Falco's own fullname logic rather than reusing kubernetes-agent.fullname, because
+the Falco subchart does not see the parent chart's fullnameOverride.
+*/}}
+{{- define "kubernetes-agent.runtimeDetectionName" -}}
+{{- $name := "kubernetes-agent-runtime-detection" -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+The URL that Falco uses to deliver detection events to the agent.
+Uses runtimeDetection.httpOutputUrl if set, otherwise auto-computes from the agent's service name.
+*/}}
+{{- define "kubernetes-agent.runtimeDetectionHttpOutputUrl" -}}
+{{- if .Values.runtimeDetection.httpOutputUrl -}}
+{{- .Values.runtimeDetection.httpOutputUrl -}}
+{{- else -}}
+{{- printf "http://%s:%d/detection" (include "kubernetes-agent.fullname" .) (.Values.runtimeDetection.port | int) -}}
+{{- end -}}
+{{- end -}}
