@@ -55,6 +55,10 @@ config:
   # Set to "true" to force polling connection
   forcePolling: ''
 
+  # Optional: Log all proxied requests for debugging
+  # Set to "1" to enable request debug logging
+  debugRequests: ''
+
   # Optional: No proxy configuration
   # Comma-separated list of hosts/domains that should bypass the proxy
   # Example: "localhost,127.0.0.1,.company.local"
