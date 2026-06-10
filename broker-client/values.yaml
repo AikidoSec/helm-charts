@@ -4,8 +4,16 @@
 
 # Broker client configuration
 config:
-  # REQUIRED: Your broker client secret from Aikido
+  # REQUIRED: Your broker client secret from Aikido.
+  # Ignored when existingSecretName is set.
   clientSecret: ''
+
+  # Optional: Name of an existing Kubernetes Secret that holds the clientSecret value.
+  # Use this with GitOps tools (e.g. ArgoCD + SOPS) to avoid committing the secret to git.
+  # When set, config.clientSecret is ignored.
+  existingSecretName: ''
+  # Key inside the existing secret that holds the client secret value.
+  existingSecretKey: 'CLIENT_SECRET'
 
   # REQUIRED: Allowed internal subnets (comma-separated CIDR blocks)
   # Example: "192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,127.0.0.0/8"

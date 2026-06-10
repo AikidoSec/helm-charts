@@ -39,6 +39,14 @@ spec:
         envFrom:
         - secretRef:
             name: {{ include "broker-client.fullname" . }}
+        {{- if .Values.config.existingSecretName }}
+        env:
+        - name: CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.config.existingSecretName }}
+              key: {{ .Values.config.existingSecretKey | default "CLIENT_SECRET" }}
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         volumeMounts:
