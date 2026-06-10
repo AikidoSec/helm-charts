@@ -76,6 +76,23 @@ rules:
       - gateways
       - httproutes
     verbs: [ "get","list","watch" ]
+  # configuration.konghq.com
+  - apiGroups: [ "configuration.konghq.com" ]
+    resources:
+      - kongroutes
+      - kongservices
+    verbs: [ "get","list","watch" ]
+  # keda.sh
+  - apiGroups: [ "keda.sh" ]
+    resources:
+      - scaledjobs
+    verbs: [ "get","list","watch" ]
+  # argoproj.io
+  - apiGroups: [ "argoproj.io" ]
+    resources:
+      - applications
+      - rollouts
+    verbs: [ "get","list","watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
