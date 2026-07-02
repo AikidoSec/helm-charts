@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.14.3
+    tag: v1.15.0
   service:
     port: 8091
     metricsPort: 8080
@@ -51,6 +51,18 @@ sbomCollector:
     - key: node-role.kubernetes.io/master
       operator: Exists
       effect: NoSchedule
+    # To allow scheduling on nodes with arbitrary taints, one of the following configurations can be used:
+    # Tolerate all NoSchedule and PreferNoSchedule taints:
+    #   daemonSetTolerations:
+    #     - operator: Exists
+    #       effect: NoSchedule
+    #     - operator: Exists
+    #       effect: PreferNoSchedule
+    # Alternatively, tolerate all taints and effects:
+    #   daemonSetTolerations:
+    #     - operator: Exists
+    # Node: Broad tolerations will allow the DaemonSet pods to be created or recreated on cordoned nodes during upgrades or rollouts.
+    # This can be unexpected in environments where cordoned nodes are assumed to be out of service and may interfere with certain maintenance, drain, or node lifecycle workflows.
   securityContext:
     # Running as root allows the collector to access images cached on the node
     # instead of always pulling them from the registry.
