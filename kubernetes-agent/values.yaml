@@ -230,8 +230,8 @@ runtimeDetection:
   # Default: http://RELEASE-NAME-kubernetes-agent:PORT/detection
   httpOutputUrl: ""
 
-# Internal Falco subchart configuration. Not part of the public API of this chart and
-# may change between versions. See https://github.com/falcosecurity/charts/tree/falco-9.0.0/charts/falco
+# Internal Falco subchart configuration.
+# See https://github.com/falcosecurity/charts/tree/falco-9.0.0/charts/falco
 # Only values that differ from the Falco chart's defaults are listed here.
 falco:
   image:
