@@ -41,6 +41,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Render an image reference. Digest wins over tag when both are set so callers can
+pin the deployed image while keeping the semantic version label unchanged.
+*/}}
+{{- define "kubernetes-agent.imageRef" -}}
+{{- if .digest -}}
+{{- printf "%s@%s" .repository .digest -}}
+{{- else -}}
+{{- printf "%s:%s" .repository .tag -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubernetes-agent.selectorLabels" -}}
