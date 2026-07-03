@@ -240,11 +240,15 @@ falco:
     # image version that chart revision was built against). This is NOT the kubernetes-agent
     # chart's appVersion.
     tag: &falcoVersion "0.44.0"
+    registry: public.ecr.aws
+    repository: aikido-cloud/falco
   driver:
     loader:
       initContainer:
         image:
           tag: *falcoVersion
+          registry: public.ecr.aws
+          repository: aikido-cloud/falco-driver-loader
 
   # Makes the DaemonSet name predictable: RELEASE-NAME-kubernetes-agent-runtime-detection
   nameOverride: "kubernetes-agent-runtime-detection"
