@@ -3,3 +3,4 @@
 .vscode/
 __debug*
 values.*.yaml
+**/charts/*.tgz

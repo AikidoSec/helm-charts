@@ -65,6 +65,12 @@ spec:
               value: {{ .Values.sbomCollector.enabled | quote }}
             - name: AUTO_UPDATE_ENABLED
               value: {{ .Values.agent.autoUpdate.enabled | quote }}
+            - name: RUNTIME_DETECTION_ENABLED
+              value: {{ .Values.runtimeDetection.enabled | quote }}
+            {{- if .Values.runtimeDetection.enabled }}
+            - name: RUNTIME_DETECTION_PORT
+              value: {{ .Values.runtimeDetection.port | quote }}
+            {{- end }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
@@ -92,6 +98,11 @@ spec:
             - containerPort: {{ .Values.agent.service.metricsPort }}
               name: metrics-port
               protocol: TCP
+            {{- if .Values.runtimeDetection.enabled }}
+            - containerPort: {{ .Values.runtimeDetection.port }}
+              name: rd-port
+              protocol: TCP
+            {{- end }}
           startupProbe:
             httpGet:
               path: /healthz
