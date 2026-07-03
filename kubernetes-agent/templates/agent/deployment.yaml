@@ -39,7 +39,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag }}"
+          image: {{ include "kubernetes-agent.imageRef" .Values.agent.image | quote }}
           imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
           args: ["-health-probe-bind-address=:{{ .Values.healthCheck.port }}"]
           env:

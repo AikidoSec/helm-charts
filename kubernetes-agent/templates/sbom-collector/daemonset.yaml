@@ -40,7 +40,7 @@ spec:
         - name: sbom-collector
           securityContext:
             {{- toYaml .Values.sbomCollector.securityContext | nindent 12 }}
-          image: "{{ .Values.sbomCollector.image.repository }}:{{ .Values.sbomCollector.image.tag }}"
+          image: {{ include "kubernetes-agent.imageRef" .Values.sbomCollector.image | quote }}
           imagePullPolicy: {{ .Values.sbomCollector.image.pullPolicy }}
           args: [ "-health-probe-bind-address=:{{ .Values.healthCheck.port }}" ]
           env:
