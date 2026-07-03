@@ -20,6 +20,7 @@ agent:
       memory: 100Mi
     limits:
       # cpu: 1500m # No CPU limit by default
+      # The SBOM collector can consume significat memory for very large images. We recommend observing the usage for a few hours and tuning the memory limit (e.g., 1Gi might be enough), preferably setting the requests to the same value. This will make scheduling easier.
       memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
