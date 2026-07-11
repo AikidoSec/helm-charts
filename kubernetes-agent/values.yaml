@@ -76,6 +76,14 @@ sbomCollector:
     capabilities:
       drop:
         - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Pod-level security context for the SBOM collector deployment
+  # (daemonset uses the root podSecurityContext)
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
 
   # Optional SBOM collector Syft overrides.
   # Supported keys:
@@ -172,7 +180,9 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
 # fsGroup: 2000
 
 securityContext:
@@ -183,6 +193,8 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
   allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
 
 healthCheck:
   port: 8081
