@@ -33,9 +33,10 @@ config:
 
   # Optional: Name of an existing Kubernetes Secret containing the custom CA bundle.
   # Use this with GitOps tools (e.g. Argo CD + SOPS) to avoid committing the certificate to Git.
-  # The Secret must contain the PEM-encoded CA certificate under the key 'custom-ca.crt'.
   # When set, config.customCaBundleContent is ignored.
   existingCaBundleSecretName: ''
+  # Key inside the existing secret that holds the PEM-encoded CA certificate.
+  existingCaBundleSecretKey: 'custom-ca.crt'
 
   # Optional: Proxy configuration for outbound requests
   # HTTP proxy for HTTP requests (e.g., "http://proxy.company.local:8080")
