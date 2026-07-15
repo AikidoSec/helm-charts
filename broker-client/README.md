@@ -65,32 +65,32 @@ helm install broker-client aikido/broker-client -f my-values.yaml --namespace ai
 
 ### Optional Parameters
 
-| Parameter                           | Description                                                                                     | Default                             |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------- |
-| `config.dnsServers`                 | Custom DNS servers (comma-separated)                                                            | `""`                                |
-| `config.httpProxy`                  | HTTP proxy for HTTP requests                                                                    | `""`                                |
-| `config.httpsProxy`                 | HTTPS proxy for HTTPS requests                                                                  | `""`                                |
-| `config.allProxy`                   | Universal proxy fallback for all protocols                                                      | `""`                                |
-| `config.brokerTargetUrl`            | Custom broker target URL                                                                        | `"https://broker.aikidobroker.com"` |
-| `config.customCaBundleContent`      | Custom CA certificate content (PEM format)                                                      | `""`                                |
-| `config.existingCaBundleSecretName` | Name of an existing Kubernetes Secret containing the custom CA certificate bundle               | `""`                                |
-| `config.existingCaBundleSecretKey`  | Key inside the existing secret that holds the CA certificate bundle                              | `"custom-ca.crt"`                   |
-| `config.existingSecretName`         | Name of an existing Kubernetes Secret that holds the clientSecret value                         | `""`                                |
-| `config.existingSecretKey`          | Key inside the existing secret that holds the client secret value                               | `"CLIENT_SECRET"`                   |
-| `config.nodeTlsRejectUnauthorized`  | Disable TLS certificate validation (set to `"0"`)                                               | `""`                                |
-| `config.forceWebsocket`             | Force WebSocket connection (set to `"true"`)                                                    | `""`                                |
-| `config.forcePolling`               | Force polling connection (set to `"true"`)                                                      | `""`                                |
-| `config.noProxy`                    | Comma-separated hosts/domains to bypass proxy                                                   | `""`                                |
-| `config.mtlsPemContent`             | Combined PEM content (cert + private key) for mTLS client auth to internal resources            | `""`                                |
-| `config.mtlsCaContent`              | CA certificate content (PEM) to verify internal resource servers using a private/self-signed CA | `""`                                |
-| `image.repository`                  | Docker image repository                                                                         | `aikidosecurity/broker-client`      |
-| `image.tag`                         | Docker image tag                                                                                | Chart appVersion                    |
-| `persistence.enabled`               | Enable persistent storage for client_id                                                         | `true`                              |
-| `persistence.size`                  | PVC size                                                                                        | `100Mi`                             |
-| `resources.requests.cpu`            | CPU request                                                                                     | `100m`                              |
-| `resources.requests.memory`         | Memory request                                                                                  | `256Mi`                             |
-| `resources.limits.cpu`              | CPU limit                                                                                       | `2000m` (2 vCPU)                    |
-| `resources.limits.memory`           | Memory limit                                                                                    | `1Gi`                               |
+| Parameter                      | Description                                | Default                            |
+| ------------------------------ | ------------------------------------------ | ---------------------------------- |
+| `config.dnsServers`            | Custom DNS servers (comma-separated)       | `""`                               |
+| `config.httpProxy`             | HTTP proxy for HTTP requests               | `""`                               |
+| `config.httpsProxy`            | HTTPS proxy for HTTPS requests             | `""`                               |
+| `config.allProxy`              | Universal proxy fallback for all protocols | `""`                               |
+| `config.brokerTargetUrl`       | Custom broker target URL                   | `"https://broker.aikidobroker.com"`|
+| `config.customCaBundleContent` | Custom CA certificate content (PEM format) | `""`                               |
+| `config.existingCaBundleSecretName` | Name of an existing Kubernetes Secret containing the custom CA certificate bundle | `""` |
+| `config.existingCaBundleSecretKey` | Key inside the existing secret that holds the CA certificate bundle | `"custom-ca.crt"` |
+| `config.existingSecretName`    | Name of an existing Kubernetes Secret that holds the clientSecret value | `""` |
+| `config.existingSecretKey`     | Key inside the existing secret that holds the client secret value | `"CLIENT_SECRET"` |
+| `config.nodeTlsRejectUnauthorized` | Disable TLS certificate validation (set to "0") | `""`                               |
+| `config.forceWebsocket`        | Force WebSocket connection (set to "true") | `""`                               |
+| `config.forcePolling`          | Force polling connection (set to "true")   | `""`                               |
+| `config.noProxy`               | Comma-separated hosts/domains to bypass proxy | `""`                               |
+| `config.mtlsPemContent`        | Combined PEM content (cert + private key) for mTLS client auth to internal resources | `""` |
+| `config.mtlsCaContent`         | CA certificate content (PEM) to verify internal resource servers using a private/self-signed CA | `""` |
+| `image.repository`             | Docker image repository                    | `aikidosecurity/broker-client`     |
+| `image.tag`                    | Docker image tag                           | Chart appVersion                   |
+| `persistence.enabled`          | Enable persistent storage for client_id    | `true`                             |
+| `persistence.size`             | PVC size                                   | `100Mi`                            |
+| `resources.requests.cpu`       | CPU request                                | `100m`                             |
+| `resources.requests.memory`    | Memory request                             | `256Mi`                            |
+| `resources.limits.cpu`         | CPU limit                                  | `2000m` (2 vCPU)                   |
+| `resources.limits.memory`      | Memory limit                               | `1Gi`                              |
 
 ### Example with Proxy and Custom CA
 
