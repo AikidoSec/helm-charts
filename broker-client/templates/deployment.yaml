@@ -56,7 +56,11 @@ spec:
         {{- if or .Values.config.customCaBundleContent .Values.config.existingCaBundleSecretName }}
         - name: custom-ca
           mountPath: /certs/custom-ca.crt
+          {{- if .Values.config.existingCaBundleSecretName }}
           subPath: {{ .Values.config.existingCaBundleSecretKey | default "custom-ca.crt" }}
+          {{- else }}
+          subPath: custom-ca.crt
+          {{- end }}
           readOnly: true
         {{- end }}
         {{- if .Values.config.mtlsPemContent }}

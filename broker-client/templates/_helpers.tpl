@@ -71,7 +71,7 @@ CA Bundle secret name
 */}}
 {{- define "broker-client.customCaBundleSecretName" -}}
 {{- if .Values.config.existingCaBundleSecretName -}}
-{{ .Values.config.existingCaBundleSecretName }}
+{{- .Values.config.existingCaBundleSecretName -}}
 {{- else -}}
 {{ include "broker-client.fullname" . }}-ca-bundle
 {{- end -}}
