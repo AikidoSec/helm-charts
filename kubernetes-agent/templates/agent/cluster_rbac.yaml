@@ -37,6 +37,7 @@ rules:
     resources:
       - networkpolicies
       - ingresses
+      - ingressclasses
     verbs: ["get","list","watch"]
   # batch
   - apiGroups: ["batch"]
