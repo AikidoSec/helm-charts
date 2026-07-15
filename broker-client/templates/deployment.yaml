@@ -53,10 +53,14 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
-        {{- if .Values.config.customCaBundleContent }}
+        {{- if or .Values.config.customCaBundleContent .Values.config.existingCaBundleSecretName }}
         - name: custom-ca
           mountPath: /certs/custom-ca.crt
+          {{- if .Values.config.existingCaBundleSecretName }}
+          subPath: {{ .Values.config.existingCaBundleSecretKey | default "custom-ca.crt" }}
+          {{- else }}
           subPath: custom-ca.crt
+          {{- end }}
           readOnly: true
         {{- end }}
         {{- if .Values.config.mtlsPemContent }}
@@ -79,10 +83,10 @@ spec:
         {{- else }}
         emptyDir: {}
         {{- end }}
-      {{- if .Values.config.customCaBundleContent }}
+      {{- if or .Values.config.customCaBundleContent .Values.config.existingCaBundleSecretName }}
       - name: custom-ca
         secret:
-          secretName: {{ include "broker-client.fullname" . }}-ca-bundle
+          secretName: {{ include "broker-client.customCaBundleSecretName" . }}
       {{- end }}
       {{- if .Values.config.mtlsPemContent }}
       - name: mtls-pem
