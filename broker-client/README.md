@@ -73,6 +73,10 @@ helm install broker-client aikido/broker-client -f my-values.yaml --namespace ai
 | `config.allProxy`              | Universal proxy fallback for all protocols | `""`                               |
 | `config.brokerTargetUrl`       | Custom broker target URL                   | `"https://broker.aikidobroker.com"`|
 | `config.customCaBundleContent` | Custom CA certificate content (PEM format) | `""`                               |
+| `config.existingCaBundleSecretName` | Name of an existing Kubernetes Secret containing the custom CA certificate bundle | `""` |
+| `config.existingCaBundleSecretKey` | Key inside the existing secret that holds the CA certificate bundle | `"custom-ca.crt"` |
+| `config.existingSecretName`    | Name of an existing Kubernetes Secret that holds the clientSecret value | `""` |
+| `config.existingSecretKey`     | Key inside the existing secret that holds the client secret value | `"CLIENT_SECRET"` |
 | `config.nodeTlsRejectUnauthorized` | Disable TLS certificate validation (set to "0") | `""`                               |
 | `config.forceWebsocket`        | Force WebSocket connection (set to "true") | `""`                               |
 | `config.forcePolling`          | Force polling connection (set to "true")   | `""`                               |

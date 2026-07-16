@@ -65,3 +65,14 @@ Image tag
 {{- define "broker-client.imageTag" -}}
 {{- .Values.image.tag | default .Chart.AppVersion }}
 {{- end }}
+
+{{/*
+CA Bundle secret name
+*/}}
+{{- define "broker-client.customCaBundleSecretName" -}}
+{{- if .Values.config.existingCaBundleSecretName -}}
+{{- .Values.config.existingCaBundleSecretName -}}
+{{- else -}}
+{{ include "broker-client.fullname" . }}-ca-bundle
+{{- end -}}
+{{- end -}}
