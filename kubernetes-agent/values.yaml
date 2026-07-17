@@ -159,6 +159,39 @@ fullnameOverride: ''
 
 networkPolicy:
   enabled: true
+  egress:
+    enabled: false
+    # Egress rules applied to the agent and SBOM collector pods.
+    # Each item is rendered as a raw NetworkPolicy egress rule.
+    rules:
+      # Allow traffic to any pod in the same namespace.
+      - to:
+          - podSelector: {}
+      # Allow DNS to kube-system.
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+        ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
+      # Allows HTTPS egress to the Kubernetes API, Aikido API, container registries,
+      # registry auth endpoints, and configured HTTPS proxies.
+      # Restrict cidrs to your API server/proxy/registry ranges when known.
+      - ports:
+          - protocol: TCP
+            port: 443
+      # GKE metadata endpoint used by the agent for cluster identification.
+      - to:
+          - ipBlock:
+              cidr: 169.254.169.254/32
+        ports:
+          - protocol: TCP
+            port: 80
+    # Extra raw NetworkPolicy egress rules appended to the defaults above.
+    extra: []
 
 serviceAccount:
   # Specifies whether a service account should be created
