@@ -88,6 +88,8 @@ spec:
             httpGet:
               path: /healthz
               port: health
+            failureThreshold: 30
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /readyz
