@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kubernetes-agent
 description: Install the Aikido Kubernetes Agent to secure and integrate your Kubernetes clusters with Aikido.
-version: 2.9.12
+version: 2.9.13
 appVersion: v1.18.1
 type: application
