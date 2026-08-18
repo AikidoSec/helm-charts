@@ -68,6 +68,10 @@ rules:
       - imagetagmirrorsets
     verbs: [ "get","list","watch" ]
   # route.openshift.io
+  # A Route embeds its certificate and private key inline in
+  # spec.tls. The agent clears those fields before sending the object, so no key
+  # material ever leaves the cluster:
+  # https://github.com/AikidoSec/kubernetes-agent/blob/7a5440d5ae07af2a60000f8d9780f233a283e743/internal/format/route.go#L12
   - apiGroups: [ "route.openshift.io" ]
     resources:
       - routes
