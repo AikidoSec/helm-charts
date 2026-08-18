@@ -483,6 +483,17 @@ entries:
     version: 1.0.0
   kubernetes-agent:
   - apiVersion: v2
+    appVersion: v1.21.0
+    created: "2026-08-18T13:36:56.276562001Z"
+    description: Install the Aikido Kubernetes Agent to secure and integrate your
+      Kubernetes clusters with Aikido.
+    digest: 798ac08f8225769837e12c3361f624523db9109e1491f0863c1eea6c3ed8862e
+    name: kubernetes-agent
+    type: application
+    urls:
+    - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-2.9.15/kubernetes-agent-2.9.15.tgz
+    version: 2.9.15
+  - apiVersion: v2
     appVersion: v1.19.0
     created: "2026-08-05T13:18:01.576034915Z"
     description: Install the Aikido Kubernetes Agent to secure and integrate your
@@ -1053,4 +1064,4 @@ entries:
     urls:
     - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-1.0.0/kubernetes-agent-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-05T13:18:01.576296166Z"
+generated: "2026-08-18T13:36:56.276839099Z"
