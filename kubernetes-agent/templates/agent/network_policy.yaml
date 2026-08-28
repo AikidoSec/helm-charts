@@ -10,6 +10,9 @@ spec:
       aikido-security: kubernetes-agent
   policyTypes:
     - Ingress
+    {{- if .Values.networkPolicy.egress.enabled }}
+    - Egress
+    {{- end }}
   ingress:
     - from:
         - podSelector:
@@ -33,4 +36,17 @@ spec:
         - protocol: TCP
           port: {{ .Values.runtimeDetection.port }}
     {{- end }}
+  {{- if .Values.networkPolicy.egress.enabled }}
+  {{- if or .Values.networkPolicy.egress.rules .Values.networkPolicy.egress.extra }}
+  egress:
+    {{- range .Values.networkPolicy.egress.rules }}
+    {{- toYaml (list .) | nindent 4 }}
+    {{- end }}
+    {{- range .Values.networkPolicy.egress.extra }}
+    {{- toYaml (list .) | nindent 4 }}
+    {{- end }}
+  {{- else }}
+  egress: []
+  {{- end }}
+  {{- end }}
 {{- end }}

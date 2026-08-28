@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.15.0
+    tag: v1.21.1
   service:
     port: 8091
     metricsPort: 8080
@@ -20,6 +20,7 @@ agent:
       memory: 100Mi
     limits:
       # cpu: 1500m # No CPU limit by default
+      # The agent can consume significat memory during bootup for very large clusters. We recommend observing the usage for a few hours and tuning the memory limit (e.g., 1Gi might be enough), preferably setting the requests to the same value. This will make scheduling the agent easier.
       memory: 5Gi # Only Mi and Gi are supported
 
 sbomCollector:
@@ -28,10 +29,17 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.6.6
+    tag: v1.9.2
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
+  # Image name patterns to skip during SBOM collection.
+  # Patterns are matched against the image name without tag or digest.
+  # Example:
+  # excludedImageNames:
+  #   - "registry.k8s.io/*"
+  #   - "*/pause"
+  excludedImageNames: []
   priorityClassName: ''
   resources:
     requests:
@@ -40,6 +48,7 @@ sbomCollector:
       ephemeral-storage: 500Mi
     limits:
       # cpu: 1500m # No CPU limit by default
+      # The SBOM collector can consume significat memory for very large images. We recommend observing the usage for a few hours and tuning the memory limit (e.g., 1Gi might be enough), preferably setting the requests to the same value. This will make scheduling easier.
       memory: 5Gi # Only Mi and Gi are supported
       ephemeral-storage: 10Gi
   daemonSetTolerations:
@@ -157,6 +166,39 @@ fullnameOverride: ''
 
 networkPolicy:
   enabled: true
+  egress:
+    enabled: false
+    # Egress rules applied to the agent and SBOM collector pods.
+    # Each item is rendered as a raw NetworkPolicy egress rule.
+    rules:
+      # Allow traffic to any pod in the same namespace.
+      - to:
+          - podSelector: {}
+      # Allow DNS to kube-system.
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+        ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
+      # Allows HTTPS egress to the Kubernetes API, Aikido API, container registries,
+      # registry auth endpoints, and configured HTTPS proxies.
+      # Restrict cidrs to your API server/proxy/registry ranges when known.
+      - ports:
+          - protocol: TCP
+            port: 443
+      # GKE metadata endpoint used by the agent for cluster identification.
+      - to:
+          - ipBlock:
+              cidr: 169.254.169.254/32
+        ports:
+          - protocol: TCP
+            port: 80
+    # Extra raw NetworkPolicy egress rules appended to the defaults above.
+    extra: []
 
 serviceAccount:
   # Specifies whether a service account should be created

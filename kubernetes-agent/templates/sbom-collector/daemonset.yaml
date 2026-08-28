@@ -64,6 +64,8 @@ spec:
               value: "true"
             - name: SUPPRESS_ERROR_LOGS
               value: "{{ .Values.sbomCollector.logging.suppressErrors }}"
+            - name: EXCLUDED_IMAGE_NAMES
+              value: {{ .Values.sbomCollector.excludedImageNames | toJson | quote }}
             {{- if and .Values.config.proxy .Values.config.proxy.httpProxy }}
             - name: HTTP_PROXY
               value: {{ .Values.config.proxy.httpProxy | quote }}
@@ -91,6 +93,8 @@ spec:
             httpGet:
               path: /healthz
               port: health
+            failureThreshold: 30
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /readyz
