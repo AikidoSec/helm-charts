@@ -70,6 +70,8 @@ spec:
             {{- if .Values.runtimeDetection.enabled }}
             - name: RUNTIME_DETECTION_PORT
               value: {{ .Values.runtimeDetection.port | quote }}
+            - name: RUNTIME_DETECTION_ENDPOINT
+              value: {{ .Values.config.runtimeDetectionEndpoint | quote }}
             {{- end }}
             - name: GOMEMLIMIT
               value: "{{ include "kubernetes-agent.goMemLimit" . }}"

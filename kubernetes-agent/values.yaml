@@ -151,6 +151,8 @@ sbomCollector:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
+  # Where the agent POSTs runtime threat detections.
+  runtimeDetectionEndpoint: 'https://endpoint-server-ingest.aikido.dev/infra/v1/threats'
   # HTTP proxy configuration
   proxy:
     # HTTP proxy URL (e.g., http://proxy.company.com:8080)
