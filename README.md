@@ -97,6 +97,13 @@ Aikido can generate SBOMs (Software Bill of Materials) for container images depl
 
 For pulling, the collector attempts first to pull the images from the nodes' cache, through the containerd/docker sockets. If the image is not found in the cache, it will attempt to pull it from the registry. For private registries, the collector requires access to the same image pull secrets that pods use.
 
+If your containerd images are stored in a non-default namespace, configure the namespace used for node-local containerd cache lookups:
+
+```yaml
+sbomCollector:
+  containerdNamespace: k8s.io
+```
+
 For environments running on managed Kubernetes services, Aikido supports authentication via native workload identities.
 
 ### Private registry authentication
