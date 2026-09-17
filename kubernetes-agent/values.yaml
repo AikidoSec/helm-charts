@@ -40,6 +40,9 @@ sbomCollector:
   #   - "registry.k8s.io/*"
   #   - "*/pause"
   excludedImageNames: []
+  # Optional containerd namespace used when reading images from the node-local containerd cache.
+  # Leave empty to use the collector's default.
+  containerdNamespace: ''
   priorityClassName: ''
   resources:
     requests:
