@@ -1,0 +1,10 @@
+{{- if .Values.runtimeDetection.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-agent-falco-rules
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+data: {}
+{{- end }}

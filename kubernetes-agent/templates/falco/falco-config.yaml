@@ -1,0 +1,15 @@
+{{- if .Values.runtimeDetection.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-agent-falco-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-agent.labels" . | nindent 4 }}
+data:
+  http-output.yaml: |
+    http_output:
+      enabled: true
+      url: {{ include "kubernetes-agent.runtimeDetectionHttpOutputUrl" . | quote }}
+  rules-override.yaml: ""
+{{- end }}

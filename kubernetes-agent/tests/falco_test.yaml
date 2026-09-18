@@ -1,0 +1,247 @@
+suite: falco runtime detection
+
+tests:
+  # --- falco config (our template) ---
+
+  - it: should not render when disabled
+    set:
+      runtimeDetection.enabled: false
+    template: templates/falco/falco-config.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: falco config should send events to the agent HTTP endpoint
+    set:
+      runtimeDetection.enabled: true
+    template: templates/falco/falco-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["http-output.yaml"]
+          pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:8241/detection"'
+
+  - it: falco config URL should follow runtimeDetection.port
+    set:
+      runtimeDetection.enabled: true
+      runtimeDetection.port: 9999
+    template: templates/falco/falco-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["http-output.yaml"]
+          pattern: 'url: "http://RELEASE-NAME-kubernetes-agent:9999/detection"'
+
+  - it: falco config should use httpOutputUrl override when set
+    set:
+      runtimeDetection.enabled: true
+      runtimeDetection.httpOutputUrl: "http://my-custom-agent:7777/detection"
+    template: templates/falco/falco-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["http-output.yaml"]
+          pattern: 'url: "http://my-custom-agent:7777/detection"'
+
+  # --- Falco DaemonSet (subchart) ---
+
+  - it: daemonset should be named with runtime-detection suffix
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kubernetes-agent-runtime-detection
+
+  - it: daemonset should tolerate control-plane nodes
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/control-plane
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: node-role.kubernetes.io/master
+
+  - it: daemonset should use rolling update strategy
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: RollingUpdate
+
+  # --- Falco ConfigMap (subchart) ---
+
+  - it: falco configmap should enable JSON output
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_output: true"
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_include_output_fields_property: true"
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "json_include_tags_property: true"
+
+  - it: daemonset main container and driver loader init container should use the same image tag
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/daemonset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ":0\\.44\\.0$"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].image
+          pattern: ":0\\.44\\.0$"
+
+  # --- agent deployment ---
+
+  - it: agent deployment should include runtime detection env vars when enabled
+    set:
+      runtimeDetection.enabled: true
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: RUNTIME_DETECTION_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: RUNTIME_DETECTION_PORT
+            value: "8241"
+
+  - it: agent deployment should omit runtime detection detail env vars when disabled
+    set:
+      runtimeDetection.enabled: false
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: RUNTIME_DETECTION_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: RUNTIME_DETECTION_PORT
+
+  # --- agent service ---
+
+  - it: service should expose rd-port port when enabled
+    set:
+      runtimeDetection.enabled: true
+    template: templates/agent/service.yaml
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: rd-port
+            protocol: TCP
+            port: 8241
+            targetPort: rd-port
+
+  - it: service should not expose rd-port port when disabled
+    set:
+      runtimeDetection.enabled: false
+    template: templates/agent/service.yaml
+    asserts:
+      - notContains:
+          path: spec.ports
+          content:
+            name: rd-port
+
+  # --- network policy ---
+
+  - it: network policy should allow ingress from falco pods when enabled
+    set:
+      runtimeDetection.enabled: true
+    template: templates/agent/network_policy.yaml
+    asserts:
+      - contains:
+          path: spec.ingress
+          content:
+            from:
+              - podSelector:
+                  matchLabels:
+                    aikido-security: kubernetes-agent-runtime-detection
+            ports:
+              - protocol: TCP
+                port: 8241
+
+  - it: network policy should not include runtime detection rule when disabled
+    set:
+      runtimeDetection.enabled: false
+    template: templates/agent/network_policy.yaml
+    asserts:
+      - notContains:
+          path: spec.ingress
+          content:
+            from:
+              - podSelector:
+                  matchLabels:
+                    aikido-security: kubernetes-agent-runtime-detection
+
+  # --- rbac ---
+
+  # Guards against drift between the RBAC resourceNames and the actual Falco
+  # DaemonSet name. If these diverge, the agent can't restart Falco on rule changes.
+  - it: rbac should permit patching the Falco DaemonSet by its actual name
+    set:
+      runtimeDetection.enabled: true
+    template: templates/agent/rbac.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+              - RELEASE-NAME-kubernetes-agent-sbom-collector
+              - RELEASE-NAME-kubernetes-agent-runtime-detection
+
+  # The Falco subchart does not honor the parent chart's fullnameOverride, so the
+  # runtime-detection name must stay anchored to Release.Name + falco.nameOverride.
+  - it: rbac runtime-detection resourceName must match Falco DaemonSet under fullnameOverride
+    set:
+      runtimeDetection.enabled: true
+      fullnameOverride: my-agent
+    templates:
+      - templates/agent/rbac.yaml
+      - charts/falco/templates/daemonset.yaml
+    asserts:
+      - template: charts/falco/templates/daemonset.yaml
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-kubernetes-agent-runtime-detection
+      - template: templates/agent/rbac.yaml
+        documentSelector:
+          path: kind
+          value: Role
+        contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - my-agent
+              - my-agent-sbom-collector
+              - RELEASE-NAME-kubernetes-agent-runtime-detection
