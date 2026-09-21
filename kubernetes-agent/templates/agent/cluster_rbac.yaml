@@ -116,15 +116,17 @@ rules:
       - ephemeralrunners
       - autoscalinglisteners
     verbs: [ "get","list","watch" ]
+  {{- if .Values.agent.githubArc.legacyRunnerAccess.enabled }}
   # actions.summerwind.dev (legacy GitHub Actions Runner Controller)
-  # A Runner holds a short-lived GitHub runner registration token in
-  # status.registration. The agent clears that field before sending the object, so no
-  # credential able to register a self-hosted runner ever leaves the cluster:
-  # https://github.com/AikidoSec/kubernetes-agent/blob/e2c8fe074ec53c35593c1341927402dfed033b2d/internal/format/runner.go#L19
+  # Opt-in: a Runner holds a short-lived GitHub runner registration token in
+  # status.registration. The agent redacts it before sending the object, but the grant
+  # still lets any holder of the agent's service account token read it from the API
+  # server and register a self-hosted runner.
   - apiGroups: [ "actions.summerwind.dev" ]
     resources:
       - runners
     verbs: [ "get","list","watch" ]
+  {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
