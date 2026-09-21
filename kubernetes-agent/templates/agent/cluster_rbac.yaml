@@ -116,7 +116,7 @@ rules:
       - ephemeralrunners
       - autoscalinglisteners
     verbs: [ "get","list","watch" ]
-  {{- if .Values.agent.githubArc.legacyRunnerAccess.enabled }}
+  {{- if dig "githubArc" "legacyRunnerAccess" "enabled" false .Values.agent }}
   # actions.summerwind.dev (legacy GitHub Actions Runner Controller)
   # Opt-in: a Runner holds a short-lived GitHub runner registration token in
   # status.registration. The agent redacts it before sending the object, but the grant
