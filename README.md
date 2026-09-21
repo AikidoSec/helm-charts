@@ -91,6 +91,30 @@ stringData:
     apiToken: "your-api-token-here"
 ```
 
+## GitHub Actions Runner Controller (ARC)
+
+The agent discovers self-hosted GitHub Actions runners running in your cluster.
+
+Current ARC (`actions.github.com`: `EphemeralRunner`, `AutoscalingListener`) is discovered by default and needs no configuration.
+
+Legacy ARC (`actions.summerwind.dev`: `Runner`) is **opt-in**:
+
+```yaml
+agent:
+  githubArc:
+    legacyRunnerAccess:
+      enabled: true
+```
+
+Why it is off by default:
+
+- A legacy `Runner` holds a short-lived GitHub runner registration token in `status.registration`.
+- The agent redacts that field before sending the object to Aikido, so the token never leaves the cluster through the agent.
+- The RBAC grant itself is not field-scoped. Anyone able to use the agent's service account token can read the unredacted `Runner` from the API server and use the registration token to register a self-hosted runner against the linked repository or organization.
+- Every other resource in the agent's ClusterRole is credential-free, so this is the one grant that widens the blast radius of the agent's service account.
+
+Enable it only if you run legacy ARC and accept that exposure. Leaving it disabled means legacy `Runner` objects are not reported to Aikido; current ARC resources are unaffected.
+
 ## In-cluster image scanning
 
 Aikido can generate SBOMs (Software Bill of Materials) for container images deployed in your Kubernetes cluster. This is done by a separate component, the SBOM collector, which can run as a DaemonSet, leveraging the image cache from each node, or a Deployment.
