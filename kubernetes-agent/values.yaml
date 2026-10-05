@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.21.1
+    tag: v1.22.0
   service:
     port: 8091
     metricsPort: 8080
@@ -14,6 +14,17 @@ agent:
   # When disabled, RBAC permissions for updating deployments/daemonsets will not be granted
   autoUpdate:
     enabled: true
+  # GitHub Actions Runner Controller (ARC) discovery
+  # Current ARC (actions.github.com) is discovered by default and needs no configuration.
+  githubArc:
+    legacyRunnerAccess:
+      # Grant read access to legacy ARC Runners (actions.summerwind.dev).
+      # A Runner holds a short-lived GitHub runner registration token in
+      # status.registration. The agent redacts it before sending the object, but the
+      # grant lets any holder of the agent's service account token read it from the API
+      # server and register a self-hosted runner against the linked repository or
+      # organization. Disabled by default; enable only if you accept that exposure.
+      enabled: false
   resources:
     requests:
       cpu: 100m
@@ -29,7 +40,7 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.9.2
+    tag: v1.9.5
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
