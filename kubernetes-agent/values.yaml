@@ -154,6 +154,8 @@ sbomCollector:
     # The secret must be of type kubernetes.io/dockerconfigjson or contain a .dockerconfigjson key
     secretName: ''
   logging:
+    # Minimum log level: debug, info, warn, or error. Defaults to info.
+    level: info
     # Suppress error logs from the SBOM collector.
     # When true, error messages during SBOM generation, image scanning, and registry
     # authentication will not be logged.
