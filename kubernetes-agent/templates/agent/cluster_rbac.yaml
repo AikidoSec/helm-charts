@@ -110,6 +110,23 @@ rules:
     resources:
       - horizontalpodautoscalers
     verbs: [ "get","list","watch" ]
+  # actions.github.com (GitHub Actions Runner Controller)
+  - apiGroups: [ "actions.github.com" ]
+    resources:
+      - ephemeralrunners
+      - autoscalinglisteners
+    verbs: [ "get","list","watch" ]
+  {{- if dig "githubArc" "legacyRunnerAccess" "enabled" false .Values.agent }}
+  # actions.summerwind.dev (legacy GitHub Actions Runner Controller)
+  # Opt-in: a Runner holds a short-lived GitHub runner registration token in
+  # status.registration. The agent redacts it before sending the object, but the grant
+  # still lets any holder of the agent's service account token read it from the API
+  # server and register a self-hosted runner.
+  - apiGroups: [ "actions.summerwind.dev" ]
+    resources:
+      - runners
+    verbs: [ "get","list","watch" ]
+  {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
