@@ -151,8 +151,8 @@ sbomCollector:
 config:
   apiToken: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
-  # Base URL of the ingest service for runtime threat detections; the agent appends the route path.
-  runtimeDetectionEndpoint: 'https://endpoint-server-ingest.aikido.dev'
+  # Left empty: the agent derives this from apiEndpoint's region. Set only to override.
+  runtimeDetectionEndpoint: ''
   # HTTP proxy configuration
   proxy:
     # HTTP proxy URL (e.g., http://proxy.company.com:8080)
