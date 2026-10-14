@@ -123,6 +123,29 @@ tests:
             name: RUNTIME_DETECTION_PORT
             value: "8241"
 
+  - it: agent deployment should tell the agent the Falco DaemonSet name
+    set:
+      runtimeDetection.enabled: true
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FALCO_DAEMONSET_NAME
+            value: RELEASE-NAME-kubernetes-agent-runtime-detection
+
+  - it: Falco DaemonSet name env var should not follow fullnameOverride
+    set:
+      runtimeDetection.enabled: true
+      fullnameOverride: my-agent
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FALCO_DAEMONSET_NAME
+            value: RELEASE-NAME-kubernetes-agent-runtime-detection
+
   - it: agent deployment should omit runtime detection detail env vars when disabled
     set:
       runtimeDetection.enabled: false
@@ -137,6 +160,11 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: RUNTIME_DETECTION_PORT
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FALCO_DAEMONSET_NAME
+            value: RELEASE-NAME-kubernetes-agent-runtime-detection
 
   # --- agent service ---
 
