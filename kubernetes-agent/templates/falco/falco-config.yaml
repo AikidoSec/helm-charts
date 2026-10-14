@@ -11,5 +11,4 @@ data:
     http_output:
       enabled: true
       url: {{ include "kubernetes-agent.runtimeDetectionHttpOutputUrl" . | quote }}
-  rules-override.yaml: ""
 {{- end }}
