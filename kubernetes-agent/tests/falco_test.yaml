@@ -349,3 +349,30 @@ tests:
               - RELEASE-NAME-kubernetes-agent
               - RELEASE-NAME-kubernetes-agent-sbom-collector
               - my-falco
+
+  - it: rbac should not grant Falco permissions when runtime detection is disabled
+    set:
+      runtimeDetection.enabled: false
+    template: templates/agent/rbac.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: ["configmaps"]
+            verbs: ["get","update","patch"]
+            resourceNames:
+              - kubernetes-agent-falco-config
+              - kubernetes-agent-falco-rules
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+              - RELEASE-NAME-kubernetes-agent-sbom-collector
