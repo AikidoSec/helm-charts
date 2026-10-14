@@ -330,9 +330,7 @@ falco:
         mountPath: /etc/falco/rules.d
 
   falco:
-    # Add our aikido-config.d alongside the default config.d
     config_files:
-      - /etc/falco/config.d
       - /etc/falco/aikido-config.d
 
     # Load only our explicitly managed rules directory; the agent writes rule files

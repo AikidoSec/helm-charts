@@ -102,6 +102,18 @@ tests:
           path: data["falco.yaml"]
           pattern: "json_include_tags_property: true"
 
+  - it: falco configmap should load only the aikido config directory
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "- /etc/falco/aikido-config.d"
+      - notMatchRegex:
+          path: data["falco.yaml"]
+          pattern: "- /etc/falco/config.d"
+
   - it: daemonset main container should use the pinned Falco image tag
     set:
       runtimeDetection.enabled: true
