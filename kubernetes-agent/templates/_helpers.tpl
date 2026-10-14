@@ -158,7 +158,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Name shared by all runtime detection resources (Falco DaemonSet, config ConfigMap).
+Name of the Falco DaemonSet. Used for the agent's RBAC rule and passed to the agent as
+FALCO_DAEMONSET_NAME.
 Must match the Falco subchart's DaemonSet name, which is derived from falco.nameOverride.
 Mirrors Falco's own fullname logic rather than reusing kubernetes-agent.fullname, because
 the Falco subchart does not see the parent chart's fullnameOverride.

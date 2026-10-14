@@ -271,6 +271,12 @@ Aikido can detect runtime threats in your Kubernetes cluster using [Falco](https
 
 Runtime detection uses Falco's modern eBPF driver, which requires Linux kernel **5.8 or newer** on every node where the Falco DaemonSet runs. Nodes with older kernels or non-Linux nodes are not supported and the Falco pod will fail to start on them.
 
+The Falco DaemonSet runs a privileged container and mounts host paths (container runtime sockets, `/proc`, `/sys`, `/boot`, `/lib/modules`, `/usr`, `/etc` and `/dev`). It cannot run in namespaces that enforce the `baseline` or `restricted` Pod Security Standards, or on platforms that disallow privileged pods. By default each Falco pod requests 100m CPU and 512Mi memory (limits: 1 CPU and 1Gi) and is scheduled on every node, including control-plane nodes.
+
+### Network requirements
+
+Detection events are sent over HTTPS (port 443) to `endpoint-server-ingest.aikido.dev`, in addition to the hosts the agent already uses. If you restrict egress by hostname, allow this host.
+
 ### Non-standard release names
 
 If you install the chart with a release name other than the default (e.g. via `fullnameOverride`), Falco's internal service URL will differ. Set `runtimeDetection.httpOutputUrl` explicitly in that case:
