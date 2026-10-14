@@ -279,3 +279,73 @@ tests:
               - my-agent
               - my-agent-sbom-collector
               - RELEASE-NAME-kubernetes-agent-runtime-detection
+
+  # The name is derived from the Falco subchart's own overrides, so the env var, the RBAC rule
+  # and the DaemonSet must keep agreeing when either is set.
+  - it: falco.nameOverride should flow to the DaemonSet name, env var and rbac
+    set:
+      runtimeDetection.enabled: true
+      falco.nameOverride: custom
+    templates:
+      - templates/agent/deployment.yaml
+      - templates/agent/rbac.yaml
+      - charts/falco/templates/daemonset.yaml
+    asserts:
+      - template: charts/falco/templates/daemonset.yaml
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom
+      - template: templates/agent/deployment.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FALCO_DAEMONSET_NAME
+            value: RELEASE-NAME-custom
+      - template: templates/agent/rbac.yaml
+        documentSelector:
+          path: kind
+          value: Role
+        contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+              - RELEASE-NAME-kubernetes-agent-sbom-collector
+              - RELEASE-NAME-custom
+
+  - it: falco.fullnameOverride should flow to the DaemonSet name, env var and rbac
+    set:
+      runtimeDetection.enabled: true
+      falco.fullnameOverride: my-falco
+    templates:
+      - templates/agent/deployment.yaml
+      - templates/agent/rbac.yaml
+      - charts/falco/templates/daemonset.yaml
+    asserts:
+      - template: charts/falco/templates/daemonset.yaml
+        equal:
+          path: metadata.name
+          value: my-falco
+      - template: templates/agent/deployment.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FALCO_DAEMONSET_NAME
+            value: my-falco
+      - template: templates/agent/rbac.yaml
+        documentSelector:
+          path: kind
+          value: Role
+        contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+              - RELEASE-NAME-kubernetes-agent-sbom-collector
+              - my-falco

@@ -165,11 +165,15 @@ Mirrors Falco's own fullname logic rather than reusing kubernetes-agent.fullname
 the Falco subchart does not see the parent chart's fullnameOverride.
 */}}
 {{- define "kubernetes-agent.runtimeDetectionName" -}}
-{{- $name := "kubernetes-agent-runtime-detection" -}}
+{{- if .Values.falco.fullnameOverride -}}
+{{- .Values.falco.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "falco" .Values.falco.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
