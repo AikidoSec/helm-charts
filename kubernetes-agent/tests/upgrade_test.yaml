@@ -1,0 +1,66 @@
+suite: upgrade safety
+
+# helm upgrade --reuse-values reuses the values of the previous release and ignores the defaults of
+# the new chart. For a release installed before runtime detection existed, the runtimeDetection keys
+# are therefore absent. These tests reproduce that state by deleting keys with null. Never combine a
+# table delete (runtimeDetection: null) with a nested key in one set: the order is not deterministic.
+tests:
+  # The Falco subchart is enabled by default when its condition key is missing, so the render must
+  # fail instead of silently deploying a privileged DaemonSet to customers who never asked for it.
+  - it: should fail to render when the runtimeDetection values are missing
+    set:
+      runtimeDetection: null
+    template: templates/falco/falco-rules.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: "nil pointer"
+
+  # Enabling the feature creates the runtimeDetection block, so the render above no longer fails and
+  # Falco would be deployed with the upstream defaults of its chart instead of ours.
+  - it: should fail to render when runtime detection is enabled but the chart defaults are missing
+    set:
+      runtimeDetection.enabled: true
+      runtimeDetection.port: null
+    template: templates/validate.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: "reset-then-reuse-values"
+
+  - it: should render nothing when runtime detection is enabled with the default values
+    set:
+      runtimeDetection.enabled: true
+    template: templates/validate.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should tell the agent runtime detection is off when explicitly disabled on an old release
+    set:
+      runtimeDetection.enabled: false
+      runtimeDetection.port: null
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: RUNTIME_DETECTION_ENABLED
+            value: "false"
+
+  - it: should keep the agent free of runtime detection resources when disabled on an old release
+    set:
+      runtimeDetection.enabled: false
+      runtimeDetection.port: null
+    template: templates/agent/rbac.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: ["configmaps"]
+            verbs: ["get","update","patch"]
+            resourceNames:
+              - kubernetes-agent-falco-config
+              - kubernetes-agent-falco-rules

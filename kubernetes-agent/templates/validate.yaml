@@ -1,0 +1,3 @@
+{{- if and .Values.runtimeDetection.enabled (not (hasKey .Values.runtimeDetection "port")) -}}
+{{- fail "runtimeDetection.enabled is set, but the defaults of this chart are missing from the values. This happens when upgrading with --reuse-values, which ignores the defaults of the new chart. Upgrade with --reset-then-reuse-values instead." -}}
+{{- end -}}
