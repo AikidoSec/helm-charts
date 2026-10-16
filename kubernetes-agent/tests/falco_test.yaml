@@ -102,6 +102,25 @@ tests:
           path: data["falco.yaml"]
           pattern: "json_include_tags_property: true"
 
+  # The agent filters on k8s.ns.name and container.image.repository, which suggested_output adds.
+  - it: falco configmap should append the suggested output fields
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "append_output:\\n- suggested_output: true"
+
+  - it: falco configmap should cap the outputs queue
+    set:
+      runtimeDetection.enabled: true
+    template: charts/falco/templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["falco.yaml"]
+          pattern: "outputs_queue:\\n  capacity: 1000"
+
   - it: falco configmap should load only the aikido config directory
     set:
       runtimeDetection.enabled: true

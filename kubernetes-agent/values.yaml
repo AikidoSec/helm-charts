@@ -356,6 +356,16 @@ falco:
     json_include_output_fields_property: true
     json_include_tags_property: true
 
+    # Falco default is already true; pinned because the agent filters events on k8s.ns.name and
+    # container.image.repository, which are only present in output_fields through suggested_output
+    append_output:
+      - suggested_output: true
+
+    # Falco default is 0, which leaves the queue unbounded and lets a stalled consumer grow Falco's memory until
+    # it is OOM killed; with a cap Falco drops the event instead
+    outputs_queue:
+      capacity: 1000
+
   falcoctl:
     artifact:
       install:
