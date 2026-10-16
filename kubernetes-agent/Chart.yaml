@@ -1,6 +1,11 @@
 apiVersion: v2
 name: kubernetes-agent
 description: Install the Aikido Kubernetes Agent to secure and integrate your Kubernetes clusters with Aikido.
-version: 2.12.1
-appVersion: v1.22.0
+version: 2.13.0
+appVersion: v1.24.0
 type: application
+dependencies:
+  - name: falco
+    version: "9.0.0"
+    repository: https://falcosecurity.github.io/charts
+    condition: runtimeDetection.enabled
