@@ -12,6 +12,7 @@ on:
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
     runs-on: open-source-releaser
