@@ -16,3 +16,9 @@ spec:
       protocol: TCP
       port: {{ .Values.agent.service.metricsPort }}
       targetPort: metrics-port
+    {{- if .Values.runtimeDetection.enabled }}
+    - name: rd-port
+      protocol: TCP
+      port: {{ .Values.runtimeDetection.port }}
+      targetPort: rd-port
+    {{- end }}
