@@ -1,15 +1,18 @@
 name: Release & Publish
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
     paths:
       - 'broker-client/**'
       - 'kubernetes-agent/**'
+      - '.github/workflows/release.yml'
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
     runs-on: open-source-releaser
@@ -24,6 +27,12 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+
+      - name: Add Helm repositories
+        run: helm repo add falcosecurity https://falcosecurity.github.io/charts
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
