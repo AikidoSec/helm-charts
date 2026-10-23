@@ -320,7 +320,7 @@ runtimeDetection:
 
 ### Falco configuration
 
-The `falco:` key in `values.yaml` passes configuration directly to the Falco subchart. It is not part of the public API of this chart and may change between versions. Only modify it if you need to override Falco behavior beyond what `runtimeDetection.*` exposes. See the [Falco chart documentation](https://github.com/falcosecurity/charts/tree/falco-9.0.0/charts/falco) for available values.
+The `falco:` key in `values.yaml` passes configuration directly to the Falco subchart. It is not part of the public API of this chart and may change between versions. Only modify it if you need to override Falco behavior beyond what `runtimeDetection.*` exposes. See the [Falco chart documentation](https://github.com/falcosecurity/charts/tree/falco-9.2.1/charts/falco) for available values.
 
 ## Using ExternalSecrets with the Chart
 
