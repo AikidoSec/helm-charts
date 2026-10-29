@@ -1,0 +1,51 @@
+suite: shared token configuration
+tests:
+  - it: disables shared tokens by default
+    template: templates/agent/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_TOKEN_ENABLED
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_TOKEN_CLUSTER_IDENTIFIER
+            value: ""
+
+  - it: passes shared token settings as environment variables
+    template: templates/agent/deployment.yaml
+    set:
+      config.sharedToken.enabled: true
+      config.sharedToken.clusterIdentifier: production-eks
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_TOKEN_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_TOKEN_CLUSTER_IDENTIFIER
+            value: production-eks
+
+  - it: preserves defaults when upgrading an older release
+    template: templates/agent/deployment.yaml
+    set:
+      config.sharedToken: null
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_TOKEN_ENABLED
+            value: "false"
+
+  - it: requires an identifier when shared tokens are enabled
+    template: templates/validate.yaml
+    set:
+      config.sharedToken.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: config.sharedToken.clusterIdentifier is required when config.sharedToken.enabled is true

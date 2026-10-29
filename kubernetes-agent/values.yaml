@@ -166,6 +166,10 @@ sbomCollector:
 
 config:
   apiToken: ''
+  sharedToken:
+    enabled: false
+    # Required when enabled. Use a stable identifier unique within your organization.
+    clusterIdentifier: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   # Left empty: the agent derives this from apiEndpoint's region. Set only to override.
   runtimeDetectionEndpoint: ''
