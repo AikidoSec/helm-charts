@@ -167,6 +167,7 @@ sbomCollector:
 config:
   apiToken: ''
   sharedToken:
+    # Enable to use the same apiToken across multiple clusters. Each cluster must have its own clusterIdentifier.
     enabled: false
     # Required when enabled. Use a stable identifier unique within your organization.
     clusterIdentifier: ''
