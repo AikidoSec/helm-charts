@@ -170,7 +170,8 @@ config:
     # Enable to use the same apiToken across multiple clusters. Each cluster must have its own clusterIdentifier.
     # Use the same token mode for all clusters in an Aikido workspace.
     enabled: false
-    # Required when enabled. Use a stable identifier unique within your organization.
+    # Required when enabled. Used to identify this cluster and as its initial name in the platform.
+    # Must be unique across all clusters in your organization and remain unchanged after installation.
     clusterIdentifier: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   # Left empty: the agent derives this from apiEndpoint's region. Set only to override.
