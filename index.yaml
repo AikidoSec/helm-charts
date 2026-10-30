@@ -503,6 +503,22 @@ entries:
     version: 1.0.0
   kubernetes-agent:
   - apiVersion: v2
+    appVersion: v1.25.1
+    created: "2026-10-30T15:17:29.351163378Z"
+    dependencies:
+    - condition: runtimeDetection.enabled
+      name: falco
+      repository: https://falcosecurity.github.io/charts
+      version: 9.2.1
+    description: Install the Aikido Kubernetes Agent to secure and integrate your
+      Kubernetes clusters with Aikido.
+    digest: c5880fd56aa5a14c3e0e4156905076f8089cccde1872d5ec8c426f71334a3ae6
+    name: kubernetes-agent
+    type: application
+    urls:
+    - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-2.14.0/kubernetes-agent-2.14.0.tgz
+    version: 2.14.0
+  - apiVersion: v2
     appVersion: v1.24.1
     created: "2026-10-23T13:02:49.827913479Z"
     dependencies:
@@ -1226,4 +1242,4 @@ entries:
     urls:
     - https://github.com/AikidoSec/helm-charts/releases/download/kubernetes-agent-1.0.0/kubernetes-agent-1.0.0.tgz
     version: 1.0.0
-generated: "2026-10-23T13:02:49.828233797Z"
+generated: "2026-10-30T15:17:29.352786145Z"
