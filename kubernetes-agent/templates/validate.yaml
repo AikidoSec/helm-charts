@@ -1,3 +1,7 @@
 {{- if and .Values.runtimeDetection.enabled (not (hasKey .Values.runtimeDetection "port")) -}}
 {{- fail "runtimeDetection.enabled is set, but the defaults of this chart are missing from the values. This happens when upgrading with --reuse-values, which ignores the defaults of the new chart. Upgrade with --reset-then-reuse-values instead." -}}
 {{- end -}}
+{{- $sharedToken := .Values.config.sharedToken | default dict -}}
+{{- if and $sharedToken.enabled (empty ($sharedToken.clusterIdentifier | default "" | trim)) -}}
+{{- fail "config.sharedToken.clusterIdentifier is required when config.sharedToken.enabled is true" -}}
+{{- end -}}

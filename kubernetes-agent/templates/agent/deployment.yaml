@@ -61,6 +61,11 @@ spec:
               value: "{{ .Values.sbomCollector.runAsDaemonSet }}"
             - name: CONFIG_SECRET_NAME
               value: "{{ include "kubernetes-agent.secretName" . }}"
+            {{- $sharedToken := .Values.config.sharedToken | default dict }}
+            - name: SHARED_TOKEN_ENABLED
+              value: {{ $sharedToken.enabled | default false | quote }}
+            - name: SHARED_TOKEN_CLUSTER_IDENTIFIER
+              value: {{ $sharedToken.clusterIdentifier | default "" | quote }}
             - name: SBOM_COLLECTOR_ENABLED
               value: {{ .Values.sbomCollector.enabled | quote }}
             - name: AUTO_UPDATE_ENABLED

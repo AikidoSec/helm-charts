@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.24.1
+    tag: v1.25.1
   service:
     port: 8091
     metricsPort: 8080
@@ -40,7 +40,7 @@ sbomCollector:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-sbom-collector
     pullPolicy: IfNotPresent
-    tag: v1.11.5
+    tag: v1.12.0
   # If set to true, the agent will run the SBOM collector as a daemonSet.
   # Otherwise, it will run it as a deployment.
   runAsDaemonSet: true
@@ -166,6 +166,13 @@ sbomCollector:
 
 config:
   apiToken: ''
+  sharedToken:
+    # Enable to use the same apiToken across multiple clusters. Each cluster must have its own clusterIdentifier.
+    # Use the same token mode for all clusters in an Aikido workspace.
+    enabled: false
+    # Required when enabled. Used to identify this cluster and as its initial name in the platform.
+    # Must be unique across all clusters in your organization and remain unchanged after installation.
+    clusterIdentifier: ''
   apiEndpoint: 'https://k8s.aikido-security.com'
   # Left empty: the agent derives this from apiEndpoint's region. Set only to override.
   runtimeDetectionEndpoint: ''
