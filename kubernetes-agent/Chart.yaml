@@ -6,6 +6,6 @@ appVersion: v1.25.1
 type: application
 dependencies:
   - name: falco
-    version: "9.0.0"
+    version: "9.2.1"
     repository: https://falcosecurity.github.io/charts
     condition: runtimeDetection.enabled
