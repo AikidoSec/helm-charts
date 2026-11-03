@@ -114,6 +114,8 @@ rules:
   - apiGroups: [ "actions.github.com" ]
     resources:
       - ephemeralrunners
+      - ephemeralrunnersets
+      - autoscalingrunnersets
       - autoscalinglisteners
     verbs: [ "get","list","watch" ]
   {{- if dig "githubArc" "legacyRunnerAccess" "enabled" false .Values.agent }}
