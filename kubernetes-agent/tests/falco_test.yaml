@@ -279,7 +279,6 @@ tests:
             verbs: ["update","patch"]
             resourceNames:
               - RELEASE-NAME-kubernetes-agent
-              - RELEASE-NAME-kubernetes-agent-sbom-collector
               - RELEASE-NAME-kubernetes-agent-runtime-detection
 
   # The Falco subchart does not honor the parent chart's fullnameOverride, so the
@@ -308,7 +307,6 @@ tests:
             verbs: ["update","patch"]
             resourceNames:
               - my-agent
-              - my-agent-sbom-collector
               - RELEASE-NAME-kubernetes-agent-runtime-detection
 
   # The name is derived from the Falco subchart's own overrides, so the env var, the RBAC rule
@@ -344,7 +342,6 @@ tests:
             verbs: ["update","patch"]
             resourceNames:
               - RELEASE-NAME-kubernetes-agent
-              - RELEASE-NAME-kubernetes-agent-sbom-collector
               - RELEASE-NAME-custom
 
   - it: falco.fullnameOverride should flow to the DaemonSet name, env var and rbac
@@ -378,7 +375,6 @@ tests:
             verbs: ["update","patch"]
             resourceNames:
               - RELEASE-NAME-kubernetes-agent
-              - RELEASE-NAME-kubernetes-agent-sbom-collector
               - my-falco
 
   - it: rbac should not grant Falco permissions when runtime detection is disabled
@@ -406,4 +402,3 @@ tests:
             verbs: ["update","patch"]
             resourceNames:
               - RELEASE-NAME-kubernetes-agent
-              - RELEASE-NAME-kubernetes-agent-sbom-collector

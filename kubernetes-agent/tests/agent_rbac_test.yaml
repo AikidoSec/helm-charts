@@ -1,0 +1,40 @@
+suite: agent workload rbac
+templates:
+  - templates/agent/rbac.yaml
+tests:
+  - it: should retain agent restart permissions without auto-update or collector
+    set:
+      agent.autoUpdate.enabled: false
+      sbomCollector.enabled: false
+      runtimeDetection.enabled: false
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+
+  - it: should retain collector management permissions without auto-update when enabled
+    set:
+      agent.autoUpdate.enabled: false
+      sbomCollector.enabled: true
+      runtimeDetection.enabled: false
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["deployments", "daemonsets"]
+            verbs: ["update","patch"]
+            resourceNames:
+              - RELEASE-NAME-kubernetes-agent
+              - RELEASE-NAME-kubernetes-agent-sbom-collector
