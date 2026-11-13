@@ -15,6 +15,10 @@ rules:
     resources:
       - serviceaccounts
     verbs: [ "get" ]
+  - apiGroups: [ "" ]
+    resources:
+      - nodes
+    verbs: [ "get", "list" ]
   {{- if .Values.sbomCollector.secretsAccess.enabled }}
   - apiGroups: [ "" ]
     resources: [ "secrets" ]
