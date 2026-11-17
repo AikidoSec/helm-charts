@@ -184,6 +184,11 @@ config:
     httpsProxy: ''
     # Comma-separated list of hosts to bypass proxy (e.g., localhost,127.0.0.1,.local)
     noProxy: ''
+  # Rename, value-map or drop cluster labels and annotations before they are uploaded.
+  # Example: labels: {team: {rename: owner, valueMap: {platform-eng: Platform Engineering}}, internal-id: {drop: true}}
+  metadataTransforms:
+    labels: {}
+    annotations: {}
 
 imagePullSecrets: []
 nameOverride: ''

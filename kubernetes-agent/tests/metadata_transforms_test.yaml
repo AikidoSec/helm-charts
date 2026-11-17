@@ -1,0 +1,36 @@
+suite: metadata transforms configuration
+tests:
+  - it: does not set METADATA_TRANSFORMS by default
+    template: templates/agent/deployment.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: METADATA_TRANSFORMS
+
+  - it: passes label rules as JSON in METADATA_TRANSFORMS
+    template: templates/agent/deployment.yaml
+    set:
+      config.metadataTransforms.labels:
+        team:
+          rename: owner
+          valueMap:
+            platform-eng: Platform Engineering
+        internal-id:
+          drop: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: METADATA_TRANSFORMS
+            value: '{"annotations":{},"labels":{"internal-id":{"drop":true},"team":{"rename":"owner","valueMap":{"platform-eng":"Platform Engineering"}}}}'
+
+  - it: renders without METADATA_TRANSFORMS when config.metadataTransforms is null
+    template: templates/agent/deployment.yaml
+    set:
+      config.metadataTransforms: null
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: METADATA_TRANSFORMS
