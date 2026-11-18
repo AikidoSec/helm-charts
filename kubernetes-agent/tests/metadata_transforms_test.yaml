@@ -17,13 +17,13 @@ tests:
           valueMap:
             platform-eng: Platform Engineering
         internal-id:
-          drop: true
+          redact: true
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: METADATA_TRANSFORMS
-            value: '{"annotations":{},"labels":{"internal-id":{"drop":true},"team":{"rename":"owner","valueMap":{"platform-eng":"Platform Engineering"}}}}'
+            value: '{"annotations":{},"labels":{"internal-id":{"redact":true},"team":{"rename":"owner","valueMap":{"platform-eng":"Platform Engineering"}}}}'
 
   - it: renders without METADATA_TRANSFORMS when config.metadataTransforms is null
     template: templates/agent/deployment.yaml
