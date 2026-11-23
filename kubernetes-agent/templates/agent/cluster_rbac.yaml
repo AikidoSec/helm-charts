@@ -87,6 +87,17 @@ rules:
       - gateways
       - httproutes
     verbs: [ "get","list","watch" ]
+  # networking.istio.io
+  - apiGroups: [ "networking.istio.io" ]
+    resources:
+      - gateways
+      - virtualservices
+    verbs: [ "get","list","watch" ]
+  # elbv2.k8s.aws
+  - apiGroups: [ "elbv2.k8s.aws" ]
+    resources:
+      - targetgroupbindings
+    verbs: [ "get","list","watch" ]
   # configuration.konghq.com
   - apiGroups: [ "configuration.konghq.com" ]
     resources:
