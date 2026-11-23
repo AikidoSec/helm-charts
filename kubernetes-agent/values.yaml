@@ -25,6 +25,10 @@ agent:
       # server and register a self-hosted runner against the linked repository or
       # organization. Disabled by default; enable only if you accept that exposure.
       enabled: false
+  istio:
+    virtualServiceAccess:
+      # Grant read access to Istio VirtualServices.
+      enabled: false
   resources:
     requests:
       cpu: 100m
