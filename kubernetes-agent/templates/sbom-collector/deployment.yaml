@@ -131,6 +131,9 @@ spec:
             {{- with .Values.additionalVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+            {{- with .Values.sbomCollector.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -168,6 +171,9 @@ spec:
             name: {{ include "sbom-collector.name" $ }}-syft-config
         {{- end }}
         {{- with .Values.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.sbomCollector.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
 {{- end }}

@@ -141,6 +141,9 @@ spec:
             {{- with .Values.additionalVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+            {{- with .Values.agent.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -158,5 +161,8 @@ spec:
           secret:
             secretName: {{ include "kubernetes-agent.secretName" . }}
         {{- with .Values.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.agent.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
