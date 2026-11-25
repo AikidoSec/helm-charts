@@ -2,7 +2,7 @@ agent:
   image:
     repository: public.ecr.aws/aikido-cloud/kubernetes-agent
     pullPolicy: IfNotPresent
-    tag: v1.27.0
+    tag: v1.28.0
   service:
     port: 8091
     metricsPort: 8080
@@ -27,6 +27,10 @@ agent:
       # grant lets any holder of the agent's service account token read it from the API
       # server and register a self-hosted runner against the linked repository or
       # organization. Disabled by default; enable only if you accept that exposure.
+      enabled: false
+  istio:
+    virtualServiceAccess:
+      # Grant read access to Istio VirtualServices.
       enabled: false
   resources:
     requests:
